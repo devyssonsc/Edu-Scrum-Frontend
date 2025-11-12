@@ -1,0 +1,47 @@
+@import '../../../styles/variables.scss';
+
+.selector-container {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+
+    width: 100%;
+
+    background-color: $medium-gray;
+}
+
+.option {
+    flex: 1;
+    text-align: center;
+    z-index: 2;
+    transition: color 0.3s ease;
+
+    p {
+        margin: 0;
+        font-weight: 500;
+        font-family: $font-secondary;
+        color: $dark-gray;
+        user-select: none;
+    }
+
+    &.active p {
+    color: $medium-gray;
+  }
+}
+
+.selected {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: calc(100% / var(--options-count));
+    height: 100%;
+    background-color: $dark-gray; // cor do seletor
+    border-radius: 12px;
+    z-index: 1;
+    transition: left 0.3s ease;
+}
