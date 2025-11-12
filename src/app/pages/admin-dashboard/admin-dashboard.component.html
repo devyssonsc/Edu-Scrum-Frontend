@@ -1,0 +1,25 @@
+<div class="div-container">
+    <div class="stats-cards">
+        <app-stats-card title="Cursos" [value]="15" description="cursos registados"
+            iconClass="bi bi-mortarboard-fill"></app-stats-card>
+        <app-stats-card title="Cadeiras" [value]="45" description="cadeiras disponíveis"
+            iconClass="bi bi-book"></app-stats-card>
+        <app-stats-card title="Estudantes" [value]="320" description="estudantes inscritos"
+            iconClass="bi bi-people-fill"></app-stats-card>
+        <app-stats-card title="Professores" [value]="28" description="professores ativos"
+            iconClass="bi bi-person-badge-fill"></app-stats-card>
+    </div>
+    <app-section-selector [options]="['Cursos', 'Cadeiras', 'Estudantes', 'Professores']"
+        (selectedOption)="onSelectOption($event)">
+        ></app-section-selector>
+    <div class="card show-all">
+        <div class="content">
+            <h3>Gestão de {{ selectedOption }}</h3>
+            <p>Registar e gerir {{ selectedOption.toLowerCase() }} da universidade</p>
+            <div class="div-table">
+                <app-show-table [data]="data"></app-show-table>
+            </div>
+            <button class="btn btn-primary">Adicionar {{ selectedOption }}</button>
+        </div>
+    </div>
+</div>
