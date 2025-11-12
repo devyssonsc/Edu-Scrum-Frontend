@@ -1,0 +1,18 @@
+@if(data.length > 0) {
+    <table class="show-table">
+        <thead>
+            <tr>
+                <th *ngFor="let col of columns">{{ col }}</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of data">
+                <td *ngFor="let col of columns">{{ row[col] }}</td>
+                <td><i class="bi bi-gear"></i><i class="bi bi-trash"></i></td>
+            </tr>
+        </tbody>
+    </table>
+} @else {
+    <p>Nenhum dado disponível.</p>
+}

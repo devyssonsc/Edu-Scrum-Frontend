@@ -1,0 +1,72 @@
+@import "../../../styles/variables.scss";
+
+.show-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: $font-secondary;
+    font-size: 14px;
+    color: $dark-gray;
+
+    thead {
+        border-bottom: 1px solid $medium-gray;
+
+        th {
+            text-align: left;
+            font-weight: 600;
+            padding: 0 1rem;
+            color: $dark-gray;
+            text-transform: capitalize;
+
+            &:last-child {
+                text-align: right;
+                width: 60px;
+            }
+        }
+    }
+
+    tbody {
+        tr {
+            border-bottom: 1px solid $light-gray;
+
+            td {
+                padding: 0.25rem 1rem;
+                vertical-align: middle;
+
+                &:first-child {
+                    font-weight: 700;
+                }
+
+                &:last-child {
+                    text-align: right;
+
+                    /* 🔹 Alinha os ícones lado a lado */
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 0.75rem;
+                    /* espaçamento entre ícones */
+
+                    i {
+                        font-size: 1rem;
+                        color: $dark-gray;
+                        margin-left: 0.75rem;
+                        cursor: pointer;
+                        transition: color 0.2s ease;
+
+                        &:hover {
+                            color: #000;
+                        }
+
+                        &.bi-trash:hover {
+                            color: #e74c3c;
+                        }
+
+                        &.bi-gear:hover {
+                            color: #3498db;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
