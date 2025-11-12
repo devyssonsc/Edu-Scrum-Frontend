@@ -1,0 +1,40 @@
+@import '../../../styles/variables.scss';
+
+.stats-card {
+
+    .info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+
+        .title {
+            font-family: $font-secondary;
+            font-weight: 800;
+            color: $dark-gray;
+        }
+
+        .value {
+            font-family: $font-primary;
+            font-weight: 900;
+            font-size: 2.5rem;
+            margin-left: 0.2rem;
+            color: $dark-gray;
+        }
+
+        .description {
+            font-family: $font-secondary;
+            font-weight: 400;
+            color: $dark-gray;
+            margin: 0;
+        }
+
+    }
+    
+    .icon{
+        i{
+            font-size: 1.2rem;
+            color: $dark-gray;
+        }
+    }
+}
