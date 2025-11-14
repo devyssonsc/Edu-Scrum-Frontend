@@ -122,8 +122,20 @@ export class AdminDashboardComponent {
       students: 52
     }
   ]
-
-  
+  students = [
+    {
+      num: 50440,
+      name: "Tiago Silva",
+      email: "50440@alunos.upt.pt",
+      degree: "Engenharia Informática"
+    },
+    {
+      num: 50441,
+      name: "David Aroso",
+      email: "50441@alunos.upt.pt",
+      degree: "Engenharia Informática"
+    }
+  ]
 
   data: any[] = this.degrees;
   
@@ -132,7 +144,6 @@ export class AdminDashboardComponent {
 
   selectedOption: string = 'Cursos';
 
-  // Getter que retorna as chaves (nomes das colunas) com base no primeiro elemento
   get columns(): string[] {
     if (!this.degrees || this.degrees.length === 0) return [];
     return Object.keys(this.degrees[0]);
@@ -146,7 +157,9 @@ export class AdminDashboardComponent {
       this.data = this.degrees;
     } else if(this.selectedOption === 'Cadeiras') {
       this.data = this.cadeiras;
-    } 
+    } else if(this.selectedOption === 'Estudantes') {
+      this.data = this.students;
+    }
   }
 
     onAddClick() {
