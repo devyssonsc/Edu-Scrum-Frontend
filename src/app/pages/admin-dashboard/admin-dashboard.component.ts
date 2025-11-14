@@ -136,6 +136,18 @@ export class AdminDashboardComponent {
       degree: "Engenharia Informática"
     }
   ]
+  teachers = [
+    {
+      name: "Fátima Leal",
+      email: "fatimal@upt.pt",
+      courses: 3
+    },
+        {
+      name: "Bruno Cunha",
+      email: "Bruninho@upt.pt",
+      courses: 4
+    }
+  ]
 
   data: any[] = this.degrees;
   
@@ -159,6 +171,8 @@ export class AdminDashboardComponent {
       this.data = this.cadeiras;
     } else if(this.selectedOption === 'Estudantes') {
       this.data = this.students;
+    } else if(this.selectedOption === 'Professores'){
+      this.data = this.teachers;
     }
   }
 
