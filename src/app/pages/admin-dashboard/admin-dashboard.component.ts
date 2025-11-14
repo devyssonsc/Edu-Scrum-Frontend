@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -123,6 +124,8 @@ export class AdminDashboardComponent {
   ]
 
   data: any[] = this.degrees;
+  
+  constructor(private router: Router) {}
 
 
   selectedOption: string = 'Cursos';
@@ -141,6 +144,24 @@ export class AdminDashboardComponent {
       this.data = this.degrees;
     } else if(this.selectedOption === 'Cadeiras') {
       this.data = this.cadeiras;
+    }
+  }
+
+    onAddClick() {
+    if (this.selectedOption === 'Cursos') {
+      this.router.navigate(['/admin-dashboard/register-degree']);
+    
+    } else if (this.selectedOption === 'Cadeiras') {
+      //Quando criar a componente para adicionar cadeiras
+      console.log('Navegar para registar cadeira');
+    
+    } else if (this.selectedOption === 'Estudantes') {
+      //Quando criar a componente para adicionar estudantes
+      console.log('Navegar para registar estudante');
+    
+    } else if (this.selectedOption === 'Professores') {
+      //Quando criar a componente para adicionar professores
+      console.log('Navegar para registar professor');
     }
   }
 }
