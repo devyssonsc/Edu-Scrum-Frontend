@@ -123,6 +123,8 @@ export class AdminDashboardComponent {
     }
   ]
 
+  
+
   data: any[] = this.degrees;
   
   constructor(private router: Router) {}
@@ -144,7 +146,7 @@ export class AdminDashboardComponent {
       this.data = this.degrees;
     } else if(this.selectedOption === 'Cadeiras') {
       this.data = this.cadeiras;
-    }
+    } 
   }
 
     onAddClick() {
@@ -155,8 +157,7 @@ export class AdminDashboardComponent {
       this.router.navigate(['/admin-dashboard/register-course']);
     
     } else if (this.selectedOption === 'Estudantes') {
-      //Quando criar a componente para adicionar estudantes
-      console.log('Navegar para registar estudante');
+      this.router.navigate(['/admin-dashboard/register-student'])
     
     } else if (this.selectedOption === 'Professores') {
       //Quando criar a componente para adicionar professores

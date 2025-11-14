@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
 import { RegisterDegreeComponent } from './pages/admin-dashboard/register-degree/register-degree.component';
 import { RegisterCourseComponent } from './pages/admin-dashboard/register-course/register-course.component';
+import { RegisterStudentComponent } from './pages/admin-dashboard/register-student/register-student.component';
 
 export const routes: Routes = [
     {
@@ -16,5 +17,9 @@ export const routes: Routes = [
     {
         path: 'admin-dashboard/register-course', 
         component: RegisterCourseComponent
+    },
+    {
+        path: 'admin-dashboard/register-student',
+        component: RegisterStudentComponent
     }
 ];
