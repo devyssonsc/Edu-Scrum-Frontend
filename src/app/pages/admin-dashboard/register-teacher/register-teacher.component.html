@@ -1,0 +1,26 @@
+<div class="form-page-container">
+    
+    <form class="card form-card" [formGroup]="teacherForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">Adicionar Professor</h2>
+
+        <div class="form-group">
+            <label for="name">Nome Completo</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Carlos Santos">
+            @if (teacherForm.get('name')?.invalid && teacherForm.get('name')?.touched) {
+                <small class="error-msg">O nome é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" formControlName="email" placeholder="Ex: carlos.santos@email.com">
+            @if (teacherForm.get('email')?.invalid && teacherForm.get('email')?.touched) {
+                <small class="error-msg">Por favor, insira um email válido.</small>
+            }
+        </div>
+        <button type="submit" class="btn btn-primary btn-submit" [disabled]="teacherForm.invalid">
+            Registar Professor
+        </button>
+    </form>
+</div>

@@ -1,0 +1,80 @@
+// Importa as variáveis globais
+@import "../../../../styles/variables.scss";
+
+// Container da página
+.form-page-container {
+    width: 100%;
+    min-height: 100%;
+    padding: 2rem;
+    background-color: $light-gray;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+// Card do formulário
+.form-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    padding: 2.5rem 2rem;
+}
+
+.form-title {
+    font-family: $font-primary;
+    font-size: 2rem;
+    font-weight: 900;
+    color: $dark-gray;
+    margin-bottom: 1rem;
+}
+
+// Estilos dos campos
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    label {
+        font-family: $font-secondary;
+        font-weight: 600;
+        color: $dark-gray;
+    }
+
+    input[type="text"], input[type="number"], input[type="email"] {
+        width: 100%;
+        border-bottom: 2px solid $medium-gray;
+        padding: 0.5rem 0.25rem;
+        font-family: $font-secondary;
+        &:focus { border-color: $dark-gray; }
+        &::placeholder { color: $medium-gray; }
+    }
+}
+
+// Separador
+.divider {
+    width: 100%;
+    border: none;
+    border-top: 1px solid $light-gray;
+    margin-top: 1rem;
+}
+
+// Botão Submeter
+.btn-submit {
+    width: 100%;
+    margin-top: 1rem;
+    &:disabled {
+        background-color: $medium-gray;
+        cursor: not-allowed;
+        color: $dark-gray;
+    }
+}
+
+// Erro
+.error-msg {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
