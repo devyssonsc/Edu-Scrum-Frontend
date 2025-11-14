@@ -24,7 +24,7 @@ export class RegisterCourseComponent implements OnInit {
       code: ['', Validators.required],
       name: ['', Validators.required],
       degree: ['', Validators.required],
-      ects: [null, [Validators.required, Validators.min(1)]]
+      ects: [null, [Validators.required, Validators.min(1), Validators.max(8)]]
     });
   }
 

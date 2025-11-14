@@ -32,7 +32,7 @@
             <label for="ects">ECTS</label>
             <input type="number" id="ects" formControlName="ects" placeholder="Ex: 6">
             @if (courseForm.get('ects')?.invalid && courseForm.get('ects')?.touched) {
-                <small class="error-msg">O valor de ECTS é obrigatório (mínimo 1).</small>
+                <small class="error-msg">O valor de ECTS é obrigatório (tem de ser entre 1 e 8).</small>
             }
         </div>
 
