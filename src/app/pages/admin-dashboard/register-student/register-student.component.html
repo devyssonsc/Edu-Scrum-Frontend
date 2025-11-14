@@ -1,0 +1,45 @@
+<div class="form-page-container">
+    
+    <form class="card form-card" [formGroup]="studentForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">Adicionar Estudante</h2>
+
+        <div class="form-group">
+            <label for="name">Nome Completo</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Ana Silva">
+            @if (studentForm.get('name')?.invalid && studentForm.get('name')?.touched) {
+                <small class="error-msg">O nome é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" formControlName="email" placeholder="Ex: ana.silva@email.com">
+            @if (studentForm.get('email')?.invalid && studentForm.get('email')?.touched) {
+                <small class="error-msg">Por favor, insira um email válido.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="studentNumber">Nº de Aluno</label>
+            <input type="text" id="studentNumber" formControlName="studentNumber" placeholder="Ex: 2024001">
+            @if (studentForm.get('studentNumber')?.invalid && studentForm.get('studentNumber')?.touched) {
+                <small class="error-msg">O número de aluno é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="degree">Curso (Degree)</label>
+            <input type="text" id="degree" formControlName="degree" placeholder="Ex: Engenharia Informática">
+            @if (studentForm.get('degree')?.invalid && studentForm.get('degree')?.touched) {
+                <small class="error-msg">O curso é obrigatório.</small>
+            }
+        </div>
+
+        <hr class="divider">
+
+        <button type="submit" class="btn btn-primary btn-submit" [disabled]="studentForm.invalid">
+            Registar Estudante
+        </button>
+    </form>
+</div>
