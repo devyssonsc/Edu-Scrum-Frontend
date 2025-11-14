@@ -4,6 +4,7 @@
         
         <h2 class="form-title">Adicionar Professor</h2>
 
+        <!-- Grupo Nome -->
         <div class="form-group">
             <label for="name">Nome Completo</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Carlos Santos">
@@ -12,6 +13,7 @@
             }
         </div>
 
+        <!-- Grupo Email -->
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" formControlName="email" placeholder="Ex: carlos.santos@email.com">
@@ -19,6 +21,49 @@
                 <small class="error-msg">Por favor, insira um email válido.</small>
             }
         </div>
+
+        <!-- Grupo Cadeiras (FormArray) -->
+        <div class="form-group">
+            <label>Cadeiras (Pelo menos 1)</label>
+            
+            <!-- Lista de cadeiras JÁ SELECIONADAS -->
+            <div class="cadeiras-list" formArrayName="courses">
+                @for(courseGroup of courses.controls; track $index; let i = $index) {
+                    <div class="cadeira-item" [formGroupName]="i">
+                        <span class="code">{{ courseGroup.value.code }}</span>
+                        <span class="name">{{ courseGroup.value.name }}</span>
+                        <i class="bi bi-trash" (click)="removeCourse(i)"></i>
+                    </div>
+                }
+            </div>
+
+            <!-- Mensagem de erro para o minLength(1) -->
+            @if (courses.invalid && (courses.touched)) {
+                <small class="error-msg">Pelo menos uma cadeira é obrigatória.</small>
+            }
+            
+            <!-- Botão de Adicionar (abre a lista de seleção) -->
+            <div class="add-button-container">
+                <button type="button" class="btn-add" (click)="toggleCourseList()">
+                    <i class="bi bi-plus-circle-fill"></i>
+                </button>
+            </div>
+
+            <!-- A LISTA DE SELEÇÃO (tipo dropdown) -->
+            @if (showCourseList) {
+                <div class="course-picker-list">
+                    @for (course of allCourses; track course.id) {
+                        <div class="course-picker-item" (click)="addCourse(course)">
+                            <span class="code">{{ course.code }}</span>
+                            <span class="name">{{ course.name }}</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <hr class="divider">
+
         <button type="submit" class="btn btn-primary btn-submit" [disabled]="teacherForm.invalid">
             Registar Professor
         </button>

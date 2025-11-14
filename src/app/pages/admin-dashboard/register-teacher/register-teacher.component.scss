@@ -1,7 +1,5 @@
-// Importa as variáveis globais
 @import "../../../../styles/variables.scss";
 
-// Container da página
 .form-page-container {
     width: 100%;
     min-height: 100%;
@@ -12,7 +10,6 @@
     align-items: flex-start;
 }
 
-// Card do formulário
 .form-card {
     flex-direction: column;
     align-items: center;
@@ -30,12 +27,12 @@
     margin-bottom: 1rem;
 }
 
-// Estilos dos campos
 .form-group {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    position: relative; 
 
     label {
         font-family: $font-secondary;
@@ -53,7 +50,6 @@
     }
 }
 
-// Separador
 .divider {
     width: 100%;
     border: none;
@@ -61,7 +57,6 @@
     margin-top: 1rem;
 }
 
-// Botão Submeter
 .btn-submit {
     width: 100%;
     margin-top: 1rem;
@@ -72,9 +67,77 @@
     }
 }
 
-// Erro
 .error-msg {
     color: #e74c3c;
     font-size: 0.8rem;
     font-weight: 500;
+}
+
+.cadeiras-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cadeira-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    .code { font-weight: 700; text-transform: uppercase; }
+    .name { font-size: 0.9rem; }
+    .bi-trash {
+        margin-left: auto;
+        font-size: 1.1rem;
+        cursor: pointer;
+        &:hover { color: #e74c3c; }
+    }
+}
+
+.add-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.btn-add {
+    i {
+        font-size: 2rem;
+        color: $dark-gray;
+        cursor: pointer;
+        &:hover { transform: scale(1.1); }
+    }
+}
+
+.course-picker-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    
+    background-color: $white;
+    border: 1px solid $medium-gray;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.course-picker-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid $light-gray;
+    font-family: $font-secondary;
+    font-size: 0.9rem;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background-color: $light-gray;
+    }
+
+    .code { font-weight: 700; }
+    .name { color: $dark-gray; }
 }
