@@ -187,8 +187,7 @@ export class AdminDashboardComponent {
       this.router.navigate(['/admin-dashboard/register-student'])
     
     } else if (this.selectedOption === 'Professores') {
-      //Quando criar a componente para adicionar professores
-      console.log('Navegar para registar professor');
+      this.router.navigate(['/admin-dashboard/register-teacher'])
     }
   }
 }
