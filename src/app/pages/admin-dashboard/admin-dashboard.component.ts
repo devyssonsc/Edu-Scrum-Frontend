@@ -152,8 +152,7 @@ export class AdminDashboardComponent {
       this.router.navigate(['/admin-dashboard/register-degree']);
     
     } else if (this.selectedOption === 'Cadeiras') {
-      //Quando criar a componente para adicionar cadeiras
-      console.log('Navegar para registar cadeira');
+      this.router.navigate(['/admin-dashboard/register-course']);
     
     } else if (this.selectedOption === 'Estudantes') {
       //Quando criar a componente para adicionar estudantes

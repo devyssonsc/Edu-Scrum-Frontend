@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminDashboardComponent } from './pages/admin-dashboard/admin-dashboard.component';
 import { RegisterDegreeComponent } from './pages/admin-dashboard/register-degree/register-degree.component';
+import { RegisterCourseComponent } from './pages/admin-dashboard/register-course/register-course.component';
 
 export const routes: Routes = [
     {
@@ -11,5 +12,9 @@ export const routes: Routes = [
     {
         path: 'admin-dashboard/register-degree', 
         component: RegisterDegreeComponent
+    },
+    {
+        path: 'admin-dashboard/register-course', 
+        component: RegisterCourseComponent
     }
 ];
