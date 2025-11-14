@@ -1,0 +1,108 @@
+@import "../../../../styles/variables.scss";
+
+.form-page-container {
+    width: 100%;
+    min-height: 100%;
+    padding: 2rem;
+    background-color: $light-gray;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.form-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    padding: 2.5rem 2rem;
+}
+
+.form-title {
+    font-family: $font-primary;
+    font-size: 2rem;
+    font-weight: 900;
+    color: $dark-gray;
+    margin-bottom: 1rem;
+}
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    label {
+        font-family: $font-secondary;
+        font-weight: 600;
+        color: $dark-gray;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        border-bottom: 2px solid $medium-gray;
+        padding: 0.5rem 0.25rem;
+        font-family: $font-secondary;
+        &:focus { border-color: $dark-gray; }
+        &::placeholder { color: $medium-gray; }
+    }
+}
+.cadeiras-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cadeira-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    .code { font-weight: 700; text-transform: uppercase; }
+    .name { font-size: 0.9rem; }
+    .bi-trash {
+        margin-left: auto;
+        font-size: 1.1rem;
+        cursor: pointer;
+        &:hover { color: #e74c3c; }
+    }
+}
+
+.empty-list-msg {
+    font-family: $font-secondary;
+    font-size: 0.9rem;
+    color: $medium-gray;
+    text-align: center;
+    padding: 1rem;
+}
+.add-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.btn-add {
+    i {
+        font-size: 2rem;
+        color: $dark-gray;
+        cursor: pointer;
+        &:hover { transform: scale(1.1); }
+    }
+}
+.divider {
+    width: 100%;
+    border: none;
+    border-top: 1px solid $light-gray;
+    margin-top: 1rem;
+}
+.btn-submit {
+    width: 100%;
+    margin-top: 1rem;
+    &:disabled {
+        background-color: $medium-gray;
+        cursor: not-allowed;
+        color: $dark-gray;
+    }
+}
+.error-msg {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
