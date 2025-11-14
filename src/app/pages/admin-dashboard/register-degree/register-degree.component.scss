@@ -106,3 +106,59 @@
     font-size: 0.8rem;
     font-weight: 500;
 }
+
+// 👇 ADICIONA ESTES NOVOS ESTILOS AQUI 👇
+
+.inline-add-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    width: 100%;
+    margin-top: 0.5rem;
+
+    .inline-input {
+        border-bottom: 2px solid $medium-gray;
+        padding: 0.5rem 0.25rem;
+        font-family: $font-secondary;
+        font-size: 0.9rem;
+        width: 100px; // Largura fixa para o código
+
+        &:focus {
+            border-color: $dark-gray;
+        }
+
+        &.flex-grow {
+            flex: 1; // Ocupa o espaço restante
+            width: auto;
+        }
+    }
+
+    .btn-icon {
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: $dark-gray;
+        padding: 0.25rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            background-color: $light-gray;
+        }
+
+        &.btn-cancel:hover {
+            color: #e74c3c; // Vermelho
+        }
+        
+        &:disabled {
+            color: $medium-gray;
+            cursor: not-allowed;
+            background-color: transparent;
+        }
+
+        i {
+            display: block; // Resolve problemas de alinhamento
+        }
+    }
+}

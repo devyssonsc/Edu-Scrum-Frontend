@@ -2,7 +2,7 @@
     
     <form class="card form-card" [formGroup]="courseForm" (ngSubmit)="onSubmit()">
         
-        <h2 class="form-title">Adicionar Curso</h2>
+        <h2 class="form-title">Registar Curso</h2> 
 
         <div class="form-group">
             <label for="nome">Nome</label>
@@ -23,16 +23,70 @@
                         <i class="bi bi-trash" (click)="removeCadeira(i)"></i>
                     </div>
                 }
-                @if(cadeiras.controls.length === 0) {
+                @if(cadeiras.controls.length === 0 && !showAddInputs) {
                     <p class="empty-list-msg">Adicione cadeiras a este curso.</p>
                 }
             </div>
             
-            <div class="add-button-container">
-                <button type="button" class="btn-add" (click)="addCadeira()">
-                    <i class="bi bi-plus-circle-fill"></i>
-                </button>
-            </div>
+            @if (showAddInputs) {
+                <div class="inline-add-form">
+                    
+                    <div class="inline-input-group">
+                        <input 
+                            type="text" 
+                            [formControl]="newCourseCode" 
+                            placeholder="Código (1-2 chars)" 
+                            class="inline-input"
+                            [class.invalid]="newCourseCode.invalid && newCourseCode.touched">
+                        
+                        @if (newCourseCode.invalid && newCourseCode.touched) {
+                            <small class="inline-error-msg">
+                                @if (newCourseCode.hasError('required')) {
+                                    Obrigatório.
+                                }
+                                @if (newCourseCode.hasError('minlength') || newCourseCode.hasError('maxlength')) {
+                                    (1-2 chars)
+                                }
+                                @if (newCourseCode.hasError('duplicate')) {
+                                    Código já existe.
+                                }
+                            </small>
+                        }
+                    </div>
+                    
+                    <div class="inline-input-group flex-grow">
+                        <input 
+                            type="text" 
+                            [formControl]="newCourseName" 
+                            placeholder="Nome (ex: Qualidade de Software)" 
+                            class="inline-input"
+                            [class.invalid]="newCourseName.invalid && newCourseName.touched">
+                        
+                        @if (newCourseName.invalid && newCourseName.touched) {
+                            <small class="inline-error-msg">Obrigatório.</small>
+                        }
+                    </div>
+                    
+                    <button type="button" class="btn-icon" (click)="confirmAddCourse()" [disabled]="newCourseCode.invalid || newCourseName.invalid">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button type="button" class="btn-icon btn-cancel" (click)="cancelAddCourse()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            }
+            
+            @if (!showAddInputs) {
+                <div class="add-button-container">
+                    <button type="button" class="btn-add" (click)="showAddCourseFields()">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </button>
+                </div>
+            }
+
+            @if (cadeiras.invalid && (cadeiras.touched) && !showAddInputs) {
+                <small class="error-msg">Pelo menos uma cadeira é obrigatória.</small>
+            }
         </div>
 
         <hr class="divider">
