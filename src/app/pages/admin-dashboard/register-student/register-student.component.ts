@@ -22,20 +22,18 @@ export class RegisterStudentComponent implements OnInit {
   constructor() {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]], // Validador de email
-      studentNumber: ['', Validators.required], // Número de aluno
-      degree: ['', Validators.required] // Curso a que pertence
+      email: ['', [Validators.required, Validators.email]],
+      studentNumber: ['', Validators.required],
+      degree: ['', Validators.required] 
     });
   }
 
   ngOnInit(): void {
-    // Aqui poderias carregar a lista de "degrees" (cursos) para um <select>
   }
 
   onSubmit() {
     if (this.studentForm.valid) {
       console.log('Formulário Válido (Student):', this.studentForm.value);
-      // ...chamar serviço para guardar o estudante...
     } else {
       console.log('Formulário Inválido');
       this.studentForm.markAllAsTouched();

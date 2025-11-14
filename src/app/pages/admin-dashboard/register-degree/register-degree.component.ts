@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { RouterLink } from '@angular/router';
-// Importa FormControl
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
 
 interface Cadeira {
@@ -23,9 +22,9 @@ interface Cadeira {
 export class RegisterDegreeComponent implements OnInit {
 
   private fb = inject(FormBuilder);
-  courseForm: FormGroup; // Este é o formulário principal do "Degree"
+  courseForm: FormGroup;
   
-  // 1. ADICIONA VALIDADORES de min/max length
+  
   newCourseCode = new FormControl('', [
     Validators.required,
     Validators.minLength(1),
@@ -64,19 +63,16 @@ export class RegisterDegreeComponent implements OnInit {
     });
   }
 
-  // 4. MOSTRA os campos de input (e limpa erros antigos)
   showAddCourseFields() {
     this.newCourseCode.reset('');
     this.newCourseName.reset('');
     this.showAddInputs = true;
   }
 
-  // 5. CANCELA a adição
   cancelAddCourse() {
     this.showAddInputs = false;
   }
 
-  // 6. CONFIRMA a adição da nova cadeira
   confirmAddCourse() {
     this.newCourseCode.markAsTouched();
     this.newCourseName.markAsTouched();
@@ -88,13 +84,11 @@ export class RegisterDegreeComponent implements OnInit {
     const newCode = this.newCourseCode.value?.toUpperCase() || '';
     const newName = this.newCourseName.value || 'N/A';
 
-    // 2. VERIFICA SE O CÓDIGO É ÚNICO
     const isDuplicate = this.cadeiras.controls.some(control => 
       control.value.code.toUpperCase() === newCode
     );
 
     if (isDuplicate) {
-      // 3. DEFINE UM ERRO PERSONALIZADO
       this.newCourseCode.setErrors({ 'duplicate': true });
     } else {
       this.cadeiras.push(this.newCadeira(newCode, newName));
@@ -107,10 +101,9 @@ export class RegisterDegreeComponent implements OnInit {
   }
 
   onSubmit() {
-    this.courseForm.markAllAsTouched(); // Garante que o erro "min 1 cadeira" aparece
+    this.courseForm.markAllAsTouched(); 
     if (this.courseForm.valid) {
       console.log('Formulário Válido:', this.courseForm.value);
-      // ...chamar serviço...
     } else {
       console.log('Formulário Inválido');
     }

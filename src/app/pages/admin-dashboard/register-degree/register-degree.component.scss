@@ -107,8 +107,6 @@
     font-weight: 500;
 }
 
-// 👇 ADICIONA ESTES NOVOS ESTILOS AQUI 👇
-
 .inline-add-form {
     display: flex;
     gap: 0.75rem;
@@ -121,14 +119,14 @@
         padding: 0.5rem 0.25rem;
         font-family: $font-secondary;
         font-size: 0.9rem;
-        width: 100px; // Largura fixa para o código
+        width: 100px;
 
         &:focus {
             border-color: $dark-gray;
         }
 
         &.flex-grow {
-            flex: 1; // Ocupa o espaço restante
+            flex: 1; 
             width: auto;
         }
     }
@@ -148,7 +146,7 @@
         }
 
         &.btn-cancel:hover {
-            color: #e74c3c; // Vermelho
+            color: #e74c3c; 
         }
         
         &:disabled {
@@ -158,7 +156,7 @@
         }
 
         i {
-            display: block; // Resolve problemas de alinhamento
+            display: block; 
         }
     }
 }

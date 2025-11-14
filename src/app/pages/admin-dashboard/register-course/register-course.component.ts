@@ -29,13 +29,11 @@ export class RegisterCourseComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Aqui poderias carregar a lista de "degrees" (cursos) para o <select>
   }
 
   onSubmit() {
     if (this.courseForm.valid) {
       console.log('Formulário Válido (Course):', this.courseForm.value);
-      // chamar serviço para guardar a cadeira
     } else {
       console.log('Formulário Inválido');
       this.courseForm.markAllAsTouched();

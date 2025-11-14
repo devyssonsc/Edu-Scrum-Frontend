@@ -1,7 +1,5 @@
-// Importa as variáveis globais
 @import "../../../../styles/variables.scss";
 
-// Container da página
 .form-page-container {
     width: 100%;
     min-height: 100%;
@@ -12,7 +10,6 @@
     align-items: flex-start;
 }
 
-// Card do formulário
 .form-card {
     flex-direction: column;
     align-items: center;
@@ -30,7 +27,6 @@
     margin-bottom: 1rem;
 }
 
-// Estilos dos campos
 .form-group {
     width: 100%;
     display: flex;
@@ -53,7 +49,6 @@
     }
 }
 
-// Separador
 .divider {
     width: 100%;
     border: none;
@@ -61,7 +56,6 @@
     margin-top: 1rem;
 }
 
-// Botão Submeter
 .btn-submit {
     width: 100%;
     margin-top: 1rem;
@@ -72,7 +66,6 @@
     }
 }
 
-// Erro
 .error-msg {
     color: #e74c3c;
     font-size: 0.8rem;
