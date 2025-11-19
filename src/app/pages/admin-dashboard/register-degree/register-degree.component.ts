@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
 
-interface Cadeira {
+interface AvailableCourse {
+  id: number;
   code: string;
   name: string;
 }
@@ -22,50 +23,50 @@ interface Cadeira {
 export class RegisterDegreeComponent implements OnInit {
 
   private fb = inject(FormBuilder);
-  courseForm: FormGroup;
+  degreeForm: FormGroup;
   
-  
-  newCourseCode = new FormControl('', [
-    Validators.required,
-    Validators.minLength(1),
-    Validators.maxLength(2),
-    Validators.pattern('^[a-zA-Z]+$')
-  ]);
-  newCourseName = new FormControl('', Validators.required);
-  showAddInputs = false;
+  isSubmitted = false;
 
-  mockCadeiras: Cadeira[] = [
-    { code: 'IA', name: 'Inteligência Artificial' },
-    { code: 'QS', name: 'Qualidade de Software' }
+  allCourses: AvailableCourse[] = [
+    { id: 1, code: 'IA', name: 'Inteligência Artificial' },
+    { id: 2, code: 'QS', name: 'Qualidade de Software' },
+    { id: 3, code: 'PWEB', name: 'Programação Web' },
+    { id: 4, code: 'BD', name: 'Bases de Dados' },
+    { id: 5, code: 'SO', name: 'Sistemas Operativos' }
   ];
 
+  selectedCourseId = new FormControl<number | null>(null, Validators.required);
+  newCourseEcts = new FormControl('', [
+    Validators.required, 
+  ]);
+  
+  showAddInputs = false;
+
   constructor() {
-    this.courseForm = this.fb.group({
+    this.degreeForm = this.fb.group({
       nome: ['', Validators.required],
       cadeiras: this.fb.array([], Validators.minLength(1)) 
     });
   }
 
   ngOnInit(): void {
-    this.mockCadeiras.forEach(cadeira => {
-      this.cadeiras.push(this.newCadeira(cadeira.code, cadeira.name));
-    });
   }
 
   get cadeiras() {
-    return this.courseForm.get('cadeiras') as FormArray;
+    return this.degreeForm.get('cadeiras') as FormArray;
   }
 
-  newCadeira(code: string, name: string): FormGroup {
+  newCadeiraGroup(code: string, name: string, ects: any): FormGroup {
     return this.fb.group({
       code: [code],
-      name: [name]
+      name: [name],
+      ects: [ects]
     });
   }
 
   showAddCourseFields() {
-    this.newCourseCode.reset('');
-    this.newCourseName.reset('');
+    this.selectedCourseId.reset(null);
+    this.newCourseEcts.reset('');
     this.showAddInputs = true;
   }
 
@@ -74,24 +75,27 @@ export class RegisterDegreeComponent implements OnInit {
   }
 
   confirmAddCourse() {
-    this.newCourseCode.markAsTouched();
-    this.newCourseName.markAsTouched();
+    this.selectedCourseId.markAsTouched();
+    this.newCourseEcts.markAsTouched();
 
-    if (this.newCourseCode.invalid || this.newCourseName.invalid) {
+    if (this.selectedCourseId.invalid || this.newCourseEcts.invalid) {
       return;
     }
     
-    const newCode = this.newCourseCode.value?.toUpperCase() || '';
-    const newName = this.newCourseName.value || 'N/A';
+    const courseId = Number(this.selectedCourseId.value);
+    const selectedCourse = this.allCourses.find(c => c.id === courseId);
+    const ectsValue = this.newCourseEcts.value;
+
+    if (!selectedCourse) return;
 
     const isDuplicate = this.cadeiras.controls.some(control => 
-      control.value.code.toUpperCase() === newCode
+      control.value.code === selectedCourse.code
     );
 
     if (isDuplicate) {
-      this.newCourseCode.setErrors({ 'duplicate': true });
+      this.selectedCourseId.setErrors({ 'duplicate': true });
     } else {
-      this.cadeiras.push(this.newCadeira(newCode, newName));
+      this.cadeiras.push(this.newCadeiraGroup(selectedCourse.code, selectedCourse.name, ectsValue));
       this.cancelAddCourse();
     }
   }
@@ -101,9 +105,11 @@ export class RegisterDegreeComponent implements OnInit {
   }
 
   onSubmit() {
-    this.courseForm.markAllAsTouched(); 
-    if (this.courseForm.valid) {
-      console.log('Formulário Válido:', this.courseForm.value);
+    this.isSubmitted = true; 
+    this.degreeForm.markAllAsTouched();
+    
+    if (this.degreeForm.valid) {
+      console.log('Formulário Válido:', this.degreeForm.value);
     } else {
       console.log('Formulário Inválido');
     }
