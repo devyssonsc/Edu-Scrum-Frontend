@@ -1,0 +1,45 @@
+<div class="form-page-container">
+    
+    <form class="card form-card" [formGroup]="courseForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">Adicionar Cadeira</h2>
+
+        <div class="form-group">
+            <label for="code">Código</label>
+            <input type="text" id="code" formControlName="code" placeholder="Ex: QS">
+            @if (courseForm.get('code')?.invalid && courseForm.get('code')?.touched) {
+                <small class="error-msg">O código é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="name">Nome</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Qualidade de Software">
+            @if (courseForm.get('name')?.invalid && courseForm.get('name')?.touched) {
+                <small class="error-msg">O nome é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="degree">Curso (Degree)</label>
+            <input type="text" id="degree" formControlName="degree" placeholder="Ex: Engenharia Informática">
+            @if (courseForm.get('degree')?.invalid && courseForm.get('degree')?.touched) {
+                <small class="error-msg">O curso é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="ects">ECTS</label>
+            <input type="number" id="ects" formControlName="ects" placeholder="Ex: 6">
+            @if (courseForm.get('ects')?.invalid && courseForm.get('ects')?.touched) {
+                <small class="error-msg">O valor de ECTS é obrigatório (tem de ser entre 1 e 8).</small>
+            }
+        </div>
+
+        <hr class="divider">
+
+        <button type="submit" class="btn btn-primary btn-submit" [disabled]="courseForm.invalid">
+            Registar Cadeira
+        </button>
+    </form>
+</div>
