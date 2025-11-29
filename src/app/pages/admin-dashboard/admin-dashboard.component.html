@@ -9,16 +9,23 @@
         <app-stats-card title="Professores" [value]="28" description="professores ativos"
             iconClass="bi bi-person-badge-fill"></app-stats-card>
     </div>
+    
     <app-section-selector [options]="['Cursos', 'Cadeiras', 'Estudantes', 'Professores']"
         (selectedOption)="onSelectOption($event)">
-        ></app-section-selector>
+    </app-section-selector>
+    
     <div class="card show-all">
         <div class="content">
             <h3>Gestão de {{ selectedOption }}</h3>
             <p>Registar e gerir {{ selectedOption.toLowerCase() }} da universidade</p>
+            
             <div class="div-table">
-                <app-show-table [data]="data"></app-show-table>
+                <app-show-table 
+                    [data]="data" 
+                    (editRow)="handleEdit($event)">
+                </app-show-table>
             </div>
+            
             <button class="btn btn-primary" (click)="onAddClick()">Adicionar {{ selectedOption }}</button>
         </div>
     </div>

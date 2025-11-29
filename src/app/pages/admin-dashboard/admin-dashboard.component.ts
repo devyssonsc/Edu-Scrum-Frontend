@@ -19,57 +19,8 @@ export class AdminDashboardComponent {
       courses: 17,
       teachers: 9,
       students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    },
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
     }
-  ]
+  ];
 
   cadeiras = [
     {
@@ -78,50 +29,9 @@ export class AdminDashboardComponent {
       degree: "Engenharia Informática",
       ects: 6,
       students: 52
-    },
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      ects: 6,
-      students: 52
-    },
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      ects: 6,
-      students: 52
-    },
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      ects: 6,
-      students: 52
-    },
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      ects: 6,
-      students: 52
-    },
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      ects: 6,
-      students: 52
-    },
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      ects: 6,
-      students: 52
     }
-  ]
+  ];
+
   students = [
     {
       num: 50440,
@@ -135,24 +45,24 @@ export class AdminDashboardComponent {
       email: "50441@alunos.upt.pt",
       degree: "Engenharia Informática"
     }
-  ]
+  ];
+
   teachers = [
     {
       name: "Fátima Leal",
       email: "fatimal@upt.pt",
       courses: 3
     },
-        {
+    {
       name: "Bruno Cunha",
       email: "Bruninho@upt.pt",
       courses: 4
     }
-  ]
+  ];
 
   data: any[] = this.degrees;
   
   constructor(private router: Router) {}
-
 
   selectedOption: string = 'Cursos';
 
@@ -176,7 +86,7 @@ export class AdminDashboardComponent {
     }
   }
 
-    onAddClick() {
+  onAddClick() {
     if (this.selectedOption === 'Cursos') {
       this.router.navigate(['/admin-dashboard/register-degree']);
     
@@ -184,10 +94,32 @@ export class AdminDashboardComponent {
       this.router.navigate(['/admin-dashboard/register-course']);
     
     } else if (this.selectedOption === 'Estudantes') {
-      this.router.navigate(['/admin-dashboard/register-student'])
+      this.router.navigate(['/admin-dashboard/register-student']);
     
     } else if (this.selectedOption === 'Professores') {
-      this.router.navigate(['/admin-dashboard/register-teacher'])
+      this.router.navigate(['/admin-dashboard/register-teacher']);
+    }
+  }
+
+  handleEdit(row: any) {
+    if (this.selectedOption === 'Cursos') {
+      
+      this.router.navigate(['/admin-dashboard/degree', row.code]);
+    
+    } else if (this.selectedOption === 'Cadeiras') {
+ 
+      this.router.navigate(['/admin-dashboard/course', row.code]);
+    
+    } else if (this.selectedOption === 'Estudantes'){ 
+      
+      this.router.navigate(['/admin-dashboard/student', row.num]);
+
+    } else if(this.selectedOption === 'Professores'){
+      
+      this.router.navigate(['/admin-dashboard/teacher', row.email]);
+
+    }else {
+      console.log('Edição ainda não implementada para:', this.selectedOption);
     }
   }
 }
