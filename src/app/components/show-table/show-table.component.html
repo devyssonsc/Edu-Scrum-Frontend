@@ -9,10 +9,18 @@
         <tbody>
             <tr *ngFor="let row of data">
                 <td *ngFor="let col of columns">{{ row[col] }}</td>
-                <td><i class="bi bi-gear"></i><i class="bi bi-trash"></i></td>
+                <td>
+                    <i class="bi bi-gear" 
+                       (click)="onEditClick(row)" 
+                       style="cursor: pointer; margin-right: 10px;">
+                    </i>
+                    
+                    <i class="bi bi-trash" style="cursor: pointer;"></i>
+                </td>
             </tr>
         </tbody>
     </table>
+    
 } @else {
     <p>Nenhum dado disponível.</p>
 }

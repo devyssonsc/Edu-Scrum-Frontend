@@ -1,0 +1,197 @@
+@import "../../../../styles/variables.scss";
+
+.form-page-container {
+    width: 100%;
+    min-height: 100%;
+    padding: 2rem;
+    background-color: $light-gray;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.card.form-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 500px; 
+    padding: 2.5rem 2rem;
+}
+
+.form-title {
+    font-family: $font-primary;
+    font-size: 2rem;
+    font-weight: 900;
+    color: $dark-gray;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    label {
+        font-family: $font-secondary;
+        font-weight: 600;
+        color: $dark-gray;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        border-bottom: 2px solid $medium-gray;
+        padding: 0.5rem 0.25rem;
+        font-family: $font-secondary;
+        &:focus { border-color: $dark-gray; }
+        &::placeholder { color: $medium-gray; }
+    }
+}
+
+.divider {
+    width: 100%;
+    border: none;
+    border-top: 1px solid $light-gray;
+    margin-top: 1rem;
+}
+
+.btn-submit {
+    width: 100%;
+    margin-top: 1rem;
+    &:disabled {
+        background-color: $medium-gray;
+        cursor: not-allowed;
+        color: $dark-gray;
+    }
+}
+
+.error-msg {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.cadeiras-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cadeira-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid $light-gray;
+
+    .info {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+
+        .code { font-weight: 700; text-transform: uppercase; color: $dark-gray; }
+        .name { font-size: 0.9rem; color: $dark-gray; }
+        .ects { font-size: 0.8rem; color: #777; }
+    }
+
+    .bi-trash {
+        font-size: 1.1rem;
+        cursor: pointer;
+        color: $medium-gray;
+        transition: color 0.2s;
+        &:hover { color: #e74c3c; }
+    }
+}
+
+.empty-list-msg {
+    font-family: $font-secondary;
+    font-size: 0.9rem;
+    color: $medium-gray;
+    text-align: center;
+    padding: 1rem;
+}
+
+.add-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.btn-add {
+    i {
+        font-size: 2rem;
+        color: $dark-gray;
+        cursor: pointer;
+        transition: transform 0.2s;
+        &:hover { transform: scale(1.1); }
+    }
+}
+
+.inline-add-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: #fafafa; 
+    border-radius: 8px;
+
+    .inline-input-group {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+
+        &.flex-grow {
+            flex: 1; 
+        }
+        .inline-input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid $medium-gray;
+            padding: 0.5rem 0.25rem;
+            font-family: $font-secondary;
+            font-size: 0.9rem;
+            background: transparent;
+
+            &:focus {
+                border-color: $dark-gray;
+                outline: none;
+            }
+            
+            &.invalid {
+                border-color: #e74c3c;
+            }
+        }
+        select.inline-input {
+            cursor: pointer;
+        }
+    }
+
+    .btn-icon {
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: $dark-gray;
+        padding: 0.25rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.25rem;
+
+        &:hover { background-color: $light-gray; }
+        &.btn-cancel:hover { color: #e74c3c; }
+        &:disabled { color: $medium-gray; cursor: not-allowed; background-color: transparent; }
+    }
+}
+
+.inline-error-msg {
+    color: #e74c3c;
+    font-size: 0.7rem;
+    font-weight: 500;
+    font-family: $font-secondary;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    white-space: nowrap;
+}

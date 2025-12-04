@@ -1,0 +1,78 @@
+<div class="detail-container">
+    
+    <div class="header-row">
+        <button class="btn-back" routerLink="/admin-dashboard">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+        <h1>Gerir Professor: <span class="highlight">{{ teacherId }}</span></h1>
+    </div>
+
+
+    <div class="stats-row">
+        <app-stats-card 
+            title="Cadeiras" 
+            [value]="mockTeacherData.stats.coursesCount" 
+            description="lecionadas atualmente"
+            iconClass="bi bi-book">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Total Alunos" 
+            [value]="mockTeacherData.stats.totalStudents" 
+            description="nas suas turmas"
+            iconClass="bi bi-people">
+        </app-stats-card>
+    </div>
+
+
+    <form [formGroup]="teacherForm" (ngSubmit)="onSubmit()" class="edit-section card">
+        
+        <div class="section-header">
+            <h3>Dados do Docente</h3>
+            <button type="submit" class="btn btn-primary" [disabled]="teacherForm.invalid || !teacherForm.dirty">
+                Guardar Alterações
+            </button>
+        </div>
+
+    
+        <div class="form-row-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-group-main">
+                <label>Nome Completo</label>
+                <input type="text" formControlName="name" class="main-input">
+            </div>
+            
+            <div class="form-group-main">
+                <label>Email Institucional</label>
+                <input type="text" formControlName="email" class="main-input">
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <h4 class="table-title">Cadeiras Lecionadas</h4>
+        
+        <div class="table-container">
+            <table class="edit-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">Código</th>
+                        <th>Cadeira</th>
+                    </tr>
+                </thead>
+                <tbody formArrayName="courses">
+                    @for (item of courses.controls; track $index; let i = $index) {
+                        <tr [formGroupName]="i">
+                            <td>
+                                <input type="text" formControlName="code" class="table-input code-input" readonly>
+                            </td>
+                            <td>
+                                <input type="text" formControlName="name" class="table-input" readonly>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </form>
+</div>

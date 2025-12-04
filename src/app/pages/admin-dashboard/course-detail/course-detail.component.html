@@ -1,0 +1,83 @@
+<div class="detail-container">
+    <div class="header-row">
+        <button class="btn-back" routerLink="/admin-dashboard">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+        <h1>Gerir Cadeira: <span class="highlight">{{ courseId }}</span></h1>
+    </div>
+
+    <div class="stats-row">
+        <app-stats-card 
+            title="Estudantes" 
+            [value]="mockCourseData.stats.studentsCount" 
+            description="inscritos"
+            iconClass="bi bi-people-fill">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Equipa Docente" 
+            [value]="mockCourseData.stats.teachersCount" 
+            description="professores"
+            iconClass="bi bi-person-badge-fill">
+        </app-stats-card>
+    </div>
+
+    <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="edit-section card">
+        
+        <div class="section-header">
+            <h3>Dados da Cadeira</h3>
+            <button type="submit" class="btn btn-primary" [disabled]="courseForm.invalid || !courseForm.dirty">
+                Guardar Alterações
+            </button>
+        </div>
+
+        <div class="form-row-grid">
+            <div class="form-group-main">
+                <label>Nome da Cadeira</label>
+                <input type="text" formControlName="name" class="main-input">
+            </div>
+            
+            <div class="form-group-main">
+                <label>Curso Associado</label>
+                <input type="text" formControlName="degree" class="main-input">
+            </div>
+
+            <div class="form-group-main small">
+                <label>ECTS</label>
+                <input type="number" formControlName="ects" class="main-input center-text">
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <h4 class="table-title">Equipa Docente</h4>
+        
+        <div class="table-container">
+            <table class="edit-table">
+                <thead>
+                    <tr>
+                        <th>Nome do Professor</th>
+                        <th>Email Institucional</th>
+                        <th style="width: 50px;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody formArrayName="teachers">
+                    @for (item of teachers.controls; track $index; let i = $index) {
+                        <tr [formGroupName]="i">
+                            <td>
+                                <input type="text" formControlName="name" class="table-input">
+                            </td>
+                            <td>
+                                <input type="text" formControlName="email" class="table-input">
+                            </td>
+                            <td class="actions">
+                                <i class="bi bi-trash delete-icon" (click)="removeTeacher(i)"></i>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </form>
+</div>
