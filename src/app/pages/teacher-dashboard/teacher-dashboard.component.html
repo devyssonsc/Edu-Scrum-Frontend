@@ -1,0 +1,45 @@
+<div class="div-container">
+    
+    <div class="header">
+        <h1>Professor <span class="highlight">{{ teacherName }}</span></h1>
+    </div>
+
+    <div class="nav-bar-container">
+        <div class="nav-pills">
+            @for (tab of tabs; track tab) {
+                <div 
+                    class="nav-item" 
+                    [class.active]="selectedTab === tab"
+                    (click)="selectTab(tab)">
+                    {{ tab }}
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card show-all">
+        <div class="content">
+            <div class="section-header">
+                @if (selectedTab === 'Cadeiras') {
+                    <h2>Cadeiras a lecionar</h2>
+                    <p>Lista de cadeiras</p>
+                } @else if (selectedTab === 'Projetos') {
+                    <h2>Meus Projetos</h2>
+                    <p>Gestão de projetos ativos e passados</p>
+                } @else {
+                    <h2>Gestão de Prémios</h2>
+                    <p>Configuração de gamificação</p>
+                }
+            </div>
+
+            <div class="div-table">
+                <app-show-table 
+                    [data]="currentData"
+                    (editRow)="handleRowClick($event)"
+                    [showDelete]="selectedTab !== 'Cadeiras'">
+                </app-show-table>
+            </div>
+
+        </div>
+    </div>
+</div>

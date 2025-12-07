@@ -8,6 +8,8 @@ import { DegreeDetailComponent } from './pages/degree-detail/degree-detail.compo
 import { CourseDetailComponent } from './pages/course-detail/course-detail.component';
 import { StudentDetailComponent } from './pages/student-detail/student-detail.component';
 import {TeacherDetailComponent} from './pages/teacher-detail/teacher-detail.component';
+import {TeacherDashboardComponent} from './pages/teacher-dashboard/teacher-dashboard.component';
+
 import { LoginComponent } from './pages/login/login.component';
 
 export const routes: Routes = [
@@ -50,5 +52,9 @@ export const routes: Routes = [
     {
         path:'admin-dashboard/teacher/:id',
         component: TeacherDetailComponent
+    },
+    {
+        path: 'teacher-dashboard',
+        component: TeacherDashboardComponent
     }
 ];
