@@ -24,16 +24,16 @@ export class TeacherDashboardComponent implements OnInit {
     { code: 'E', name: 'Empreendedorismo', degree: 'Relações Internacionais', ects: 4, students: 59, projects: 1 }
   ];
 
-  // Dados Mockados de Projetos 
+  // Dados Mockados de Projetos
   projectsData = [
     { name: 'Projeto Final 2024', course: 'Qualidade de Software', startDate: '2024-09-15', endDate: '2024-12-20' },
     { name: 'Agentes Inteligentes', course: 'Inteligência Artificial', startDate: '2024-10-01', endDate: '2024-11-30' }
   ];
 
-  // Dados Reais de Prémios 
+  // Dados Reais de Prémios
   private fullAwardsData = [
-    { name: 'Fast Hands', type: 'Global', points: 50, isOwner: false }, // Sistema
-    { name: 'Best Bug Report', type: 'Cadeira', points: 100, isOwner: true } // Professor
+    { name: 'Fast Hands', type: 'Global', points: 50, isOwner: false },
+    { name: 'Best Bug Report', type: 'Cadeira', points: 100, isOwner: true }
   ];
 
   currentData: any[] = [];
@@ -60,15 +60,15 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
+
   handleRowClick(row: any) {
     if (this.selectedTab === 'Cadeiras') {
-      console.log('Navegar para cadeira:', row.code);
+      this.router.navigate(['/teacher-dashboard/course', row.code]);
     
     } else if (this.selectedTab === 'Projetos') {
       console.log('Navegar para projeto:', row.name);
     
     } else if (this.selectedTab === 'Prémios') {
-  
       const originalAward = this.fullAwardsData.find(a => a.name === row.name);
       
       if (originalAward && originalAward.isOwner) {

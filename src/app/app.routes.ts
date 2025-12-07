@@ -9,6 +9,7 @@ import { CourseDetailComponent } from './pages/course-detail/course-detail.compo
 import { StudentDetailComponent } from './pages/student-detail/student-detail.component';
 import {TeacherDetailComponent} from './pages/teacher-detail/teacher-detail.component';
 import {TeacherDashboardComponent} from './pages/teacher-dashboard/teacher-dashboard.component';
+import { TeacherCourseDetailComponent } from './pages/teacher-course-detail/teacher-course-detail.component';
 
 import { LoginComponent } from './pages/login/login.component';
 
@@ -56,5 +57,9 @@ export const routes: Routes = [
     {
         path: 'teacher-dashboard',
         component: TeacherDashboardComponent
+    },
+    {
+        path: 'teacher-dashboard/course/:id',
+        component: TeacherCourseDetailComponent
     }
 ];

@@ -1,0 +1,59 @@
+<div class="div-container">
+    <div class="header">
+        <button class="btn-back" routerLink="/teacher-dashboard">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </button>
+        <h1>
+            <span class="subtitle">{{ courseData.code }}</span> 
+            {{ courseData.name }}
+        </h1>
+        <p class="degree-name">{{ courseData.degree }}</p>
+    </div>
+
+    <div class="stats-cards">
+        <app-stats-card 
+            title="Alunos Inscritos" 
+            [value]="courseData.stats.totalStudents" 
+            description="neste semestre"
+            iconClass="bi bi-people-fill">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Projetos" 
+            [value]="courseData.stats.activeProjects" 
+            description="ativos agora"
+            iconClass="bi bi-kanban">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Equipas" 
+            [value]="courseData.stats.totalTeams" 
+            description="formadas"
+            iconClass="bi bi-microsoft-teams">
+        </app-stats-card>
+    </div>
+
+    <div class="card show-all">
+        <div class="content">
+            
+            <div class="section-header">
+                <h2>Projetos da Cadeira</h2>
+                <p>Gerir projetos e equipas</p>
+            </div>
+
+            <div class="div-table">
+
+                <app-show-table 
+                    [data]="courseData.projects"
+                    (editRow)="handleProjectClick($event)"
+                    [showDelete]="false"> 
+                </app-show-table>
+            </div>
+
+            <button class="btn btn-primary" (click)="createProject()">
+                Criar Novo Projeto
+            </button>
+
+        </div>
+    </div>
+</div>
