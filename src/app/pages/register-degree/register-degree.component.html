@@ -1,4 +1,4 @@
-<div class="form-page-container">
+<div class="div-container">
     
     <form class="card form-card" [formGroup]="degreeForm" (ngSubmit)="onSubmit()">
         
@@ -94,8 +94,6 @@
 
         <hr class="divider">
 
-        <button type="submit" class="btn btn-primary btn-submit" [disabled]="degreeForm.invalid">
-            Registar curso
-        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="degreeForm.invalid">Registar curso</button>
     </form>
 </div>
