@@ -1,0 +1,26 @@
+<div class="div-container">
+    <form class="card form-card login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">Edu Scrum</h2>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" formControlName="email" placeholder="Ex: ana.silva">
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+                <small class="error-msg">O email é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="password">Palavra-Passe</label>
+            <input type="password" id="password" formControlName="password" placeholder="********">
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                <small class="error-msg">A palavra-passe é obrigatória.</small>
+            }
+        </div>
+        <hr class="divider">
+        <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">
+            Iniciar Sessão
+        </button>
+    </form>
+</div>

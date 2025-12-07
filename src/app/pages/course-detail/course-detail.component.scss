@@ -1,4 +1,4 @@
-@import "../../../../styles/variables.scss";
+@import "../../../styles/variables.scss";
 
 .detail-container {
     padding: 2rem;
@@ -60,14 +60,15 @@
     }
 }
 
+// Layout em Grid para os inputs de topo
 .form-row-grid {
     display: grid;
-    grid-template-columns: 2fr 2fr 2fr;
+    grid-template-columns: 2fr 2fr 1fr; // Nome maior, Curso maior, ECTS pequeno
     gap: 1.5rem;
     margin-bottom: 1rem;
 
-    @media (max-width: 900px) {
-        grid-template-columns: 1fr;
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr; // Em mobile fica um por linha
     }
 }
 
@@ -91,6 +92,8 @@
         font-family: $font-secondary;
         
         &:focus { border-color: $dark-gray; }
+        
+        &.center-text { text-align: center; }
     }
 }
 
@@ -135,12 +138,19 @@
         font-size: 0.95rem;
         transition: all 0.2s;
 
-        &:focus:not([readonly]), &:hover:not([readonly]) {
+        &:focus, &:hover {
             background-color: $light-gray;
             border-color: $medium-gray;
         }
+    }
 
-        &[readonly] { color: #777; cursor: default; }
-        &.code-input { font-weight: 700; text-transform: uppercase; color: $dark-gray; }
+    .actions { text-align: right; }
+
+    .delete-icon {
+        cursor: pointer;
+        color: $medium-gray;
+        font-size: 1.1rem;
+        transition: color 0.2s;
+        &:hover { color: #e74c3c; }
     }
 }

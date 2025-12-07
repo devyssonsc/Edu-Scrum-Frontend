@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { StatsCardComponent } from '../../../components/stats-card/stats-card.component'; 
+import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
 
 @Component({
   selector: 'app-teacher-detail',
