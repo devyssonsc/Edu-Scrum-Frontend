@@ -39,12 +39,12 @@ export class TeacherCourseDetailComponent implements OnInit {
   ngOnInit() {
     this.courseId = this.route.snapshot.paramMap.get('id');
   }
-
   handleProjectClick(row: any) {
     console.log('Abrir projeto:', row.name);
   }
 
   createProject() {
-    console.log('Criar novo projeto para:', this.courseData.code);
+    console.log('Criar novo projeto para:', this.courseId);
+    this.router.navigate(['/teacher-dashboard/course', this.courseId, 'create-project']);
   }
 }

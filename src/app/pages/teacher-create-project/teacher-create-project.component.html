@@ -1,0 +1,48 @@
+<div class="form-page-container">
+    
+    <form class="card form-card" [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">Novo Projeto</h2>
+        <p class="context-info">Cadeira: <strong>{{ courseId }}</strong></p>
+
+        <div class="form-group">
+            <label for="name">Nome do Projeto</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Projeto Final 2025">
+            @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
+                <small class="error-msg">O nome é obrigatório.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="desc">Descrição</label>
+            <input type="text" id="desc" formControlName="description" placeholder="Breve descrição dos objetivos...">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start">Data de Início</label>
+                <input type="date" id="start" formControlName="startDate">
+                @if (projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched) {
+                    <small class="error-msg">Obrigatório.</small>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="end">Data de Fim</label>
+                <input type="date" id="end" formControlName="endDate">
+                @if (projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched) {
+                    <small class="error-msg">Obrigatório.</small>
+                }
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <button type="submit" class="btn btn-primary btn-submit" [disabled]="projectForm.invalid">
+            Criar Projeto
+        </button>
+
+        <a class="btn-cancel" [routerLink]="['/teacher-dashboard/course', courseId]">Cancelar</a>
+
+    </form>
+</div>

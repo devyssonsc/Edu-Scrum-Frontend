@@ -10,7 +10,7 @@ import { StudentDetailComponent } from './pages/student-detail/student-detail.co
 import {TeacherDetailComponent} from './pages/teacher-detail/teacher-detail.component';
 import {TeacherDashboardComponent} from './pages/teacher-dashboard/teacher-dashboard.component';
 import { TeacherCourseDetailComponent } from './pages/teacher-course-detail/teacher-course-detail.component';
-
+import { TeacherCreateProjectComponent } from './pages/teacher-create-project/teacher-create-project.component';
 import { LoginComponent } from './pages/login/login.component';
 
 export const routes: Routes = [
@@ -61,5 +61,9 @@ export const routes: Routes = [
     {
         path: 'teacher-dashboard/course/:id',
         component: TeacherCourseDetailComponent
+    },
+    {
+        path: 'teacher-dashboard/course/:courseId/create-project',
+        component: TeacherCreateProjectComponent
     }
 ];
