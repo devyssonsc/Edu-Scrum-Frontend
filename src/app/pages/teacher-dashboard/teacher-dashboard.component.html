@@ -17,7 +17,6 @@
         </div>
     </div>
 
-
     <div class="card show-all">
         <div class="content">
             
@@ -34,13 +33,12 @@
                 }
             </div>
 
-
             <div class="div-table">
                 <app-show-table 
                     [data]="currentData"
                     (editRow)="handleRowClick($event)"
                     (deleteRow)="handleDelete($event)" 
-                    [showDelete]="selectedTab !== 'Courses'">
+                    [showDelete]="selectedTab === 'Awards'">
                 </app-show-table>
             </div>
 

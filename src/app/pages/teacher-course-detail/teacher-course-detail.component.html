@@ -5,12 +5,10 @@
             <i class="bi bi-arrow-left"></i> Back
         </button>
         <h1>
-            <span class="subtitle">{{ course?.code }}</span> 
             {{ course?.name }}
         </h1>
         <p class="degree-name">{{ course?.degree?.name }}</p>
     </div>
-
     <div class="stats-cards">
         <app-stats-card 
             title="Enrolled Students" 
@@ -26,7 +24,6 @@
             iconClass="bi bi-microsoft-teams">
         </app-stats-card>
     </div>
-
     <div class="card show-all">
         <div class="content">
             
@@ -39,13 +36,19 @@
                 <app-show-table 
                     [data]="projectsView"
                     (editRow)="handleProjectClick($event)"
-                    [showDelete]="false">
+                    (deleteRow)="handleDeleteProject($event)"
+                    [showDelete]="true"
+                    [showEdit]="false">
                 </app-show-table>
+                <br>
+                <br>
+
+                <button class="btn btn-primary" (click)="createProject()">
+                Create New Project
+                </button>
             </div>
 
-            <button class="btn btn-primary" (click)="createProject()">
-                Create New Project
-            </button>
+
 
         </div>
     </div>

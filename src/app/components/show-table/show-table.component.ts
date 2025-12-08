@@ -10,7 +10,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 })
 export class ShowTableComponent {
   @Input() data: any[] = [];
+  
   @Input() showDelete: boolean = true; 
+  @Input() showEdit: boolean = true; 
 
   @Output() editRow = new EventEmitter<any>();
   @Output() deleteRow = new EventEmitter<any>();
