@@ -25,8 +25,8 @@ export class RegisterStudentComponent implements OnInit {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
-      degree: null,
+      password: [''],
+      degree: [''],
       user_type: ['STUDENT'],  
       role: ['STUDENT']        
     });
@@ -41,6 +41,8 @@ export class RegisterStudentComponent implements OnInit {
 
       //linha temporaria, depois é pra validar se um curso foi colocado ou não
       this.studentForm.value.degree = null
+      const firstName = this.studentForm.value.name.trim().split(' ')[0];
+      this.studentForm.value.password = firstName + "12345"
 
       console.log('Formulário Válido (Student):', this.studentForm.value);
       this.httpClient.post(`${enviroments.apiUrl}/users`, this.studentForm.value).subscribe(response => {
