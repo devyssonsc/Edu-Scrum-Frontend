@@ -10,10 +10,14 @@
             <tr *ngFor="let row of data">
                 <td *ngFor="let col of columns">{{ row[col] }}</td>
                 <td>
-                    <i class="bi bi-gear" 
-                       (click)="onEditClick(row)" 
-                       style="cursor: pointer; margin-right: 10px;">
-                    </i>
+
+                    @if (showEdit) {
+                        <i class="bi bi-gear" 
+                           (click)="onEditClick(row)" 
+                           style="cursor: pointer; margin-right: 10px;">
+                        </i>
+                    }
+                    
                     @if (showDelete) {
                         <i class="bi bi-trash" 
                            (click)="onDeleteClick(row)" 
@@ -24,6 +28,7 @@
             </tr>
         </tbody>
     </table>
+    
 } @else {
     <p>Nenhum dado disponível.</p>
 }

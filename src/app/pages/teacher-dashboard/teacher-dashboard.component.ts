@@ -48,6 +48,7 @@ export class TeacherDashboardComponent implements OnInit {
     // 2. Projetos
     this.dataService.getAllProjects().subscribe(data => {
       this.projectsView = data.map(p => ({
+        id: p.id, 
         name: p.name,
         course: p.courseName,
         startDate: p.startDate,
@@ -87,6 +88,8 @@ export class TeacherDashboardComponent implements OnInit {
     
     } else if (this.selectedTab === 'Projects') {
       console.log('Navigate to project:', row.name);
+
+      this.router.navigate(['/teacher-dashboard/project', row.name]);
     
     } else if (this.selectedTab === 'Awards') {
       this.handleAwardAction(row);
@@ -109,6 +112,7 @@ export class TeacherDashboardComponent implements OnInit {
       alert('You can only manage awards created by you.');
     }
   }
+
   handleDelete(row: any) {
     if (this.selectedTab === 'Projects') {
         if(confirm(`Are you sure you want to delete project "${row.name}"?`)) {
@@ -120,19 +124,18 @@ export class TeacherDashboardComponent implements OnInit {
         }
     } 
     else if (this.selectedTab === 'Awards') {
-
         const originalAward = this.rawAwards.find(a => a.name === row.name);
         
-        if (originalAward && originalAward.type === 'Course') {
+        if (originalAward && originalAward.isOwner) {
             if(confirm(`Delete award "${row.name}"?`)) {
                 this.dataService.deleteAward(row.name).subscribe(success => {
                     if(success) {
-                        this.loadAllData(); 
+                        this.loadAllData();
                     }
                 });
             }
         } else {
-            alert('You can only delete awards of type "Course".');
+            alert('You can only delete awards created by you (type "Course").');
         }
     }
   }
