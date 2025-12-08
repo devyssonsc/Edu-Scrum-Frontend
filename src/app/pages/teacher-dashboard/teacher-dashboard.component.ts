@@ -1,4 +1,3 @@
-// ... imports ...
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -18,8 +17,10 @@ export class TeacherDashboardComponent implements OnInit {
   private router = inject(Router);
 
   teacherName = "Fátima Leal";
+  
   selectedTab: string = 'Courses';
   tabs: string[] = ['Courses', 'Projects', 'Awards'];
+
   coursesView: any[] = [];
   projectsView: any[] = [];
   awardsView: any[] = [];
@@ -32,46 +33,82 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   loadAllData() {
-    // Cursos
+    // 1. Cursos
     this.dataService.getCourses().subscribe(data => {
-        this.coursesView = data.map(c => ({
-          code: c.code, name: c.name, degree: c.degree?.name, ects: c.ects,
-          students: c.studentsCount, projects: c.projectsCount
-        }));
-        if (this.selectedTab === 'Courses') this.currentData = this.coursesView;
+      this.coursesView = data.map(c => ({
+        code: c.code,
+        name: c.name,
+        degree: c.degree?.name,
+        students: c.studentsCount,
+        projects: c.projectsCount
+      }));
+      if (this.selectedTab === 'Courses') this.currentData = this.coursesView;
     });
-    // Projetos
+
+    // 2. Projetos
     this.dataService.getAllProjects().subscribe(data => {
-        this.projectsView = data.map(p => ({
-          name: p.name, course: p.courseName, startDate: p.startDate, endDate: p.endDate
-        }));
-        if (this.selectedTab === 'Projects') this.currentData = this.projectsView;
+      this.projectsView = data.map(p => ({
+        name: p.name,
+        course: p.courseName,
+        startDate: p.startDate,
+        endDate: p.endDate
+      }));
+      if (this.selectedTab === 'Projects') this.currentData = this.projectsView;
     });
-    // Prémios
+
+    // 3. Prémios
     this.dataService.getAwards().subscribe(data => {
-        this.rawAwards = data;
-        this.awardsView = data.map(a => ({
-          name: a.name, type: a.type, points: a.points
-        }));
-        if (this.selectedTab === 'Awards') this.currentData = this.awardsView;
+      this.rawAwards = data;
+      this.awardsView = data.map(a => ({
+        name: a.name,
+        type: a.type,
+        points: a.points
+      }));
+      if (this.selectedTab === 'Awards') this.currentData = this.awardsView;
     });
   }
 
   selectTab(tab: string) {
     this.selectedTab = tab;
-    if (tab === 'Courses') this.currentData = this.coursesView;
-    else if (tab === 'Projects') this.currentData = this.projectsView;
-    else if (tab === 'Awards') this.currentData = this.awardsView;
+    
+    if (tab === 'Courses') {
+      this.currentData = this.coursesView;
+    } else if (tab === 'Projects') {
+      this.currentData = this.projectsView;
+    } else if (tab === 'Awards') {
+      this.currentData = this.awardsView;
+    }
   }
 
   handleRowClick(row: any) {
     if (this.selectedTab === 'Courses') {
-        this.router.navigate(['/teacher-dashboard/course', row.code]);
+      console.log('Navigate to course:', row.code);
+      this.router.navigate(['/teacher-dashboard/course', row.code]);
+    
     } else if (this.selectedTab === 'Projects') {
-        console.log('Navigate to project:', row.name);
+      console.log('Navigate to project:', row.name);
+    
+    } else if (this.selectedTab === 'Awards') {
+      this.handleAwardAction(row);
     }
   }
 
+  handleAwardAction(row: any) {
+    const originalAward = this.rawAwards.find(a => a.name === row.name);
+    
+    if (originalAward && originalAward.isOwner) {
+      if(confirm('Do you want to delete this award?')) {
+        this.dataService.deleteAward(originalAward.name).subscribe(success => {
+          if(success) {
+            alert('Award deleted');
+            this.loadAllData();
+          }
+        });
+      }
+    } else {
+      alert('You can only manage awards created by you.');
+    }
+  }
   handleDelete(row: any) {
     if (this.selectedTab === 'Projects') {
         if(confirm(`Are you sure you want to delete project "${row.name}"?`)) {

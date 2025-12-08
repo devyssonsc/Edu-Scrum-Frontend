@@ -24,13 +24,11 @@ export class CourseDetailComponent implements OnInit {
     code: 'QS',
     name: 'Qualidade de Software',
     degree: 'Engenharia Informática',
-    ects: 6,
     stats: {
-      studentsCount: 52,    
-      teachersCount: 2,     
-      avgGrade: 14.5        
+      studentsCount: 52,
+      teachersCount: 2,
+      avgGrade: 14.5
     },
-
     teachers: [
       { name: 'Fátima Leal', email: 'fatimal@upt.pt' },
       { name: 'Bruno Cunha', email: 'bruninho@upt.pt' }
@@ -38,19 +36,15 @@ export class CourseDetailComponent implements OnInit {
   };
 
   constructor() {
-
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
       degree: ['', Validators.required],
-      ects: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
       teachers: this.fb.array([]) 
     });
   }
 
   ngOnInit() {
-
     this.courseId = this.route.snapshot.paramMap.get('id');
-    
     if (this.courseId) {
       this.loadData();
     }
@@ -59,8 +53,7 @@ export class CourseDetailComponent implements OnInit {
   loadData() {
     this.courseForm.patchValue({
       name: this.mockCourseData.name,
-      degree: this.mockCourseData.degree,
-      ects: this.mockCourseData.ects
+      degree: this.mockCourseData.degree
     });
     
     const teachersArray = this.courseForm.get('teachers') as FormArray;
