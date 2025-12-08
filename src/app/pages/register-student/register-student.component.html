@@ -2,13 +2,13 @@
     
     <form class="card form-card" [formGroup]="studentForm" (ngSubmit)="onSubmit()">
         
-        <h2 class="form-title">Adicionar Estudante</h2>
+        <h2 class="form-title">Register Student</h2>
 
         <div class="form-group">
-            <label for="name">Nome Completo</label>
+            <label for="name">Full Name</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Ana Silva">
             @if (studentForm.get('name')?.invalid && studentForm.get('name')?.touched) {
-                <small class="error-msg">O nome é obrigatório.</small>
+                <small class="error-msg">This field is required</small>
             }
         </div>
 
@@ -16,30 +16,30 @@
             <label for="email">Email</label>
             <input type="email" id="email" formControlName="email" placeholder="Ex: ana.silva@email.com">
             @if (studentForm.get('email')?.invalid && studentForm.get('email')?.touched) {
-                <small class="error-msg">Por favor, insira um email válido.</small>
+                <small class="error-msg">Please, insert a valid email</small>
             }
         </div>
 
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" formControlName="password" placeholder="">
-            @if (studentForm.get('studentNumber')?.invalid && studentForm.get('studentNumber')?.touched) {
-                <small class="error-msg">O número de aluno é obrigatório.</small>
+            @if (studentForm.get('password')?.invalid && studentForm.get('password')?.touched) {
+                <small class="error-msg">A senha é obrigatória.</small>
             }
-        </div>
+        </div> -->
 
         <div class="form-group">
-            <label for="degree">Curso</label>
+            <label for="degree">Degree</label>
             <input type="text" id="degree" formControlName="degree" placeholder="Ex: Engenharia Informática">
             @if (studentForm.get('degree')?.invalid && studentForm.get('degree')?.touched) {
-                <small class="error-msg">O curso é obrigatório.</small>
+                <small class="error-msg">This field is required</small>
             }
         </div>
 
         <hr class="divider">
 
         <button type="submit" class="btn btn-primary" [disabled]="studentForm.invalid">
-            Registar Estudante
+            Register Student
         </button>
     </form>
 </div>
