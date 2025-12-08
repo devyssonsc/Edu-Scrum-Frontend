@@ -30,6 +30,7 @@ export class LoginComponent {
         console.log('Resposta do servidor:', response);
         localStorage.setItem('token', response.token);
        })
+       
     } else {
       console.log('Formulário Inválido');
       this.loginForm.markAllAsTouched();

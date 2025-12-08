@@ -1,0 +1,61 @@
+<div class="form-page-container">
+    
+    <form class="card form-card" [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">New Project</h2>
+        
+        <p class="context-info">Course: <strong>{{ courseName }}</strong></p>
+
+        <div class="form-group">
+            <label for="name">Project Name</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Final Project 2025">
+            @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
+                <small class="error-msg">Project name is required.</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="desc">Description</label>
+            <input type="text" id="desc" formControlName="description" placeholder="Brief description of goals...">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="start">Start Date</label>
+                <input 
+                    type="date" 
+                    id="start" 
+                    formControlName="startDate" 
+                    lang="en-CA"
+                    placeholder="yyyy-mm-dd">
+                
+                @if (projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched) {
+                    <small class="error-msg">Required.</small>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="end">End Date</label>
+                <input 
+                    type="date" 
+                    id="end" 
+                    formControlName="endDate" 
+                    lang="en-CA"
+                    placeholder="yyyy-mm-dd">
+                
+                @if (projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched) {
+                    <small class="error-msg">Required.</small>
+                }
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <button type="submit" class="btn btn-primary btn-submit" [disabled]="projectForm.invalid">
+            Create Project
+        </button>
+        
+        <a class="btn-cancel" [routerLink]="['/teacher-dashboard/course', courseId]">Cancel</a>
+
+    </form>
+</div>

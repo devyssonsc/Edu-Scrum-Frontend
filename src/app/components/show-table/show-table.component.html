@@ -14,8 +14,9 @@
                        (click)="onEditClick(row)" 
                        style="cursor: pointer; margin-right: 10px;">
                     </i>
-                    
-                    <i class="bi bi-trash" style="cursor: pointer;"></i>
+                    @if (showDelete) {
+                        <i class="bi bi-trash" style="cursor: pointer;"></i>
+                    }
                 </td>
             </tr>
         </tbody>
