@@ -12,45 +12,17 @@
 
     .header {
         margin-bottom: 0.5rem;
-
         .btn-back {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: none;
-            border: none;
-            font-family: $font-secondary;
-            font-weight: 600;
-            color: $dark-gray;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            padding: 0;
-            
+            display: flex; align-items: center; gap: 0.5rem; background: none; border: none; font-family: $font-secondary; font-weight: 600; color: $dark-gray; cursor: pointer; margin-bottom: 1rem; padding: 0;
             &:hover { color: #333; }
         }
-        
         h1 {
-            font-family: $font-secondary;
-            font-weight: 800;
-            font-size: 2rem;
-            color: $dark-gray;
-            line-height: 1.2;
-            
-            .subtitle {
-                color: $dark-gray;
-                opacity: 0.6;
-                font-weight: 400;
-                margin-right: 0.5rem;
-            }
+            font-family: $font-secondary; font-weight: 800; font-size: 2rem; color: $dark-gray; line-height: 1.2;
+            .subtitle { color: $dark-gray; opacity: 0.6; font-weight: 400; margin-right: 0.5rem; }
         }
-
-        .degree-name {
-            font-family: $font-secondary;
-            font-size: 1rem;
-            color: #666;
-            margin-top: 0.2rem;
-        }
+        .degree-name { font-family: $font-secondary; font-size: 1rem; color: #666; margin-top: 0.2rem; }
     }
+
     .stats-cards {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -59,13 +31,15 @@
 
     .show-all {
         width: 100%;
-        flex: 1;
+        flex: 1; 
+        min-height: 0; 
         display: flex;
         justify-content: flex-start;
         padding: 20px 30px;
 
         .content {
             width: 100%;
+            height: 100%; 
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -73,23 +47,14 @@
             gap: 1rem;
 
             .section-header {
-                h2 {
-                    font-family: $font-secondary;
-                    font-weight: 800;
-                    font-size: 1.5rem;
-                    color: $dark-gray;
-                    margin-bottom: 0.2rem;
-                }
-                p {
-                    color: #777;
-                    font-family: $font-secondary;
-                    font-size: 0.9rem;
-                }
+                h2 { font-family: $font-secondary; font-weight: 800; font-size: 1.5rem; color: $dark-gray; margin-bottom: 0.2rem; }
+                p { color: #777; font-family: $font-secondary; font-size: 0.9rem; }
             }
-
             .div-table {
                 width: 100%;
-                overflow-y: auto;
+                flex: 1; 
+                overflow-y: auto; 
+                min-height: 200px; 
             }
         }
     }
