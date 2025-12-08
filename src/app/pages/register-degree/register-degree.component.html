@@ -2,98 +2,70 @@
     
     <form class="card form-card" [formGroup]="degreeForm" (ngSubmit)="onSubmit()">
         
-        <h2 class="form-title">Registar Curso</h2> 
+        <h2 class="form-title">Register Degree</h2> 
 
         <div class="form-group">
-            <label for="nome">Nome do Curso</label>
-            <input type="text" id="nome" formControlName="nome" placeholder="Ex: Engenharia Informática">
-            @if (degreeForm.get('nome')?.invalid && degreeForm.get('nome')?.touched) {
-                <small class="error-msg">O nome é obrigatório.</small>
+            <label for="name">Name</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Informatics Engineering">
+            @if (degreeForm.get('name')?.invalid && degreeForm.get('name')?.touched) {
+                <small class="error-msg">This field is required</small>
             }
-        </div>
-
-        <div class="form-group">
-            <label>Cadeiras do Curso</label>
+        </div>  
             
-            <div class="cadeiras-list" formArrayName="cadeiras">
-                @for(cadeiraGroup of cadeiras.controls; track $index; let i = $index) {
-                    <div class="cadeira-item" [formGroupName]="i">
-                        <div class="info">
-                            <span class="code">{{ cadeiraGroup.value.code }}</span>
-                            <span class="name">{{ cadeiraGroup.value.name }}</span>
-                            <span class="ects">({{ cadeiraGroup.value.ects }} ECTS)</span>
-                        </div>
-                        <i class="bi bi-trash" (click)="removeCadeira(i)"></i>
+        <div class="form-group">
+            <label>Courses</label>
+
+            <div formArrayName="courses" class="cadeiras-list">
+                @for(course of courses.controls; track $index; let i = $index) {
+                    <div class="cadeira-item">
+                        <span class="name">{{ course.value }}</span>
+                        <i class="bi bi-trash" (click)="removeCourse(i)"></i>
                     </div>
                 }
-                @if(cadeiras.controls.length === 0 && !showAddInputs) {
-                    <p class="empty-list-msg">Adicione cadeiras a este curso.</p>
+
+                @if(courses.length === 0 && !showAddInput) {
+                    <p class="empty-list-msg">Add courses to this degree</p>
                 }
             </div>
-            
-            @if (showAddInputs) {
+
+            <!-- INPUT DE ADICIONAR CADEIRA -->
+            @if (showAddInput) {
                 <div class="inline-add-form">
-                    
-                    <div class="inline-input-group flex-grow">
-                        <select 
-                            [formControl]="selectedCourseId" 
-                            class="inline-input"
-                            [class.invalid]="selectedCourseId.invalid && selectedCourseId.touched">
-                            <option [ngValue]="null" disabled>Selecione uma cadeira...</option>
-                            @for (course of allCourses; track course.id) {
-                                <option [value]="course.id">
-                                    [{{ course.code }}] {{ course.name }}
-                                </option>
-                            }
-                        </select>
-                        
-                        @if (selectedCourseId.invalid && selectedCourseId.touched) {
-                            <small class="inline-error-msg">
-                                @if (selectedCourseId.hasError('required')) { Obrigatório. }
-                                @if (selectedCourseId.hasError('duplicate')) { Já adicionada. }
-                            </small>
-                        }
-                    </div>
-                    
-                    <div class="inline-input-group" style="width: 80px;">
-                        <input 
-                            type="number" 
-                            [formControl]="newCourseEcts" 
-                            placeholder="ECTS" 
-                            min="1" 
-                            max="7"
-                            class="inline-input"
-                            [class.invalid]="newCourseEcts.invalid && newCourseEcts.touched">
-                        
-                        @if (newCourseEcts.invalid && newCourseEcts.touched) {
-                            <small class="inline-error-msg">O número de ECTS tem de ser entre 1 e 7.</small>
-                        }
-                    </div>
-                    
-                    <button type="button" class="btn-icon" (click)="confirmAddCourse()" [disabled]="selectedCourseId.invalid || newCourseEcts.invalid">
+                    <input 
+                        type="text"
+                        [formControl]="newCourseName"
+                        placeholder="Ex: Software Quality"
+                        class="inline-input"
+                        [class.invalid]="newCourseName.invalid && newCourseName.touched"
+                    >
+
+                    <button type="button" class="btn-icon" (click)="addCourse()" [disabled]="newCourseName.invalid">
                         <i class="bi bi-check-lg"></i>
                     </button>
-                    <button type="button" class="btn-icon btn-cancel" (click)="cancelAddCourse()">
+
+                    <button type="button" class="btn-icon btn-cancel" (click)="showAddInput = false">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
             }
-            
-            @if (!showAddInputs) {
+
+            <!-- BOTÃO DE MOSTRAR INPUT -->
+            @if (!showAddInput) {
                 <div class="add-button-container">
-                    <button type="button" class="btn-add" (click)="showAddCourseFields()">
+                    <button type="button" class="btn-add" (click)="showAddInput = true">
                         <i class="bi bi-plus-circle-fill"></i>
                     </button>
                 </div>
             }
 
-            @if (cadeiras.invalid && (cadeiras.touched || isSubmitted) && !showAddInputs) {
-                <small class="error-msg">Pelo menos uma cadeira é obrigatória.</small>
+            <!-- ERRO SE NÃO HOUVER NENHUMA CADEIRA -->
+            @if (courses.invalid && (courses.touched || isSubmitted)) {
+                <small class="error-msg">At least one course is required</small>
             }
         </div>
 
         <hr class="divider">
 
-        <button type="submit" class="btn btn-primary" [disabled]="degreeForm.invalid">Registar curso</button>
+        <button type="submit" class="btn btn-primary" [disabled]="degreeForm.invalid">Register Degree</button>
     </form>
 </div>
