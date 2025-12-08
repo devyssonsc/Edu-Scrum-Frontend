@@ -29,8 +29,6 @@ export interface Course {
   id: number;
   name: string;
   degree?: Degree; 
-  
-  // Campos UI
   code?: string; 
   ects?: number; 
   studentsCount?: number;
@@ -169,6 +167,15 @@ export class DataService {
     const index = this.awards.findIndex(a => a.name === awardName && a.isOwner);
     if (index !== -1) {
       this.awards.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteProject(projectName: string): Observable<boolean> {
+    const index = this.projects.findIndex(p => p.name === projectName);
+    if (index !== -1) {
+      this.projects.splice(index, 1);
       return of(true);
     }
     return of(false);
