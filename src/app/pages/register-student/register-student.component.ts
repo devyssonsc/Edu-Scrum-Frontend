@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-register-student',
@@ -19,21 +21,31 @@ export class RegisterStudentComponent implements OnInit {
   private fb = inject(FormBuilder);
   studentForm: FormGroup;
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      studentNumber: ['', Validators.required],
-      degree: ['', Validators.required] 
+      password: ['', Validators.required],
+      degree: null,
+      user_type: ['STUDENT'],  
+      role: ['STUDENT']        
     });
   }
 
   ngOnInit(): void {
   }
 
+
   onSubmit() {
     if (this.studentForm.valid) {
+
+      //linha temporaria, depois é pra validar se um curso foi colocado ou não
+      this.studentForm.value.degree = null
+
       console.log('Formulário Válido (Student):', this.studentForm.value);
+      this.httpClient.post(`${enviroments.apiUrl}/users`, this.studentForm.value).subscribe(response => {
+              console.log('Resposta do servidor:', response);
+            })
     } else {
       console.log('Formulário Inválido');
       this.studentForm.markAllAsTouched();
