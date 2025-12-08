@@ -30,7 +30,6 @@ export interface Course {
   name: string;
   degree?: Degree; 
   code?: string; 
-  ects?: number; 
   studentsCount?: number;
   projectsCount?: number;
 }
@@ -73,15 +72,15 @@ export class DataService {
   private courses: Course[] = [
     { 
       id: 1, code: 'QS', name: 'Software Quality', degree: this.degreeEI, 
-      ects: 6, studentsCount: 75, projectsCount: 1 
+     studentsCount: 75, projectsCount: 1 
     },
     { 
       id: 2, code: 'IA', name: 'Artificial Intelligence', degree: this.degreeEI, 
-      ects: 6, studentsCount: 75, projectsCount: 2 
+      studentsCount: 75, projectsCount: 2 
     },
     { 
       id: 3, code: 'E', name: 'Entrepreneurship', degree: this.degreeRI, 
-      ects: 4, studentsCount: 59, projectsCount: 1 
+     studentsCount: 59, projectsCount: 1 
     }
   ];
 
