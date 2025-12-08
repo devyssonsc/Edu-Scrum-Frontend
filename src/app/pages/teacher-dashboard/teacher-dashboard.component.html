@@ -19,16 +19,17 @@
 
     <div class="card show-all">
         <div class="content">
+            
             <div class="section-header">
-                @if (selectedTab === 'Cadeiras') {
-                    <h2>Cadeiras a lecionar</h2>
-                    <p>Lista de cadeiras</p>
-                } @else if (selectedTab === 'Projetos') {
-                    <h2>Meus Projetos</h2>
-                    <p>Gestão de projetos ativos e passados</p>
+                @if (selectedTab === 'Courses') {
+                    <h2>Teaching Courses</h2>
+                    <p>List of courses</p>
+                } @else if (selectedTab === 'Projects') {
+                    <h2>My Projects</h2>
+                    <p>Manage active and past projects</p>
                 } @else {
-                    <h2>Gestão de Prémios</h2>
-                    <p>Configuração de gamificação</p>
+                    <h2>Awards Management</h2>
+                    <p>Gamification configuration</p>
                 }
             </div>
 
@@ -36,7 +37,7 @@
                 <app-show-table 
                     [data]="currentData"
                     (editRow)="handleRowClick($event)"
-                    [showDelete]="selectedTab !== 'Cadeiras'">
+                    [showDelete]="selectedTab !== 'Courses'">
                 </app-show-table>
             </div>
 

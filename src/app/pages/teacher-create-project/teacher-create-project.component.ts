@@ -18,37 +18,50 @@ export class TeacherCreateProjectComponent implements OnInit {
 
   projectForm: FormGroup;
   courseId: string | null = null;
+  courseName: string = '';
+  
+  private coursesList = [
+    { code: 'QS', name: 'Software Quality' },
+    { code: 'IA', name: 'Artificial Intelligence' },
+    { code: 'E', name: 'Entrepreneurship' }
+  ];
 
   constructor() {
     this.projectForm = this.fb.group({
       name: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      description: [''] // Opcional, mas útil
+      description: ['']
     });
   }
 
   ngOnInit() {
-    // Captura o ID da cadeira da URL para saber onde criar o projeto
     this.courseId = this.route.snapshot.paramMap.get('courseId');
+    
+    const state = history.state;
+    
+    if (state && state.courseName) {
+      this.courseName = state.courseName;
+    } else {
+      const foundCourse = this.coursesList.find(c => c.code === this.courseId);
+      this.courseName = foundCourse ? foundCourse.name : (this.courseId || 'Course');
+    }
   }
 
   onSubmit() {
     if (this.projectForm.valid) {
-      // Validação extra de datas
       const start = new Date(this.projectForm.value.startDate);
       const end = new Date(this.projectForm.value.endDate);
 
       if (end <= start) {
-        alert('A data de fim deve ser posterior à data de início.');
+        alert('End date must be after start date.');
         return;
       }
 
-      console.log('Criar Projeto para a cadeira:', this.courseId);
-      console.log('Dados do Projeto:', this.projectForm.value);
+      console.log('Creating Project for course:', this.courseName);
+      console.log('Project Data:', this.projectForm.value);
       
-      // Simula sucesso e volta para o detalhe da cadeira
-      alert('Projeto criado com sucesso!');
+      alert('Project created successfully!');
       this.router.navigate(['/teacher-dashboard/course', this.courseId]);
     } else {
       this.projectForm.markAllAsTouched();

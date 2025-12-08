@@ -1,7 +1,8 @@
 <div class="div-container">
+
     <div class="header">
         <button class="btn-back" routerLink="/teacher-dashboard">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> Back
         </button>
         <h1>
             <span class="subtitle">{{ courseData.code }}</span> 
@@ -12,23 +13,23 @@
 
     <div class="stats-cards">
         <app-stats-card 
-            title="Alunos Inscritos" 
+            title="Enrolled Students" 
             [value]="courseData.stats.totalStudents" 
-            description="neste semestre"
+            description="this semester"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
-            title="Projetos" 
+            title="Active Projects" 
             [value]="courseData.stats.activeProjects" 
-            description="ativos agora"
+            description="currently running"
             iconClass="bi bi-kanban">
         </app-stats-card>
 
         <app-stats-card 
-            title="Equipas" 
+            title="Teams" 
             [value]="courseData.stats.totalTeams" 
-            description="formadas"
+            description="formed"
             iconClass="bi bi-microsoft-teams">
         </app-stats-card>
     </div>
@@ -37,21 +38,20 @@
         <div class="content">
             
             <div class="section-header">
-                <h2>Projetos da Cadeira</h2>
-                <p>Gerir projetos e equipas</p>
+                <h2>Course Projects</h2>
+                <p>Manage projects and teams</p>
             </div>
 
             <div class="div-table">
-
                 <app-show-table 
                     [data]="courseData.projects"
                     (editRow)="handleProjectClick($event)"
-                    [showDelete]="false"> 
+                    [showDelete]="false">
                 </app-show-table>
             </div>
 
             <button class="btn btn-primary" (click)="createProject()">
-                Criar Novo Projeto
+                Create New Project
             </button>
 
         </div>

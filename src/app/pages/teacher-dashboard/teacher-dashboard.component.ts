@@ -14,26 +14,26 @@ export class TeacherDashboardComponent implements OnInit {
 
   teacherName = "Fátima Leal";
   
-  selectedTab: string = 'Cadeiras';
-  tabs: string[] = ['Cadeiras', 'Projetos', 'Prémios'];
+  selectedTab: string = 'Courses';
+  tabs: string[] = ['Courses', 'Projects', 'Awards'];
 
-  // Dados Mockados das Cadeiras
+  // Mock Data: Courses 
   coursesData = [
-    { code: 'QS', name: 'Qualidade de Software', degree: 'Engenharia Informática', ects: 6, students: 75, projects: 1 },
-    { code: 'IA', name: 'Inteligência Artificial', degree: 'Engenharia Informática', ects: 6, students: 75, projects: 2 },
-    { code: 'E', name: 'Empreendedorismo', degree: 'Relações Internacionais', ects: 4, students: 59, projects: 1 }
+    { code: 'QS', name: 'Software Quality', degree: 'Computer Engineering', ects: 6, students: 75, projects: 1 },
+    { code: 'IA', name: 'Artificial Intelligence', degree: 'Computer Engineering', ects: 6, students: 75, projects: 2 },
+    { code: 'E', name: 'Entrepreneurship', degree: 'International Relations', ects: 4, students: 59, projects: 1 }
   ];
 
-  // Dados Mockados de Projetos
+  // Mock Data: Projects 
   projectsData = [
-    { name: 'Projeto Final 2024', course: 'Qualidade de Software', startDate: '2024-09-15', endDate: '2024-12-20' },
-    { name: 'Agentes Inteligentes', course: 'Inteligência Artificial', startDate: '2024-10-01', endDate: '2024-11-30' }
+    { name: 'Final Project 2024', course: 'Software Quality', startDate: '2024-09-15', endDate: '2024-12-20' },
+    { name: 'Intelligent Agents', course: 'Artificial Intelligence', startDate: '2024-10-01', endDate: '2024-11-30' }
   ];
 
-  // Dados Reais de Prémios
+  // Mock Data: Awards 
   private fullAwardsData = [
-    { name: 'Fast Hands', type: 'Global', points: 50, isOwner: false },
-    { name: 'Best Bug Report', type: 'Cadeira', points: 100, isOwner: true }
+    { name: 'Fast Hands', type: 'Global', points: 50, isOwner: false }, 
+    { name: 'Best Bug Report', type: 'Course', points: 100, isOwner: true }
   ];
 
   currentData: any[] = [];
@@ -47,11 +47,11 @@ export class TeacherDashboardComponent implements OnInit {
   selectTab(tab: string) {
     this.selectedTab = tab;
     
-    if (tab === 'Cadeiras') {
+    if (tab === 'Courses') {
       this.currentData = this.coursesData;
-    } else if (tab === 'Projetos') {
+    } else if (tab === 'Projects') {
       this.currentData = this.projectsData;
-    } else if (tab === 'Prémios') {
+    } else if (tab === 'Awards') {
       this.currentData = this.fullAwardsData.map(award => ({
         name: award.name,
         type: award.type,
@@ -60,21 +60,21 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
-
   handleRowClick(row: any) {
-    if (this.selectedTab === 'Cadeiras') {
+    if (this.selectedTab === 'Courses') {
+      console.log('Navigate to course:', row.code);
       this.router.navigate(['/teacher-dashboard/course', row.code]);
     
-    } else if (this.selectedTab === 'Projetos') {
-      console.log('Navegar para projeto:', row.name);
+    } else if (this.selectedTab === 'Projects') {
+      console.log('Navigate to project:', row.name);
     
-    } else if (this.selectedTab === 'Prémios') {
+    } else if (this.selectedTab === 'Awards') {
       const originalAward = this.fullAwardsData.find(a => a.name === row.name);
       
       if (originalAward && originalAward.isOwner) {
-        console.log('Permissão concedida: Eliminar/Editar prémio', row.name);
+        console.log('Permission granted: Delete/Edit award', row.name);
       } else {
-        alert('Apenas pode gerir prémios criados por si.');
+        alert('You can only manage awards created by you.');
       }
     }
   }
