@@ -15,13 +15,15 @@
                        style="cursor: pointer; margin-right: 10px;">
                     </i>
                     @if (showDelete) {
-                        <i class="bi bi-trash" style="cursor: pointer;"></i>
+                        <i class="bi bi-trash" 
+                           (click)="onDeleteClick(row)" 
+                           style="cursor: pointer;">
+                        </i>
                     }
                 </td>
             </tr>
         </tbody>
     </table>
-    
 } @else {
     <p>Nenhum dado disponível.</p>
 }
