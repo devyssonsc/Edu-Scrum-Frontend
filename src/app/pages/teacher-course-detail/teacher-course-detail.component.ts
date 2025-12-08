@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
+import { DataService, Course } from '../../services/dataService';
 
 @Component({
   selector: 'app-teacher-course-detail',
@@ -15,36 +16,50 @@ export class TeacherCourseDetailComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private dataService = inject(DataService);
 
   courseId: string | null = null;
-
-  // DADOS MOCKADOS (Simula a cadeira "Qualidade de Software")
-  courseData = {
-    code: 'QS',
-    name: 'Qualidade de Software',
-    degree: 'Engenharia Informática',
-    stats: {
-      totalStudents: 75,
-      activeProjects: 1,
-      totalTeams: 12
-    },
-    projects: [
-      { name: 'Projeto Final 2024', startDate: '2024-09-15', endDate: '2024-12-20', teams: 12 },
-      { name: 'Mini-Projeto Testes', startDate: '2024-10-01', endDate: '2024-10-30', teams: 12 }
-    ]
-  };
+  course: Course | undefined;
+  
+  projectsView: any[] = [];
 
   constructor() {}
 
   ngOnInit() {
     this.courseId = this.route.snapshot.paramMap.get('id');
+    
+    if (this.courseId) {
+      this.loadCourseData(this.courseId);
+    }
   }
+
+  loadCourseData(code: string) {
+    // 1. Obter detalhes da cadeira
+    this.dataService.getCourseByCode(code).subscribe(data => {
+      this.course = data;
+    });
+
+    // 2. Obter projetos e formatar para tabela
+    this.dataService.getProjectsByCourse(code).subscribe(data => {
+      this.projectsView = data.map(p => ({
+        name: p.name,
+        startDate: p.startDate,
+        endDate: p.endDate,
+        teams: p.teamsCount
+      }));
+    });
+  }
+
   handleProjectClick(row: any) {
-    console.log('Abrir projeto:', row.name);
+    console.log('Open project:', row.name);
   }
 
   createProject() {
-    console.log('Criar novo projeto para:', this.courseId);
-    this.router.navigate(['/teacher-dashboard/course', this.courseId, 'create-project']);
+    if (!this.course) return;
+    
+    this.router.navigate(
+      ['/teacher-dashboard/course', this.courseId, 'create-project'],
+      { state: { courseName: this.course.name } }
+    );
   }
 }

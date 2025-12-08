@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DataService } from '../../services/dataService';
 
 @Component({
   selector: 'app-teacher-create-project',
@@ -15,16 +16,11 @@ export class TeacherCreateProjectComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private dataService = inject(DataService);
 
   projectForm: FormGroup;
   courseId: string | null = null;
   courseName: string = '';
-  
-  private coursesList = [
-    { code: 'QS', name: 'Software Quality' },
-    { code: 'IA', name: 'Artificial Intelligence' },
-    { code: 'E', name: 'Entrepreneurship' }
-  ];
 
   constructor() {
     this.projectForm = this.fb.group({
@@ -39,17 +35,17 @@ export class TeacherCreateProjectComponent implements OnInit {
     this.courseId = this.route.snapshot.paramMap.get('courseId');
     
     const state = history.state;
-    
     if (state && state.courseName) {
       this.courseName = state.courseName;
-    } else {
-      const foundCourse = this.coursesList.find(c => c.code === this.courseId);
-      this.courseName = foundCourse ? foundCourse.name : (this.courseId || 'Course');
+    } else if (this.courseId) {
+      this.dataService.getCourseByCode(this.courseId).subscribe(c => {
+        this.courseName = c ? c.name : this.courseId!;
+      });
     }
   }
 
   onSubmit() {
-    if (this.projectForm.valid) {
+    if (this.projectForm.valid && this.courseId) {
       const start = new Date(this.projectForm.value.startDate);
       const end = new Date(this.projectForm.value.endDate);
 
@@ -58,11 +54,21 @@ export class TeacherCreateProjectComponent implements OnInit {
         return;
       }
 
-      console.log('Creating Project for course:', this.courseName);
-      console.log('Project Data:', this.projectForm.value);
-      
-      alert('Project created successfully!');
-      this.router.navigate(['/teacher-dashboard/course', this.courseId]);
+      const newProject = {
+        name: this.projectForm.value.name,
+        courseCode: this.courseId,
+        startDate: this.projectForm.value.startDate,
+        endDate: this.projectForm.value.endDate,
+        description: this.projectForm.value.description
+      };
+
+      this.dataService.createProject(newProject).subscribe(success => {
+        if (success) {
+          alert('Project created successfully!');
+          this.router.navigate(['/teacher-dashboard/course', this.courseId]);
+        }
+      });
+
     } else {
       this.projectForm.markAllAsTouched();
     }

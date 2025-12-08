@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
+import { DataService, Course, Project, Award } from '../../services/dataService';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -12,51 +13,70 @@ import { ShowTableComponent } from '../../components/show-table/show-table.compo
 })
 export class TeacherDashboardComponent implements OnInit {
 
+  private dataService = inject(DataService);
+  private router = inject(Router);
+
   teacherName = "Fátima Leal";
   
   selectedTab: string = 'Courses';
   tabs: string[] = ['Courses', 'Projects', 'Awards'];
-
-  // Mock Data: Courses 
-  coursesData = [
-    { code: 'QS', name: 'Software Quality', degree: 'Computer Engineering', ects: 6, students: 75, projects: 1 },
-    { code: 'IA', name: 'Artificial Intelligence', degree: 'Computer Engineering', ects: 6, students: 75, projects: 2 },
-    { code: 'E', name: 'Entrepreneurship', degree: 'International Relations', ects: 4, students: 59, projects: 1 }
-  ];
-
-  // Mock Data: Projects 
-  projectsData = [
-    { name: 'Final Project 2024', course: 'Software Quality', startDate: '2024-09-15', endDate: '2024-12-20' },
-    { name: 'Intelligent Agents', course: 'Artificial Intelligence', startDate: '2024-10-01', endDate: '2024-11-30' }
-  ];
-
-  // Mock Data: Awards 
-  private fullAwardsData = [
-    { name: 'Fast Hands', type: 'Global', points: 50, isOwner: false }, 
-    { name: 'Best Bug Report', type: 'Course', points: 100, isOwner: true }
-  ];
-
+  coursesView: any[] = [];
+  projectsView: any[] = [];
+  awardsView: any[] = [];
+  
+  private rawAwards: Award[] = [];
   currentData: any[] = [];
 
-  constructor(private router: Router) {}
-
   ngOnInit() {
-    this.currentData = this.coursesData;
+    this.loadAllData();
+  }
+
+  loadAllData() {
+    // 1. Cursos
+    this.dataService.getCourses().subscribe(data => {
+      this.coursesView = data.map(c => ({
+        code: c.code,
+        name: c.name,
+        degree: c.degree?.name,
+        ects: c.ects,
+        students: c.studentsCount,
+        projects: c.projectsCount
+      }));
+      if (this.selectedTab === 'Courses') this.currentData = this.coursesView;
+    });
+
+    // 2. Projetos
+    this.dataService.getAllProjects().subscribe(data => {
+      this.projectsView = data.map(p => ({
+        name: p.name,
+        course: p.courseName,
+        startDate: p.startDate,
+        endDate: p.endDate
+      }));
+      if (this.selectedTab === 'Projects') this.currentData = this.projectsView;
+    });
+
+    // 3. Prémios
+    this.dataService.getAwards().subscribe(data => {
+      this.rawAwards = data;
+      this.awardsView = data.map(a => ({
+        name: a.name,
+        type: a.type,
+        points: a.points
+      }));
+      if (this.selectedTab === 'Awards') this.currentData = this.awardsView;
+    });
   }
 
   selectTab(tab: string) {
     this.selectedTab = tab;
     
     if (tab === 'Courses') {
-      this.currentData = this.coursesData;
+      this.currentData = this.coursesView;
     } else if (tab === 'Projects') {
-      this.currentData = this.projectsData;
+      this.currentData = this.projectsView;
     } else if (tab === 'Awards') {
-      this.currentData = this.fullAwardsData.map(award => ({
-        name: award.name,
-        type: award.type,
-        points: award.points
-      }));
+      this.currentData = this.awardsView;
     }
   }
 
@@ -69,13 +89,24 @@ export class TeacherDashboardComponent implements OnInit {
       console.log('Navigate to project:', row.name);
     
     } else if (this.selectedTab === 'Awards') {
-      const originalAward = this.fullAwardsData.find(a => a.name === row.name);
-      
-      if (originalAward && originalAward.isOwner) {
-        console.log('Permission granted: Delete/Edit award', row.name);
-      } else {
-        alert('You can only manage awards created by you.');
+      this.handleAwardAction(row);
+    }
+  }
+
+  handleAwardAction(row: any) {
+    const originalAward = this.rawAwards.find(a => a.name === row.name);
+    
+    if (originalAward && originalAward.isOwner) {
+      if(confirm('Do you want to delete this award?')) {
+        this.dataService.deleteAward(originalAward.name).subscribe(success => {
+          if(success) {
+            alert('Award deleted');
+            this.loadAllData();
+          }
+        });
       }
+    } else {
+      alert('You can only manage awards created by you.');
     }
   }
 }
