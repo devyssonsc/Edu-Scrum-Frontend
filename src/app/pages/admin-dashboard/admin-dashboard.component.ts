@@ -12,6 +12,8 @@ import { Router } from '@angular/router';
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent {
+  
+  // --- DADOS MOCKADOS ---
   degrees = [
     {
       code: "EI",
@@ -27,7 +29,6 @@ export class AdminDashboardComponent {
       code: "QS",
       name: "Qualidade de Software",
       degree: "Engenharia Informática",
-      ects: 6,
       students: 52
     }
   ];
@@ -61,10 +62,10 @@ export class AdminDashboardComponent {
   ];
 
   data: any[] = this.degrees;
+  selectedOption: string = 'Cursos';
   
   constructor(private router: Router) {}
 
-  selectedOption: string = 'Cursos';
 
   get columns(): string[] {
     if (!this.degrees || this.degrees.length === 0) return [];
@@ -103,22 +104,22 @@ export class AdminDashboardComponent {
 
   handleEdit(row: any) {
     if (this.selectedOption === 'Cursos') {
-      
       this.router.navigate(['/admin-dashboard/degree', row.code]);
     
     } else if (this.selectedOption === 'Cadeiras') {
- 
       this.router.navigate(['/admin-dashboard/course', row.code]);
     
-    } else if (this.selectedOption === 'Estudantes'){ 
-      
+    } else if (this.selectedOption === 'Estudantes') {
+
+      console.log('A navegar para estudante:', row.num);
       this.router.navigate(['/admin-dashboard/student', row.num]);
 
-    } else if(this.selectedOption === 'Professores'){
-      
-      this.router.navigate(['/admin-dashboard/teacher', row.email]);
+    } else if (this.selectedOption === 'Professores') {
 
-    }else {
+      console.log('A editar professor:', row.email);
+      this.router.navigate(['/admin-dashboard/teacher', row.email]);
+      
+    } else {
       console.log('Edição ainda não implementada para:', this.selectedOption);
     }
   }

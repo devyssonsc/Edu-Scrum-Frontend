@@ -5,6 +5,7 @@
         <h2 class="form-title">Register Course</h2>
 
         <div class="form-group">
+
             <label for="name">Name</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Software Quality">
             @if (courseForm.get('name')?.invalid && courseForm.get('name')?.touched) {
@@ -13,40 +14,21 @@
         </div>
 
         <div class="form-group">
-            <label>Degrees</label>
-            
-            <div class="cadeiras-list" formArrayName="degrees">
-                @for(degreeGroup of degrees.controls; track $index; let i = $index) {
-                    <div class="cadeira-item" [formGroupName]="i">
-                        <span class="code">{{ degreeGroup.value.code }}</span>
-                        <span class="name">{{ degreeGroup.value.name }}</span>
-                        <i class="bi bi-trash" (click)="removeDegree(i)"></i>
-                    </div>
+
+            <label for="degree">Curso (Degree)</label>
+            <select
+                [formControl]="selectedDegreeId"
+                class="inline-input"
+                [class.invalid]="selectedDegreeId.invalid && selectedDegreeId.touched"
+                (change)="selectDegree()">
+                <option [ngValue]="null" disabled>Selecione um curso...</option>
+                @for (degree of allDegrees; track degree.id) {
+                    <option [value]="degree.id">
+                        {{ degree.name }}
+                    </option>
                 }
-            </div>
-
-            @if (degrees.invalid && (degrees.touched)) {
-                <small class="error-msg">At least one degree is required.</small>
-            }
-            
-            <div class="add-button-container">
-                <button type="button" class="btn-add" (click)="toggleDegreeList()">
-                    <i class="bi bi-plus-circle-fill"></i>
-                </button>
-            </div>
-
-            @if (showDegreeList) {
-                <div class="course-picker-list">
-                    @for (degree of allDegrees; track degree.id) {
-                        <div class="course-picker-item" (click)="addDegree(degree)">
-                            <span class="code">{{ degree.code }}</span>
-                            <span class="name">{{ degree.name }}</span>
-                        </div>
-                    }
-                </div>
-            }
+            </select>
         </div>
-
 
         <hr class="divider">
 

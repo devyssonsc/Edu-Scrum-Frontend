@@ -2,65 +2,80 @@
     
     <form class="card form-card" [formGroup]="degreeForm" (ngSubmit)="onSubmit()">
         
-        <h2 class="form-title">Register Degree</h2> 
+        <h2 class="form-title">Registar Curso</h2>
 
         <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" formControlName="name" placeholder="Ex: Informatics Engineering">
+            <label for="name">Nome do Curso</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Engenharia Informática">
             @if (degreeForm.get('name')?.invalid && degreeForm.get('name')?.touched) {
-                <small class="error-msg">This field is required</small>
+                <small class="error-msg">O nome é obrigatório.</small>
             }
-        </div>  
-            
-        <div class="form-group">
-            <label>Courses</label>
+        </div>
 
-            <div formArrayName="courses" class="cadeiras-list">
-                @for(course of courses.controls; track $index; let i = $index) {
-                    <div class="cadeira-item">
-                        <span class="name">{{ course.value }}</span>
-                        <i class="bi bi-trash" (click)="removeCourse(i)"></i>
+        <div class="form-group">
+            <label>courses do Curso</label>
+            
+            <div class="courses-list" formArrayName="courses">
+                @for(courseGroup of courses.controls; track $index; let i = $index) {
+                    <div class="course-item" [formGroupName]="i">
+                        <div class="info">
+                            <span class="name">{{ courseGroup.value.name }}</span>
+                        </div>
+                        <i class="bi bi-trash" (click)="removecourse(i)"></i>
                     </div>
                 }
+                @if(courses.controls.length === 0 && !showAddInputs) {
 
-                @if(courses.length === 0 && !showAddInput) {
-                    <p class="empty-list-msg">Add courses to this degree</p>
                 }
             </div>
 
             <!-- INPUT DE ADICIONAR CADEIRA -->
-            @if (showAddInput) {
+            @if (showAddInputs) {
                 <div class="inline-add-form">
-                    <input 
-                        type="text"
-                        [formControl]="newCourseName"
-                        placeholder="Ex: Software Quality"
-                        class="inline-input"
-                        [class.invalid]="newCourseName.invalid && newCourseName.touched"
-                    >
-
-                    <button type="button" class="btn-icon" (click)="addCourse()" [disabled]="newCourseName.invalid">
+                    
+                    <div class="inline-input-group flex-grow">
+                        <select 
+                            [formControl]="selectedCourseId" 
+                            class="inline-input"
+                            [class.invalid]="selectedCourseId.invalid && selectedCourseId.touched">
+                            <option [ngValue]="null" disabled>Selecione uma course...</option>
+                            @for (course of allCourses; track course.id) {
+                                <option [value]="course.id">
+                                    {{ course.name }}
+                                </option>
+                            }
+                        </select>
+                        
+                        @if (selectedCourseId.invalid && selectedCourseId.touched) {
+                            <small class="inline-error-msg">
+                                @if (selectedCourseId.hasError('required')) { Obrigatório. }
+                                @if (selectedCourseId.hasError('duplicate')) { Já adicionada. }
+                            </small>
+                        }
+                    </div>
+                    
+                    <button type="button" class="btn-icon" (click)="confirmAddCourse()" [disabled]="selectedCourseId.invalid">
                         <i class="bi bi-check-lg"></i>
                     </button>
 
-                    <button type="button" class="btn-icon btn-cancel" (click)="showAddInput = false">
+                    <button type="button" class="btn-icon btn-cancel" (click)="showAddInputs = false">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
             }
 
             <!-- BOTÃO DE MOSTRAR INPUT -->
-            @if (!showAddInput) {
+            @if (!showAddInputs) {
                 <div class="add-button-container">
-                    <button type="button" class="btn-add" (click)="showAddInput = true">
+                    <button type="button" class="btn-add" (click)="showAddInputs = true">
                         <i class="bi bi-plus-circle-fill"></i>
                     </button>
                 </div>
             }
 
-            <!-- ERRO SE NÃO HOUVER NENHUMA CADEIRA -->
-            @if (courses.invalid && (courses.touched || isSubmitted)) {
-                <small class="error-msg">At least one course is required</small>
+
+            @if (courses.invalid && (courses.touched || isSubmitted) && !showAddInputs) {
+                <small class="error-msg">Pelo menos uma course é obrigatória.</small>
             }
         </div>
 

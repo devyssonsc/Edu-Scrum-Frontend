@@ -34,14 +34,13 @@ export class TeacherCourseDetailComponent implements OnInit {
   }
 
   loadCourseData(code: string) {
-    // 1. Obter detalhes da cadeira
     this.dataService.getCourseByCode(code).subscribe(data => {
       this.course = data;
     });
 
-    // 2. Obter projetos e formatar para tabela
     this.dataService.getProjectsByCourse(code).subscribe(data => {
       this.projectsView = data.map(p => ({
+        id: p.id,
         name: p.name,
         startDate: p.startDate,
         endDate: p.endDate,
@@ -52,6 +51,18 @@ export class TeacherCourseDetailComponent implements OnInit {
 
   handleProjectClick(row: any) {
     console.log('Open project:', row.name);
+
+  }
+
+  handleDeleteProject(row: any) {
+    if(confirm(`Are you sure you want to delete project "${row.name}"?`)) {
+      this.dataService.deleteProject(row.name).subscribe(success => {
+        if(success) {
+          // Se apagou com sucesso, recarrega os dados para atualizar a tabela visualmente
+          if (this.courseId) this.loadCourseData(this.courseId);
+        }
+      });
+    }
   }
 
   createProject() {

@@ -37,7 +37,8 @@
                 <app-show-table 
                     [data]="currentData"
                     (editRow)="handleRowClick($event)"
-                    [showDelete]="selectedTab !== 'Courses'">
+                    (deleteRow)="handleDelete($event)" 
+                    [showDelete]="selectedTab === 'Awards'">
                 </app-show-table>
             </div>
 

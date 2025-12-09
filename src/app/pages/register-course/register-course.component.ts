@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { FormArray, FormControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
@@ -28,18 +29,19 @@ export class RegisterCourseComponent implements OnInit {
   courseForm: FormGroup;
   showDegreeList = false;
 
+
   get degrees() {
   return this.courseForm.get('degrees') as FormArray;
   }
 
   constructor(private httpClient: HttpClient) {
     this.courseForm = this.fb.group({
-      code: ['', Validators.required],
       name: ['', Validators.required],
-      degrees: this.fb.array([], Validators.required),
-      ects: [null, [Validators.required, Validators.min(1), Validators.max(8)]]
+      degrees: ['', Validators.required]
     });
   }
+
+  selectedDegreeId = new FormControl<number | null>(null, Validators.required);
 
   newDegreeGroup(degree: Degree) {
     return this.fb.group({
@@ -85,6 +87,21 @@ export class RegisterCourseComponent implements OnInit {
       }
     });
 }
+
+  selectDegree() {
+    this.selectedDegreeId.markAsTouched();
+
+    if (this.selectedDegreeId.invalid) {
+      return;
+    }
+    
+    const degreeId = Number(this.selectedDegreeId.value);
+    const selectedDegree = this.allDegrees.find(c => c.id === degreeId);
+
+    if (!selectedDegree) return;
+
+    this.courseForm.get("degree")?.setValue(selectedDegree);
+  }
 
   onSubmit() {
     if (this.courseForm.valid) {

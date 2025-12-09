@@ -29,10 +29,7 @@ export interface Course {
   id: number;
   name: string;
   degree?: Degree; 
-  
-  // Campos UI
   code?: string; 
-  ects?: number; 
   studentsCount?: number;
   projectsCount?: number;
 }
@@ -75,15 +72,15 @@ export class DataService {
   private courses: Course[] = [
     { 
       id: 1, code: 'QS', name: 'Software Quality', degree: this.degreeEI, 
-      ects: 6, studentsCount: 75, projectsCount: 1 
+     studentsCount: 75, projectsCount: 1 
     },
     { 
       id: 2, code: 'IA', name: 'Artificial Intelligence', degree: this.degreeEI, 
-      ects: 6, studentsCount: 75, projectsCount: 2 
+      studentsCount: 75, projectsCount: 2 
     },
     { 
       id: 3, code: 'E', name: 'Entrepreneurship', degree: this.degreeRI, 
-      ects: 4, studentsCount: 59, projectsCount: 1 
+     studentsCount: 59, projectsCount: 1 
     }
   ];
 
@@ -169,6 +166,15 @@ export class DataService {
     const index = this.awards.findIndex(a => a.name === awardName && a.isOwner);
     if (index !== -1) {
       this.awards.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteProject(projectName: string): Observable<boolean> {
+    const index = this.projects.findIndex(p => p.name === projectName);
+    if (index !== -1) {
+      this.projects.splice(index, 1);
       return of(true);
     }
     return of(false);
