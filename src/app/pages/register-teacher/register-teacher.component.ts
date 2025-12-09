@@ -1,11 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 
 interface Course {
   id: number;
-  code: string;
   name: string;
 }
 
@@ -26,13 +25,18 @@ export class RegisterTeacherComponent implements OnInit {
   teacherForm: FormGroup;
   showCourseList = false; 
 
+  isSubmitted = false;
+
   allCourses: Course[] = [
-    { id: 1, code: 'QS', name: 'Qualidade de Software' },
-    { id: 2, code: 'IA', name: 'Inteligência Artificial' },
-    { id: 3, code: 'PWEB', name: 'Prog. Web' },
-    { id: 4, code: 'BD', name: 'Bases de Dados' },
-    { id: 5, code: 'SO', name: 'Sistemas Operativos' }
+    { id: 1, name: 'Qualidade de Software' },
+    { id: 2, name: 'Inteligência Artificial' },
+    { id: 3, name: 'Prog. Web' },
+    { id: 4, name: 'Bases de Dados' },
+    { id: 5, name: 'Sistemas Operativos' }
   ];
+
+    selectedCourseId = new FormControl<number | null>(null, Validators.required);
+    showAddInputs = false;
 
   constructor() {
     this.teacherForm = this.fb.group({
@@ -48,37 +52,58 @@ export class RegisterTeacherComponent implements OnInit {
     return this.teacherForm.get('courses') as FormArray;
   }
 
-  newCourse(course: Course): FormGroup {
+  newCourseGroup(name: string): FormGroup {
     return this.fb.group({
-      id: [course.id],
-      code: [course.code],
-      name: [course.name]
+      name: [name]
     });
   }
 
-  addCourse(course: Course) {
-    const alreadyAdded = this.courses.controls.some(control => control.value.id === course.id);
-    
-    if (!alreadyAdded) {
-      this.courses.push(this.newCourse(course));
-    }
-    this.showCourseList = false; 
+  showAddCourseFields() {
+    this.selectedCourseId.reset(null);
+    this.showAddInputs = true;
   }
 
-  removeCourse(index: number) {
+  
+  cancelAddCourse() {
+    this.showAddInputs = false;
+  }
+
+  confirmAddCourse() {
+    this.selectedCourseId.markAsTouched();
+
+    if (this.selectedCourseId.invalid) {
+      return;
+    }
+    
+    const courseId = Number(this.selectedCourseId.value);
+    const selectedCourse = this.allCourses.find(c => c.id === courseId);
+
+    if (!selectedCourse) return;
+
+    const isDuplicate = this.courses.controls.some(control => 
+      control.value.name === selectedCourse.name
+    );
+
+    if (isDuplicate) {
+      this.selectedCourseId.setErrors({ 'duplicate': true });
+    } else {
+      this.courses.push(this.newCourseGroup(selectedCourse.name));
+      this.cancelAddCourse();
+    }
+  }
+
+  removecourse(index: number) {
     this.courses.removeAt(index);
   }
 
-  toggleCourseList() {
-    this.showCourseList = !this.showCourseList;
-  }
-
   onSubmit() {
+    this.isSubmitted = true; 
+    this.teacherForm.markAllAsTouched();
+    
     if (this.teacherForm.valid) {
-      console.log('Formulário Válido (Teacher):', this.teacherForm.value);
+      console.log('Formulário Válido:', this.teacherForm.value);
     } else {
       console.log('Formulário Inválido');
-      this.teacherForm.markAllAsTouched();
     }
   }
 }
