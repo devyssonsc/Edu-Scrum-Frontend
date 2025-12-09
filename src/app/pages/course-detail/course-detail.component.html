@@ -1,4 +1,5 @@
 <div class="detail-container">
+
     <div class="header-row">
         <button class="btn-back" routerLink="/admin-dashboard">
             <i class="bi bi-arrow-left"></i> Voltar
@@ -19,6 +20,13 @@
             [value]="mockCourseData.stats.teachersCount" 
             description="professores"
             iconClass="bi bi-person-badge-fill">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Média Atual" 
+            [value]="mockCourseData.stats.avgGrade" 
+            description="valores"
+            iconClass="bi bi-graph-up">
         </app-stats-card>
     </div>
 
@@ -41,11 +49,6 @@
                 <label>Curso Associado</label>
                 <input type="text" formControlName="degree" class="main-input">
             </div>
-
-            <div class="form-group-main small">
-                <label>ECTS</label>
-                <input type="number" formControlName="ects" class="main-input center-text">
-            </div>
         </div>
 
         <hr class="divider">
@@ -58,7 +61,6 @@
                     <tr>
                         <th>Nome do Professor</th>
                         <th>Email Institucional</th>
-                        <th style="width: 50px;">Ações</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="teachers">
@@ -69,9 +71,6 @@
                             </td>
                             <td>
                                 <input type="text" formControlName="email" class="table-input">
-                            </td>
-                            <td class="actions">
-                                <i class="bi bi-trash delete-icon" (click)="removeTeacher(i)"></i>
                             </td>
                         </tr>
                     }
