@@ -148,6 +148,20 @@ app-root {
         &:focus { border-color: $dark-gray; }
         &::placeholder { color: $medium-gray; }
     }
+
+    select {
+        width: 100%;
+        border-bottom: 2px solid $medium-gray;
+        padding: 0.5rem 0.25rem;
+        font-family: $font-secondary;
+        cursor: pointer;
+
+        &:focus { border-color: $dark-gray; }
+
+        option {
+            font-family: $font-secondary;
+        }
+    }
 }
 
 .divider {

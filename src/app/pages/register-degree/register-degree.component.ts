@@ -20,7 +20,7 @@ interface AvailableCourse {
   templateUrl: './register-degree.component.html',
   styleUrl: './register-degree.component.scss'
 })
-export class RegisterDegreeComponent implements OnInit {
+export class RegisterDegreeComponent {
 
   private fb = inject(FormBuilder);
   degreeForm: FormGroup;
@@ -44,9 +44,6 @@ export class RegisterDegreeComponent implements OnInit {
       name: ['', Validators.required],
       courses: this.fb.array([], Validators.minLength(1)) 
     });
-  }
-
-  ngOnInit(): void {
   }
 
   get courses() {
