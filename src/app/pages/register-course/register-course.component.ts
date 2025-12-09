@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-register-course',
@@ -19,16 +19,39 @@ export class RegisterCourseComponent implements OnInit {
   private fb = inject(FormBuilder);
   courseForm: FormGroup;
 
+  allDegrees: any[] = [
+    { id: 1, code: 'EI', name: 'Engenharia Informática' },
+    { id: 2, code: 'SIG', name: 'Sistemas de Informação para Gestão' },
+    { id: 3, code: 'RI', name: 'Relações Internacionais' },
+    { id: 4, code: 'ES', name: 'Educação Social' },
+    { id: 5, code: 'EGI', name: 'Engenharia e Gestão Industrial' }
+  ];
+
+  selectedDegreeId = new FormControl<number | null>(null, Validators.required);
+
   constructor() {
     this.courseForm = this.fb.group({
-      code: ['', Validators.required],
       name: ['', Validators.required],
-      degree: ['', Validators.required],
-      ects: [null, [Validators.required, Validators.min(1), Validators.max(8)]]
+      degree: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
+  }
+
+  selectDegree() {
+    this.selectedDegreeId.markAsTouched();
+
+    if (this.selectedDegreeId.invalid) {
+      return;
+    }
+    
+    const degreeId = Number(this.selectedDegreeId.value);
+    const selectedDegree = this.allDegrees.find(c => c.id === degreeId);
+
+    if (!selectedDegree) return;
+
+    this.courseForm.get("degree")?.setValue(selectedDegree);
   }
 
   onSubmit() {

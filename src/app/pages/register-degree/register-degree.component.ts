@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 
 interface AvailableCourse {
   id: number;
@@ -20,7 +20,7 @@ interface AvailableCourse {
   templateUrl: './register-degree.component.html',
   styleUrl: './register-degree.component.scss'
 })
-export class RegisterDegreeComponent implements OnInit {
+export class RegisterDegreeComponent {
 
   private fb = inject(FormBuilder);
   degreeForm: FormGroup;
@@ -36,37 +36,28 @@ export class RegisterDegreeComponent implements OnInit {
   ];
 
   selectedCourseId = new FormControl<number | null>(null, Validators.required);
-  newCourseEcts = new FormControl('', [
-    Validators.required, 
-  ]);
   
   showAddInputs = false;
 
   constructor() {
     this.degreeForm = this.fb.group({
-      nome: ['', Validators.required],
-      cadeiras: this.fb.array([], Validators.minLength(1)) 
+      name: ['', Validators.required],
+      courses: this.fb.array([], Validators.minLength(1)) 
     });
   }
 
-  ngOnInit(): void {
+  get courses() {
+    return this.degreeForm.get('courses') as FormArray;
   }
 
-  get cadeiras() {
-    return this.degreeForm.get('cadeiras') as FormArray;
-  }
-
-  newCadeiraGroup(code: string, name: string, ects: any): FormGroup {
+  newCourseGroup(name: string): FormGroup {
     return this.fb.group({
-      code: [code],
       name: [name],
-      ects: [ects]
     });
   }
 
   showAddCourseFields() {
     this.selectedCourseId.reset(null);
-    this.newCourseEcts.reset('');
     this.showAddInputs = true;
   }
 
@@ -76,32 +67,30 @@ export class RegisterDegreeComponent implements OnInit {
 
   confirmAddCourse() {
     this.selectedCourseId.markAsTouched();
-    this.newCourseEcts.markAsTouched();
 
-    if (this.selectedCourseId.invalid || this.newCourseEcts.invalid) {
+    if (this.selectedCourseId.invalid) {
       return;
     }
     
     const courseId = Number(this.selectedCourseId.value);
     const selectedCourse = this.allCourses.find(c => c.id === courseId);
-    const ectsValue = this.newCourseEcts.value;
 
     if (!selectedCourse) return;
 
-    const isDuplicate = this.cadeiras.controls.some(control => 
-      control.value.code === selectedCourse.code
+    const isDuplicate = this.courses.controls.some(control => 
+      control.value.name === selectedCourse.name
     );
 
     if (isDuplicate) {
       this.selectedCourseId.setErrors({ 'duplicate': true });
     } else {
-      this.cadeiras.push(this.newCadeiraGroup(selectedCourse.code, selectedCourse.name, ectsValue));
+      this.courses.push(this.newCourseGroup(selectedCourse.name));
       this.cancelAddCourse();
     }
   }
 
-  removeCadeira(index: number) {
-    this.cadeiras.removeAt(index);
+  removecourse(index: number) {
+    this.courses.removeAt(index);
   }
 
   onSubmit() {
