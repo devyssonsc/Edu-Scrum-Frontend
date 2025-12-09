@@ -1,0 +1,179 @@
+@import "../../../styles/variables.scss";
+
+.div-container {
+    padding: 2rem;
+    background-color: $light-gray;
+    min-height: 100%;
+}
+
+.header-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    .btn-back {
+        align-self: flex-start;
+        display: flex; align-items: center; gap: 0.5rem;
+        font-family: $font-secondary; font-weight: 600; color: #777;
+        cursor: pointer;
+        transition: color 0.2s;
+        &:hover { color: $dark-gray; }
+    }
+
+    .title-group {
+        display: flex; align-items: center; gap: 1rem;
+        flex-wrap: wrap;
+        
+        h1 { font-family: $font-primary; font-size: 2.5rem; color: $dark-gray; margin: 0; }
+        .course-badge {
+            background-color: $medium-gray; color: $dark-gray;
+            padding: 4px 12px; border-radius: 12px;
+            font-family: $font-secondary; font-size: 0.85rem; font-weight: 600;
+        }
+    }
+}
+
+.description-card {
+    width: 100%;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    justify-content: flex-start;
+    border-left: 6px solid $dark-gray;
+
+    .desc-content {
+        width: 100%;
+        h4 { font-family: $font-secondary; font-weight: 700; color: $dark-gray; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        p { font-family: $font-secondary; color: #555; line-height: 1.6; margin-bottom: 1.5rem; }
+        
+        .meta-data {
+            display: flex; gap: 2rem;
+            .meta-item {
+                display: flex; align-items: center; gap: 0.5rem;
+                font-family: $font-secondary; font-size: 0.9rem; color: #666;
+                strong { color: $dark-gray; }
+            }
+        }
+    }
+}
+
+.section-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem;
+    h3 { font-family: $font-secondary; color: $dark-gray; font-weight: 700; font-size: 1.25rem; }
+}
+
+/* --- FORM STYLES --- */
+.inline-create {
+    flex-direction: column; align-items: stretch; max-width: 600px; margin-bottom: 2rem;
+    animation: fadeIn 0.3s ease-in-out;
+    
+    .form-header { font-family: $font-secondary; margin-bottom: 1rem; text-align: center; color: $dark-gray; }
+    
+    .form-group {
+        margin-bottom: 1rem;
+        label { font-family: $font-secondary; font-weight: 600; font-size: 0.9rem; color: $dark-gray; margin-bottom: 0.25rem; display: block; }
+        input, select {
+            width: 100%; padding: 0.6rem; border-bottom: 2px solid $medium-gray;
+            font-family: $font-secondary; font-size: 0.95rem;
+            &:focus { border-color: $dark-gray; }
+        }
+    }
+
+    .inline-add {
+        display: flex; gap: 0.5rem;
+        .add-btn { 
+            color: $dark-gray; font-size: 1.5rem; cursor: pointer; transition: transform 0.2s;
+            &:hover:not(:disabled) { transform: scale(1.1); }
+            &:disabled { color: $medium-gray; cursor: not-allowed; }
+        }
+    }
+
+    .members-preview {
+        display: flex; flex-direction: column; gap: 0.5rem; margin: 1rem 0;
+        background: #fafafa; padding: 0.5rem; border-radius: 8px;
+
+        .empty-hint { font-size: 0.85rem; color: #999; text-align: center; font-style: italic; }
+
+        .member-tag {
+            background: $white; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #eee;
+            display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+            
+            .member-info {
+                display: flex; flex-direction: column;
+                .name { font-family: $font-secondary; font-weight: 600; font-size: 0.9rem; color: $dark-gray; }
+                .num { font-family: $font-secondary; font-size: 0.75rem; color: #777; }
+            }
+
+            .role-select { 
+                width: auto; border: 1px solid $medium-gray; border-radius: 4px; 
+                padding: 2px 5px; font-size: 0.8rem; color: $dark-gray; 
+            }
+            
+            .delete-btn { cursor: pointer; color: $medium-gray; font-size: 1.2rem; &:hover { color: #e74c3c; } }
+        }
+    }
+
+    .form-actions { 
+        display: flex; gap: 1rem; margin-top: 1rem; 
+        .btn-cancel { cursor: pointer; text-decoration: underline; color: #777; font-family: $font-secondary; font-size: 0.9rem; &:hover { color: $dark-gray; } } 
+    }
+}
+
+/* --- TEAMS GRID --- */
+.teams-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;
+}
+
+.team-card {
+    flex-direction: column; justify-content: flex-start; padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    &:hover { transform: translateY(-4px); box-shadow: 8px 8px 0px rgba(0,0,0,0.1); }
+
+    .team-header {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;
+        h5 { font-family: $font-primary; font-size: 1.6rem; color: $dark-gray; }
+        .badge-count { background: #eee; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-family: $font-secondary; color: #666; }
+    }
+
+    .members-list {
+        display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem;
+        .mini-member {
+            display: flex; align-items: center; gap: 0.5rem; font-family: $font-secondary; font-size: 0.85rem; color: #555;
+            .role-dot {
+                width: 8px; height: 8px; border-radius: 50%; background-color: #bdc3c7; // Developer default
+                &.po { background-color: #9b59b6; } // Purple for PO
+                &.sm { background-color: #3498db; } // Blue for SM
+            }
+        }
+    }
+
+    .divider-small { border: none; border-top: 1px solid $light-gray; margin: 0.5rem 0 1rem 0; }
+
+    .sprints-section {
+        h6 { font-family: $font-secondary; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem; color: $dark-gray; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .sprint-list {
+            display: flex; flex-direction: column; gap: 0.6rem;
+            .sprint-item {
+                background: #f9f9f9; padding: 0.6rem; border-radius: 6px; border-left: 3px solid #f39c12; 
+                &.completed { border-left-color: #27ae60; background: #f0fdf4; }
+                
+                .sp-top {
+                    display: flex; justify-content: space-between; font-family: $font-secondary; font-weight: 600; font-size: 0.85rem; margin-bottom: 2px;
+                    .sp-status { font-size: 0.65rem; padding: 1px 4px; background: rgba(0,0,0,0.05); border-radius: 4px; }
+                }
+                .sp-goal { display: block; font-family: $font-secondary; font-size: 0.75rem; color: #777; line-height: 1.2; }
+            }
+        }
+        .no-data { font-style: italic; color: #aaa; font-size: 0.85rem; font-family: $font-secondary; }
+    }
+}
+
+.empty-state {
+    grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; color: #999;
+    i { font-size: 3rem; margin-bottom: 1rem; }
+    p { font-family: $font-secondary; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }

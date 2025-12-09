@@ -1,0 +1,149 @@
+<div class="div-container">
+    
+    <div class="header-row">
+        <button class="btn-back" routerLink="/teacher-dashboard">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </button>
+        <div class="title-group">
+            <h1>{{ project?.name }}</h1>
+            <span class="course-badge">{{ project?.courseName }}</span>
+        </div>
+    </div>
+
+    <div class="card description-card">
+        <div class="desc-content">
+            <h4><i class="bi bi-info-circle-fill"></i> Description & Goals</h4>
+            <p>{{ project?.description || 'No description provided by the teacher.' }}</p>
+            
+            <div class="meta-data">
+                <div class="meta-item">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>Start: <strong>{{ project?.startDate }}</strong></span>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-flag-fill"></i>
+                    <span>End: <strong>{{ project?.endDate }}</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-actions">
+        <h3>Teams Management ({{ teams.length }})</h3>
+        <button class="btn btn-primary" (click)="toggleCreateForm()" *ngIf="!showCreateTeamForm">
+            <i class="bi bi-plus-lg"></i> Create New Team
+        </button>
+    </div>
+
+    @if (showCreateTeamForm) {
+        <form [formGroup]="teamForm" (ngSubmit)="onSubmitTeam()" class="card form-card inline-create">
+            <h4 class="form-header">Create Team</h4>
+            
+            <div class="form-group">
+                <label>Team Name</label>
+                <input type="text" formControlName="name" placeholder="Ex: The Bug Hunters">
+                @if (teamForm.get('name')?.invalid && teamForm.get('name')?.touched) {
+                    <small class="error-msg">Name is required.</small>
+                }
+            </div>
+
+            <div class="form-group">
+                <label>Add Members (Enrolled Students)</label>
+                <div class="inline-add">
+                    <select [formControl]="selectedStudentId">
+                        <option [ngValue]="null" disabled>Select a student...</option>
+                        @for (student of availableStudents; track student.id) {
+                            <option [value]="student.id">{{ student.name }} ({{ student.studentNumber }})</option>
+                        }
+                    </select>
+                    <button type="button" class="btn-icon add-btn" (click)="addMemberToForm()" 
+                            [disabled]="!selectedStudentId.value" title="Add Student">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="members-preview" formArrayName="members">
+                <p *ngIf="members.length === 0" class="empty-hint">No members added yet.</p>
+                
+                @for (control of members.controls; track $index; let i = $index) {
+                    <div class="member-tag" [formGroupName]="i">
+                        <div class="member-info">
+                            <span class="name">{{ control.value.student.name }}</span>
+                            <span class="num">{{ control.value.student.studentNumber }}</span>
+                        </div>
+                        
+                        <select formControlName="role" class="role-select">
+                            <option value="SCRUM_MASTER">Scrum Master</option>
+                            <option value="PRODUCT_OWNER">Product Owner</option>
+                            <option value="DEVELOPER">Developer</option>
+                        </select>
+                        
+                        <i class="bi bi-x delete-btn" (click)="removeMemberFromForm(i)"></i>
+                    </div>
+                }
+                @if (members.invalid && members.touched) {
+                    <small class="error-msg center">At least one member is required.</small>
+                }
+            </div>
+
+            <hr class="divider">
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="teamForm.invalid">Confirm & Create</button>
+                <button type="button" class="btn-cancel" (click)="toggleCreateForm()">Cancel</button>
+            </div>
+        </form>
+    }
+
+    <div class="teams-grid">
+        @for (team of teams; track team.id) {
+            <div class="card team-card">
+                <div class="team-header">
+                    <h5>{{ team.name }}</h5>
+                    <span class="badge-count">{{ team.members.length }} members</span>
+                </div>
+                
+                <div class="members-list">
+                    @for (m of team.members; track m.student.id) {
+                        <div class="mini-member">
+                            <span class="role-dot" [title]="m.role"
+                                  [class.po]="m.role === 'PRODUCT_OWNER'"
+                                  [class.sm]="m.role === 'SCRUM_MASTER'">
+                            </span>
+                            <span>{{ m.student.name }}</span>
+                        </div>
+                    }
+                </div>
+
+                <hr class="divider-small">
+                
+                <div class="sprints-section">
+                    <h6>Active Sprints</h6>
+                    @if (team.sprints.length > 0) {
+                        <div class="sprint-list">
+                            @for (sprint of team.sprints; track sprint.id) {
+                                <div class="sprint-item" [class.completed]="sprint.status === 'COMPLETED'">
+                                    <div class="sp-top">
+                                        <span class="sp-name">{{ sprint.name }}</span>
+                                        <span class="sp-status">{{ sprint.status }}</span>
+                                    </div>
+                                    <small class="sp-goal">{{ sprint.goal }}</small>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <p class="no-data">No sprints started yet.</p>
+                    }
+                </div>
+            </div>
+        }
+        
+        @if (teams.length === 0 && !showCreateTeamForm) {
+            <div class="empty-state">
+                <i class="bi bi-microsoft-teams"></i>
+                <p>No teams created for this project yet.</p>
+            </div>
+        }
+    </div>
+</div>
