@@ -21,6 +21,7 @@ export class TeacherDetailComponent implements OnInit {
 
   teacherForm: FormGroup;
   teacherId: number | null = null; 
+
   stats = {
     coursesCount: 0
   };
@@ -49,11 +50,13 @@ export class TeacherDetailComponent implements OnInit {
   loadData(id: number) {
     this.dataService.getTeacherById(id).subscribe((teacher: Teacher | undefined) => {
       if (teacher) {
+        
         this.stats.coursesCount = teacher.coursesCount;
         this.teacherForm.patchValue({
           name: teacher.name,
           email: teacher.email
         });
+        
         this.loadTeacherCourses(teacher.courseIds);
       }
     });
@@ -62,6 +65,7 @@ export class TeacherDetailComponent implements OnInit {
   loadTeacherCourses(courseIds: number[]) {
     const coursesArray = this.teacherForm.get('courses') as FormArray;
     coursesArray.clear();
+
     this.dataService.getCourses().subscribe(allCourses => {
         const teacherCourses = allCourses.filter(c => courseIds.includes(c.id));
         
@@ -72,6 +76,7 @@ export class TeacherDetailComponent implements OnInit {
             });
             coursesArray.push(group);
         });
+        
         this.stats.coursesCount = teacherCourses.length;
     });
   }
@@ -81,9 +86,29 @@ export class TeacherDetailComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.teacherForm.valid) {
-      alert('Teacher updated successfully!');
-      this.router.navigate(['/admin-dashboard']);
+    if (this.teacherForm.valid && this.teacherId) {
+      
+      const payload = {
+        name: this.teacherForm.value.name,
+        email: this.teacherForm.value.email
+      };
+
+      this.dataService.updateTeacher(this.teacherId, payload).subscribe({
+        next: (success) => {
+          if (success) {
+            alert('Teacher updated successfully!');
+            this.router.navigate(['/admin-dashboard']);
+          }
+        },
+        error: (err) => {
+          if (err.status === 409) {
+             alert('Error: This email is already assigned to another teacher.');
+             this.teacherForm.get('email')?.setErrors({ 'duplicate': true });
+          } else {
+             alert('An error occurred while updating the teacher.');
+          }
+        }
+      });
     }
   }
 }

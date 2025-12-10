@@ -245,6 +245,22 @@ export class DataService {
     }
     return of(false);
   }
+  updateTeacher(id: number, updatedData: { name: string, email: string }): Observable<boolean> {
+    const teacher = this.teachers.find(t => t.id === id);
+    
+    if (teacher) {
+        const emailExists = this.teachers.some(t => t.email === updatedData.email && t.id !== id);
+        
+        if (emailExists) {
+            return throwError(() => ({ status: 409, message: 'Email already exists.' }));
+        }
+
+        teacher.name = updatedData.name;
+        teacher.email = updatedData.email;
+        return of(true);
+    }
+    return of(false);
+  }
 
   // --- RELATIONSHIP METHODS ---
 
