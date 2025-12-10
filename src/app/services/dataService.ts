@@ -30,7 +30,7 @@ export interface StudentLite {
 
 export interface Degree {
   id: number;
-  code: string;
+  // REMOVIDO: code: string;
   name: string;
   coursesCount?: number;
   teachersCount?: number;
@@ -49,7 +49,7 @@ export interface Course {
   name: string;
   degree?: Degree; 
   degreeName?: string; 
-  code: string; 
+  // REMOVIDO: code: string; 
   studentsCount?: number;
   projectsCount?: number;
 }
@@ -61,7 +61,8 @@ export interface Project {
   startDate: string;
   endDate: string;
   course?: Course;
-  courseCode?: string; 
+  // REMOVIDO: courseCode?: string; 
+  courseId?: number; // ADICIONADO: substitui o código para ligação interna
   courseName?: string;
   teamsCount?: number;
 }
@@ -116,15 +117,15 @@ export class DataService {
   
   // Degrees 
   private degrees: Degree[] = [
-    { id: 1, code: 'EI', name: 'Engenharia Informática', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
-    { id: 2, code: 'SIG', name: 'Sistemas de Informação', coursesCount: 25, teachersCount: 10, studentsCount: 150 }
+    { id: 1, name: 'Computer Engineering', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
+    { id: 2, name: 'Information Systems', coursesCount: 25, teachersCount: 10, studentsCount: 150 }
   ];
 
   // Courses 
   private courses: Course[] = [
-    { id: 1, code: 'QS', name: 'Software Quality', degree: this.degrees[0], degreeName: 'Engenharia Informática', studentsCount: 75, projectsCount: 1 },
-    { id: 2, code: 'IA', name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Engenharia Informática', studentsCount: 60, projectsCount: 2 },
-    { id: 3, code: 'GPS', name: 'Gestão de Projetos', degree: this.degrees[1], degreeName: 'Sistemas de Informação', studentsCount: 45, projectsCount: 1 }
+    { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
+    { id: 2, name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 60, projectsCount: 2 },
+    { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 }
   ];
 
   // Students
@@ -143,11 +144,12 @@ export class DataService {
     { id: 3, name: 'Joaquim Silva', email: 'joaquim@upt.pt', coursesCount: 2 }
   ];
 
+  // Projects 
   private projects: Project[] = [
     { 
       id: 1, name: 'Final Project 2025', description: 'Gamified Scrum Platform.', 
       startDate: '2024-09-15', endDate: '2024-12-20', 
-      course: this.courses[0], courseCode: 'QS', courseName: 'Software Quality', teamsCount: 2 
+      course: this.courses[0], courseId: 1, courseName: 'Software Quality', teamsCount: 2 
     }
   ];
 
@@ -161,14 +163,12 @@ export class DataService {
   getDegreeById(id: number): Observable<Degree | undefined> { 
     return of(this.degrees.find(d => d.id === id)); 
   }
-  getDegreeByCode(code: string): Observable<Degree | undefined> { 
-    return of(this.degrees.find(d => d.code === code)); 
-  }
   
   getCourses(): Observable<Course[]> { return of(this.courses); }
-  getCourseByCode(code: string): Observable<Course | undefined> { 
-      return of(this.courses.find(c => c.code === code)); 
+  getCourseById(id: number): Observable<Course | undefined> { 
+      return of(this.courses.find(c => c.id === id)); 
   }
+  
   getCoursesByDegreeId(degreeId: number): Observable<Course[]> {
     return of(this.courses.filter(c => c.degree?.id === degreeId));
   }
@@ -180,15 +180,16 @@ export class DataService {
   getProjectById(id: number): Observable<Project | undefined> {
     return of(this.projects.find(p => p.id === id));
   }
-  getProjectsByCourse(code: string): Observable<Project[]> { 
-    return of(this.projects.filter(p => p.courseCode === code)); 
+  
+  getProjectsByCourseId(courseId: number): Observable<Project[]> { 
+    return of(this.projects.filter(p => p.courseId === courseId)); 
   }
 
   getTeamsByProject(projectId: number): Observable<Team[]> {
     return of(this.teams.filter(t => t.projectId === projectId));
   }
 
-  getStudentsByCourse(courseCode: string): Observable<StudentLite[]> {
+  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
     return of(this.students);
   }
 
@@ -200,16 +201,14 @@ export class DataService {
     const degree = this.degrees.find(d => d.id === id);
     
     if (degree) {
-
       degree.name = updatedData.name;
-
+      // Cascade Update
       this.courses.forEach(course => {
         if (course.degree && course.degree.id === id) {
           course.degree.name = updatedData.name; 
           course.degreeName = updatedData.name;  
         }
       });
-
       return of(true);
     }
     return of(false);
@@ -267,7 +266,9 @@ export class DataService {
   // --- CREATE METHODS ---
 
   createProject(projectData: any): Observable<boolean> {
-    const relatedCourse = this.courses.find(c => c.code === projectData.courseCode);
+    const courseId = Number(projectData.courseId);
+    const relatedCourse = this.courses.find(c => c.id === courseId);
+    
     const newId = this.projects.length > 0 ? Math.max(...this.projects.map(p => p.id)) + 1 : 101;
 
     const newProject: Project = {
@@ -277,7 +278,7 @@ export class DataService {
       startDate: projectData.startDate,
       endDate: projectData.endDate,
       course: relatedCourse,
-      courseCode: projectData.courseCode,
+      courseId: courseId, 
       courseName: relatedCourse ? relatedCourse.name : 'Unknown',
       teamsCount: 0
     };

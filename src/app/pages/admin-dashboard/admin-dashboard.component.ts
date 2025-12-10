@@ -23,7 +23,7 @@ export class AdminDashboardComponent implements OnInit {
   teachers: any[] = [];
 
   data: any[] = [];
-  selectedOption: string = 'Degrees'; 
+  selectedOption: string = 'Degrees';
   
   countDegrees = 0;
   countCourses = 0;
@@ -37,21 +37,26 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadAllData() {
-    // 1. Degrees
     this.dataService.getDegrees().subscribe(res => {
-      this.degrees = res;
+      this.degrees = res.map(d => ({
+        id: d.id,
+        Name: d.name,
+        Courses: d.coursesCount,
+        Teachers: d.teachersCount,
+        Students: d.studentsCount
+      }));
       this.countDegrees = res.length;
       if (this.selectedOption === 'Degrees') this.data = this.degrees;
     });
 
-    // 2. Courses
+    // 2. Courses 
     this.dataService.getCourses().subscribe(res => {
       this.courses = res.map(c => ({
         id: c.id,
-        code: c.code,
-        name: c.name,
-        degree: c.degreeName || 'N/A',
-        students: c.studentsCount
+        code: c.code, 
+        Name: c.name,
+        Degree: c.degreeName || 'N/A',
+        Students: c.studentsCount
       }));
       this.countCourses = res.length;
       if (this.selectedOption === 'Courses') this.data = this.courses;
@@ -62,8 +67,9 @@ export class AdminDashboardComponent implements OnInit {
       this.students = res.map(s => ({
         id: s.id,
         num: s.studentNumber,
-        name: s.name,
-        email: s.email
+        Number: s.studentNumber, 
+        Name: s.name,
+        Email: s.email
       }));
       this.countStudents = res.length;
       if (this.selectedOption === 'Students') this.data = this.students;
@@ -71,7 +77,12 @@ export class AdminDashboardComponent implements OnInit {
 
     // 4. Teachers
     this.dataService.getTeachers().subscribe(res => {
-      this.teachers = res;
+      this.teachers = res.map(t => ({
+        id: t.id,
+        Name: t.name,
+        Email: t.email,
+        Courses: t.coursesCount
+      }));
       this.countTeachers = res.length;
       if (this.selectedOption === 'Teachers') this.data = this.teachers;
     });
@@ -108,7 +119,7 @@ export class AdminDashboardComponent implements OnInit {
 
   handleEdit(row: any) {
     if (this.selectedOption === 'Degrees') {
-      this.router.navigate(['/admin-dashboard/degree', row.code || row.id]); 
+      this.router.navigate(['/admin-dashboard/degree', row.id]); 
     } else if (this.selectedOption === 'Courses') {
       this.router.navigate(['/admin-dashboard/course', row.code]); 
     } else if (this.selectedOption === 'Students') {
@@ -118,21 +129,16 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  // --- DELETE LOGIC ---
-  
   handleDelete(row: any) {
-    const confirmMessage = `Are you sure you want to delete: ${row.name}?`;
+    const confirmMessage = `Are you sure you want to delete: ${row.Name}?`;
     if (!confirm(confirmMessage)) return;
 
     if (this.selectedOption === 'Degrees') {
       this.dataService.deleteDegree(row.id).subscribe(success => this.postDeleteAction(success));
-    
     } else if (this.selectedOption === 'Courses') {
       this.dataService.deleteCourse(row.id).subscribe(success => this.postDeleteAction(success));
-    
     } else if (this.selectedOption === 'Students') {
       this.dataService.deleteStudent(row.id).subscribe(success => this.postDeleteAction(success));
-    
     } else if (this.selectedOption === 'Teachers') {
       this.dataService.deleteTeacher(row.id).subscribe(success => this.postDeleteAction(success));
     }
