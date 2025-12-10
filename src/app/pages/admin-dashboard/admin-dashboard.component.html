@@ -1,12 +1,12 @@
 <div class="div-container">
     <div class="stats-cards">
-        <app-stats-card title="Cursos" [value]="15" description="cursos registados"
+        <app-stats-card title="Cursos" [value]="countDegrees" description="cursos registados"
             iconClass="bi bi-mortarboard-fill"></app-stats-card>
-        <app-stats-card title="Cadeiras" [value]="45" description="cadeiras disponíveis"
+        <app-stats-card title="Cadeiras" [value]="countCourses" description="cadeiras disponíveis"
             iconClass="bi bi-book"></app-stats-card>
-        <app-stats-card title="Estudantes" [value]="320" description="estudantes inscritos"
+        <app-stats-card title="Estudantes" [value]="countStudents" description="estudantes inscritos"
             iconClass="bi bi-people-fill"></app-stats-card>
-        <app-stats-card title="Professores" [value]="28" description="professores ativos"
+        <app-stats-card title="Professores" [value]="countTeachers" description="professores ativos"
             iconClass="bi bi-person-badge-fill"></app-stats-card>
     </div>
     
@@ -22,7 +22,10 @@
             <div class="div-table">
                 <app-show-table 
                     [data]="data" 
-                    (editRow)="handleEdit($event)">
+                    (editRow)="handleEdit($event)"
+                    (deleteRow)="handleDelete($event)"
+                    [showEdit]="true"
+                    [showDelete]="true">
                 </app-show-table>
             </div>
             

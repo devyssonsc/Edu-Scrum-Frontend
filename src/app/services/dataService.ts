@@ -30,13 +30,25 @@ export interface StudentLite {
 
 export interface Degree {
   id: number;
+  code: string;
   name: string;
+  coursesCount?: number;
+  teachersCount?: number;
+  studentsCount?: number;
+}
+
+export interface Teacher {
+  id: number;
+  name: string;
+  email: string;
+  coursesCount: number;
 }
 
 export interface Course {
   id: number;
   name: string;
   degree?: Degree; 
+  degreeName?: string; // Flattened for UI
   code: string; 
   studentsCount?: number;
   projectsCount?: number;
@@ -49,8 +61,6 @@ export interface Project {
   startDate: string;
   endDate: string;
   course?: Course;
-  
-  // Frontend Helpers
   courseCode?: string; 
   courseName?: string;
   teamsCount?: number;
@@ -103,98 +113,135 @@ export interface CreateTeamRequest {
 export class DataService {
 
   // --- MOCK DATA ---
-  private degreeEI: Degree = { id: 1, name: 'Computer Engineering' };
+  
+  // Degrees 
+  private degrees: Degree[] = [
+    { id: 1, code: 'EI', name: 'Engenharia Informática', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
+    { id: 2, code: 'SIG', name: 'Sistemas de Informação', coursesCount: 25, teachersCount: 10, studentsCount: 150 }
+  ];
 
+  // Courses 
   private courses: Course[] = [
-    { id: 1, code: 'QS', name: 'Software Quality', degree: this.degreeEI, studentsCount: 75, projectsCount: 1 },
-    { id: 2, code: 'IA', name: 'Artificial Intelligence', degree: this.degreeEI, studentsCount: 60, projectsCount: 2 }
+    { id: 1, code: 'QS', name: 'Software Quality', degree: this.degrees[0], degreeName: 'Engenharia Informática', studentsCount: 75, projectsCount: 1 },
+    { id: 2, code: 'IA', name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Engenharia Informática', studentsCount: 60, projectsCount: 2 },
+    { id: 3, code: 'GPS', name: 'Gestão de Projetos', degree: this.degrees[1], degreeName: 'Sistemas de Informação', studentsCount: 45, projectsCount: 1 }
+  ];
+
+  // Students
+  private students: StudentLite[] = [
+    { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt' },
+    { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt' },
+    { id: 3, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt' },
+    { id: 4, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt' },
+    { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt' }
+  ];
+
+  // Teachers
+  private teachers: Teacher[] = [
+    { id: 1, name: 'Fátima Leal', email: 'fatimal@upt.pt', coursesCount: 3 },
+    { id: 2, name: 'Bruno Cunha', email: 'bruninho@upt.pt', coursesCount: 4 },
+    { id: 3, name: 'Joaquim Silva', email: 'joaquim@upt.pt', coursesCount: 2 }
   ];
 
   private projects: Project[] = [
     { 
-      id: 1, name: 'Final Project 2025', description: 'Development of a Gamified Scrum Platform for University context.', 
+      id: 1, name: 'Final Project 2025', description: 'Gamified Scrum Platform.', 
       startDate: '2024-09-15', endDate: '2024-12-20', 
       course: this.courses[0], courseCode: 'QS', courseName: 'Software Quality', teamsCount: 2 
-    },
-    { 
-      id: 2, name: 'Intelligent Agents', description: 'Multi-agent system simulation using Python.', 
-      startDate: '2024-10-01', endDate: '2024-11-30', 
-      course: this.courses[1], courseCode: 'IA', courseName: 'Artificial Intelligence', teamsCount: 0 
     }
   ];
 
-  private mockStudentsQS: StudentLite[] = [
-    { id: 50440, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt' },
-    { id: 50441, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt' },
-    { id: 50442, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt' },
-    { id: 50443, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt' },
-    { id: 50444, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt' }
-  ];
-
-  private teams: Team[] = [
-    {
-      id: 101, name: 'Alpha Team', projectId: 1,
-      members: [
-        { student: this.mockStudentsQS[0], role: 'SCRUM_MASTER' },
-        { student: this.mockStudentsQS[1], role: 'PRODUCT_OWNER' }
-      ],
-      sprints: [
-        { id: 1, name: 'Sprint 1', goal: 'Setup Env & Database', startDate: '2024-09-20', endDate: '2024-09-27', status: 'COMPLETED' },
-        { id: 2, name: 'Sprint 2', goal: 'Authentication Logic', startDate: '2024-09-28', endDate: '2024-10-05', status: 'ACTIVE' }
-      ]
-    }
-  ];
+  private teams: Team[] = []; 
 
   constructor() { }
 
-  // --- METHODS ---
+  // --- GETTERS ---
 
-  getProjectById(id: number): Observable<Project | undefined> {
-    console.log(`🔍 [DataService] Searching for project ID: ${id} (Type: ${typeof id})`);
-    
-    const p = this.projects.find(proj => proj.id === id);
-
-    if (p) {
-        console.log('✅ [DataService] Project Found:', p);
-    } else {
-        console.warn('❌ [DataService] Project NOT found. Available IDs:', this.projects.map(x => x.id));
-    }
-
-    return of(p);
-  }
-
+  getDegrees(): Observable<Degree[]> { return of(this.degrees); }
+  
+  getCourses(): Observable<Course[]> { return of(this.courses); }
   getCourseByCode(code: string): Observable<Course | undefined> { 
       return of(this.courses.find(c => c.code === code)); 
   }
-  
-  getCourses(): Observable<Course[]> { return of(this.courses); }
+
+  getStudents(): Observable<StudentLite[]> { return of(this.students); }
+  getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
+
   getAllProjects(): Observable<Project[]> { return of(this.projects); }
-  getProjectsByCourse(code: string): Observable<Project[]> { return of(this.projects.filter(p => p.courseCode === code)); }
-  getAwards(): Observable<Award[]> { return of([]); }
-  deleteAward(n: string): Observable<boolean> { return of(true); }
-  deleteProject(n: string): Observable<boolean> { return of(true); }
+  getProjectById(id: number): Observable<Project | undefined> {
+    return of(this.projects.find(p => p.id === id));
+  }
+  getProjectsByCourse(code: string): Observable<Project[]> { 
+    return of(this.projects.filter(p => p.courseCode === code)); 
+  }
 
   getTeamsByProject(projectId: number): Observable<Team[]> {
     return of(this.teams.filter(t => t.projectId === projectId));
   }
 
   getStudentsByCourse(courseCode: string): Observable<StudentLite[]> {
-    if (courseCode === 'QS') return of(this.mockStudentsQS);
-    return of([]);
+    return of(this.students);
   }
+
+  getAwards(): Observable<Award[]> { return of([]); }
+
+  // --- DELETE METHODS ---
+
+  deleteDegree(id: number): Observable<boolean> {
+    const index = this.degrees.findIndex(d => d.id === id);
+    if (index !== -1) {
+      this.degrees.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteCourse(id: number): Observable<boolean> {
+    const index = this.courses.findIndex(c => c.id === id);
+    if (index !== -1) {
+      this.courses.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteStudent(id: number): Observable<boolean> {
+    const index = this.students.findIndex(s => s.id === id);
+    if (index !== -1) {
+      this.students.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteTeacher(id: number): Observable<boolean> {
+    const index = this.teachers.findIndex(t => t.id === id);
+    if (index !== -1) {
+      this.teachers.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteProject(name: string): Observable<boolean> {
+    const index = this.projects.findIndex(p => p.name === name);
+    if (index !== -1) {
+      this.projects.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+  
+  deleteAward(name: string): Observable<boolean> { return of(true); }
+
+  // --- CREATE METHODS ---
 
   createProject(projectData: any): Observable<boolean> {
     const relatedCourse = this.courses.find(c => c.code === projectData.courseCode);
-
-    // 1. Calcula o ID corretamente
-    const newId = this.projects.length > 0 
-        ? Math.max(...this.projects.map(p => p.id)) + 1 
-        : 101;
+    const newId = this.projects.length > 0 ? Math.max(...this.projects.map(p => p.id)) + 1 : 101;
 
     const newProject: Project = {
-      // 2. CORREÇÃO AQUI: Usar a variável newId calculada acima
       id: newId, 
-      
       name: projectData.name,
       description: projectData.description || 'No description saved',
       startDate: projectData.startDate,
@@ -204,24 +251,16 @@ export class DataService {
       courseName: relatedCourse ? relatedCourse.name : 'Unknown',
       teamsCount: 0
     };
-
     this.projects.push(newProject);
-
-    console.log('✅ [DataService] Project Created:', newProject);
-    console.log('📊 [DataService] All Projects:', this.projects);
-
     return of(true);
   }
 
   createTeam(request: CreateTeamRequest): Observable<boolean> {
     const hasConflict = request.members.some(m => m.studentId === 50442);
-
-    if (hasConflict) {
-      return throwError(() => ({ status: 409, message: 'Student 50442 is already in a team.' }));
-    }
+    if (hasConflict) return throwError(() => ({ status: 409, message: 'Conflict' }));
 
     const newMembers: TeamMember[] = request.members.map(m => {
-      const student = this.mockStudentsQS.find(s => s.id === m.studentId) || this.mockStudentsQS[0];
+      const student = this.students.find(s => s.id === m.studentId) || this.students[0];
       return { student, role: m.teamRole };
     });
 
@@ -232,7 +271,6 @@ export class DataService {
       members: newMembers,
       sprints: []
     };
-
     this.teams.push(newTeam);
     return of(true).pipe(delay(500)); 
   }

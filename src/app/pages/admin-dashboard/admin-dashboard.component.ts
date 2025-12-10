@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
-import { Router } from '@angular/router';
+import { DataService } from '../../services/dataService';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -11,75 +12,83 @@ import { Router } from '@angular/router';
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
   
-  // --- DADOS MOCKADOS ---
-  degrees = [
-    {
-      code: "EI",
-      name: "Engenharia Informática",
-      courses: 17,
-      teachers: 9,
-      students: 217
-    }
-  ];
+  private dataService = inject(DataService);
+  private router = inject(Router);
 
-  cadeiras = [
-    {
-      code: "QS",
-      name: "Qualidade de Software",
-      degree: "Engenharia Informática",
-      students: 52
-    }
-  ];
+  // Data Holders
+  degrees: any[] = [];
+  courses: any[] = [];
+  students: any[] = [];
+  teachers: any[] = [];
 
-  students = [
-    {
-      num: 50440,
-      name: "Tiago Silva",
-      email: "50440@alunos.upt.pt",
-      degree: "Engenharia Informática"
-    },
-    {
-      num: 50441,
-      name: "David Aroso",
-      email: "50441@alunos.upt.pt",
-      degree: "Engenharia Informática"
-    }
-  ];
-
-  teachers = [
-    {
-      name: "Fátima Leal",
-      email: "fatimal@upt.pt",
-      courses: 3
-    },
-    {
-      name: "Bruno Cunha",
-      email: "Bruninho@upt.pt",
-      courses: 4
-    }
-  ];
-
-  data: any[] = this.degrees;
-  selectedOption: string = 'Cursos';
+  // Table Data
+  data: any[] = [];
+  selectedOption: string = 'Cursos'; 
   
-  constructor(private router: Router) {}
+  // Stats
+  countDegrees = 0;
+  countCourses = 0;
+  countStudents = 0;
+  countTeachers = 0;
 
+  constructor() {}
 
-  get columns(): string[] {
-    if (!this.degrees || this.degrees.length === 0) return [];
-    return Object.keys(this.degrees[0]);
+  ngOnInit() {
+    this.loadAllData();
+  }
+
+  loadAllData() {
+    // 1. Degrees
+    this.dataService.getDegrees().subscribe(res => {
+      this.degrees = res;
+      this.countDegrees = res.length;
+      if (this.selectedOption === 'Cursos') this.data = this.degrees;
+    });
+
+    // 2. Courses (Cadeiras)
+    this.dataService.getCourses().subscribe(res => {
+      this.courses = res.map(c => ({
+        id: c.id,
+        code: c.code,
+        name: c.name,
+        degree: c.degreeName || 'N/A',
+        students: c.studentsCount
+      }));
+      this.countCourses = res.length;
+      if (this.selectedOption === 'Cadeiras') this.data = this.courses;
+    });
+
+    // 3. Students
+    this.dataService.getStudents().subscribe(res => {
+      this.students = res.map(s => ({
+        id: s.id, 
+        num: s.studentNumber,
+        name: s.name,
+        email: s.email
+      }));
+      this.countStudents = res.length;
+      if (this.selectedOption === 'Estudantes') this.data = this.students;
+    });
+
+    this.dataService.getTeachers().subscribe(res => {
+      this.teachers = res;
+      this.countTeachers = res.length;
+      if (this.selectedOption === 'Professores') this.data = this.teachers;
+    });
   }
 
   onSelectOption(event: any) {
-    console.log(event);
     this.selectedOption = event;
+    this.refreshTable();
+  }
 
+  refreshTable() {
     if(this.selectedOption === 'Cursos') {
       this.data = this.degrees;
     } else if(this.selectedOption === 'Cadeiras') {
-      this.data = this.cadeiras;
+      this.data = this.courses;
     } else if(this.selectedOption === 'Estudantes') {
       this.data = this.students;
     } else if(this.selectedOption === 'Professores'){
@@ -90,13 +99,10 @@ export class AdminDashboardComponent {
   onAddClick() {
     if (this.selectedOption === 'Cursos') {
       this.router.navigate(['/admin-dashboard/register-degree']);
-    
     } else if (this.selectedOption === 'Cadeiras') {
       this.router.navigate(['/admin-dashboard/register-course']);
-    
     } else if (this.selectedOption === 'Estudantes') {
       this.router.navigate(['/admin-dashboard/register-student']);
-    
     } else if (this.selectedOption === 'Professores') {
       this.router.navigate(['/admin-dashboard/register-teacher']);
     }
@@ -104,23 +110,41 @@ export class AdminDashboardComponent {
 
   handleEdit(row: any) {
     if (this.selectedOption === 'Cursos') {
-      this.router.navigate(['/admin-dashboard/degree', row.code]);
+      this.router.navigate(['/admin-dashboard/degree', row.code]); 
+    } else if (this.selectedOption === 'Cadeiras') {
+      this.router.navigate(['/admin-dashboard/course', row.code]); 
+    } else if (this.selectedOption === 'Estudantes') {
+      this.router.navigate(['/admin-dashboard/student', row.num]);
+    } else if (this.selectedOption === 'Professores') {
+      this.router.navigate(['/admin-dashboard/teacher', row.email]);
+    }
+  }
+
+  // --- DELETE LOGIC ---
+  
+  handleDelete(row: any) {
+    const confirmMessage = `Tem a certeza que deseja eliminar: ${row.name}?`;
+    if (!confirm(confirmMessage)) return;
+
+    if (this.selectedOption === 'Cursos') {
+      this.dataService.deleteDegree(row.id).subscribe(success => this.postDeleteAction(success));
     
     } else if (this.selectedOption === 'Cadeiras') {
-      this.router.navigate(['/admin-dashboard/course', row.code]);
+      this.dataService.deleteCourse(row.id).subscribe(success => this.postDeleteAction(success));
     
     } else if (this.selectedOption === 'Estudantes') {
-
-      console.log('A navegar para estudante:', row.num);
-      this.router.navigate(['/admin-dashboard/student', row.num]);
-
+      this.dataService.deleteStudent(row.id).subscribe(success => this.postDeleteAction(success));
+    
     } else if (this.selectedOption === 'Professores') {
+      this.dataService.deleteTeacher(row.id).subscribe(success => this.postDeleteAction(success));
+    }
+  }
 
-      console.log('A editar professor:', row.email);
-      this.router.navigate(['/admin-dashboard/teacher', row.email]);
-      
+  postDeleteAction(success: boolean) {
+    if (success) {
+      this.loadAllData(); 
     } else {
-      console.log('Edição ainda não implementada para:', this.selectedOption);
+      alert('Erro ao eliminar elemento.');
     }
   }
 }
