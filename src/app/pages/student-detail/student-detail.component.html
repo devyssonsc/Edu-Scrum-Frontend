@@ -4,27 +4,27 @@
         <button class="btn-back" routerLink="/admin-dashboard">
             <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Manage Student: <span class="highlight">{{ studentId }}</span></h1>
+        <h1>Manage Student: <span class="highlight">{{ studentName }}</span></h1>
     </div>
 
     <div class="stats-row">
         <app-stats-card 
             title="Completed ECTS" 
-            [value]="mockStudentData.stats.ectsCompleted" 
+            [value]="mockStats.ectsCompleted" 
             description="accumulated credits"
             iconClass="bi bi-check-circle-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Current Average" 
-            [value]="mockStudentData.stats.avgGrade" 
+            [value]="mockStats.avgGrade" 
             description="grade points"
             iconClass="bi bi-graph-up-arrow">
         </app-stats-card>
 
         <app-stats-card 
             title="Enrollments" 
-            [value]="mockStudentData.stats.enrolledCourses" 
+            [value]="mockStats.enrolledCourses" 
             description="active courses"
             iconClass="bi bi-book-half">
         </app-stats-card>

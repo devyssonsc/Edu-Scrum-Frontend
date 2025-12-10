@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
+import { DataService, StudentLite } from '../../services/dataService';
 
 @Component({
   selector: 'app-student-detail',
@@ -16,25 +17,15 @@ export class StudentDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private dataService = inject(DataService);
 
   studentForm: FormGroup;
-  studentId: string | null = null;
-
-  mockStudentData = {
-    num: '50440',
-    name: 'Tiago Silva',
-    email: '50440@alunos.upt.pt',
-    degree: 'Engenharia Informática',
-    stats: {
-      ectsCompleted: 120,  
-      avgGrade: 15.2,       
-      enrolledCourses: 6     
-    },
-    enrolledCoursesList: [
-      { code: 'QS', name: 'Qualidade de Software', grade: '---' }, 
-      { code: 'IA', name: 'Inteligência Artificial', grade: '16' },
-      { code: 'PWEB', name: 'Programação Web', grade: '14' }
-    ]
+  studentId: number | null = null;
+  studentName: string = ''
+  mockStats = {
+    ectsCompleted: 120,
+    avgGrade: 15.2,
+    enrolledCourses: 6
   };
 
   constructor() {
@@ -47,27 +38,47 @@ export class StudentDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.studentId = this.route.snapshot.paramMap.get('id');
+    const rawId = this.route.snapshot.paramMap.get('id');
     
-    if (this.studentId) {
-      this.loadData();
+    if (rawId) {
+      this.studentId = Number(rawId);
+      if (!isNaN(this.studentId)) {
+        this.loadData(this.studentId);
+      } else {
+        this.router.navigate(['/admin-dashboard']);
+      }
     }
   }
 
-  loadData() {
-    this.studentForm.patchValue({
-      name: this.mockStudentData.name,
-      email: this.mockStudentData.email,
-      degree: this.mockStudentData.degree
+  loadData(id: number) {
+    this.dataService.getStudentById(id).subscribe((student: StudentLite | undefined) => {
+      if (student) {
+        this.studentName = student.name;
+
+        this.studentForm.patchValue({
+          name: student.name,
+          email: student.email,
+          degree: 'Computer Engineering' 
+        });
+        this.loadMockCourses();
+      }
     });
-    
+  }
+
+  loadMockCourses() {
     const coursesArray = this.studentForm.get('courses') as FormArray;
     coursesArray.clear();
 
-    this.mockStudentData.enrolledCoursesList.forEach(c => {
+    const mockEnrollments = [
+      { code: 'QS', name: 'Software Quality', grade: '---' }, 
+      { code: 'IA', name: 'Artificial Intelligence', grade: '16' },
+      { code: 'PWEB', name: 'Web Programming', grade: '14' }
+    ];
+
+    mockEnrollments.forEach(c => {
       const group = this.fb.group({
-        code: [c.code], // Apenas leitura
-        name: [c.name], // Apenas leitura
+        code: [c.code],
+        name: [c.name],
         grade: [c.grade] 
       });
       coursesArray.push(group);
@@ -85,11 +96,7 @@ export class StudentDetailComponent implements OnInit {
 
   onSubmit() {
     if (this.studentForm.valid) {
-      console.log('Dados do Estudante a salvar:', {
-        originalId: this.studentId,
-        ...this.studentForm.value
-      });
-      alert('Estudante atualizado com sucesso!');
+      console.log('Update student logic here...', this.studentForm.value);
       this.router.navigate(['/admin-dashboard']);
     }
   }

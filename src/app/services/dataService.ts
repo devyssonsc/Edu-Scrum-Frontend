@@ -41,7 +41,7 @@ export interface Teacher {
   name: string;
   email: string;
   coursesCount: number;
-  courseIds: number[]; 
+  courseIds: number[];
 }
 
 export interface Course {
@@ -132,11 +132,10 @@ export class DataService {
     { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt' }
   ];
 
-  // Teachers (Updated with courseIds)
   private teachers: Teacher[] = [
-    { id: 1, name: 'Fátima Leal', email: 'fatimal@upt.pt', coursesCount: 3, courseIds: [1, 3] }, 
-    { id: 2, name: 'Bruno Cunha', email: 'bruninho@upt.pt', coursesCount: 4, courseIds: [1, 2] }, 
-    { id: 3, name: 'Joaquim Silva', email: 'joaquim@upt.pt', coursesCount: 2, courseIds: [2] }  
+    { id: 1, name: 'Fátima Leal', email: 'fatimal@upt.pt', coursesCount: 3, courseIds: [1, 3] },
+    { id: 2, name: 'Bruno Cunha', email: 'bruninho@upt.pt', coursesCount: 4, courseIds: [1, 2] },
+    { id: 3, name: 'Joaquim Silva', email: 'joaquim@upt.pt', coursesCount: 2, courseIds: [2] }
   ];
 
   private projects: Project[] = [
@@ -169,6 +168,10 @@ export class DataService {
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
   
+  getStudentById(id: number): Observable<StudentLite | undefined> {
+    return of(this.students.find(s => s.id === id));
+  }
+  
   getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
   
   getTeachersByCourseId(courseId: number): Observable<Teacher[]> {
@@ -193,7 +196,7 @@ export class DataService {
 
   getAwards(): Observable<Award[]> { return of([]); }
 
-  // --- UPDATE/MANAGE RELATIONSHIPS ---
+  // --- UPDATE METHODS ---
 
   updateDegree(id: number, updatedData: { name: string }): Observable<boolean> {
     const degree = this.degrees.find(d => d.id === id);
@@ -223,7 +226,8 @@ export class DataService {
     return of(false);
   }
 
-  // NEW: Add Teacher to Course
+  // --- RELATIONSHIP METHODS ---
+
   addTeacherToCourse(courseId: number, teacherId: number): Observable<boolean> {
     const teacher = this.teachers.find(t => t.id === teacherId);
     if (teacher) {
@@ -236,7 +240,6 @@ export class DataService {
     return of(false);
   }
 
-  // NEW: Remove Teacher from Course
   removeTeacherFromCourse(courseId: number, teacherId: number): Observable<boolean> {
     const teacher = this.teachers.find(t => t.id === teacherId);
     if (teacher) {
