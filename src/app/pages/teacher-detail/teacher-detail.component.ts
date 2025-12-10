@@ -101,6 +101,7 @@ export class TeacherDetailComponent implements OnInit {
           }
         },
         error: (err) => {
+          // Validação de email duplicado
           if (err.status === 409) {
              alert('Error: This email is already assigned to another teacher.');
              this.teacherForm.get('email')?.setErrors({ 'duplicate': true });
