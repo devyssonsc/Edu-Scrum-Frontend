@@ -22,7 +22,6 @@ export class DegreeDetailComponent implements OnInit {
   degreeForm: FormGroup;
   
   degreeId: number | null = null;
-  degreeCodeDisplay: string = '';
 
   stats = {
     studentsCount: 0, 
@@ -47,12 +46,8 @@ export class DegreeDetailComponent implements OnInit {
             this.degreeId = parsedId;
             this.loadDataById(this.degreeId);
         } else {
-            this.dataService.getDegreeByCode(routeParam).subscribe(d => {
-                if (d) {
-                    this.degreeId = d.id;
-                    this.loadDataById(d.id);
-                }
-            });
+            console.error('Invalid Degree ID provided via route');
+            this.router.navigate(['/admin-dashboard']);
         }
     }
   }
@@ -60,7 +55,6 @@ export class DegreeDetailComponent implements OnInit {
   loadDataById(id: number) {
     this.dataService.getDegreeById(id).subscribe(degree => {
         if (degree) {
-            this.degreeCodeDisplay = degree.code;
             this.stats.studentsCount = degree.studentsCount || 0;
             this.stats.teachersCount = degree.teachersCount || 0;
             this.stats.coursesCount = degree.coursesCount || 0;
@@ -78,7 +72,6 @@ export class DegreeDetailComponent implements OnInit {
     this.dataService.getCoursesByDegreeId(degreeId).subscribe(courses => {
         courses.forEach(c => {
             const group = this.fb.group({
-                code: [c.code, Validators.required],
                 name: [c.name, Validators.required]
             });
             cadeirasArray.push(group);
