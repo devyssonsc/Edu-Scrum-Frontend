@@ -17,17 +17,14 @@ export class AdminDashboardComponent implements OnInit {
   private dataService = inject(DataService);
   private router = inject(Router);
 
-  // Data Holders
   degrees: any[] = [];
   courses: any[] = [];
   students: any[] = [];
   teachers: any[] = [];
 
-  // Table Data
   data: any[] = [];
-  selectedOption: string = 'Cursos'; 
+  selectedOption: string = 'Degrees'; 
   
-  // Stats
   countDegrees = 0;
   countCourses = 0;
   countStudents = 0;
@@ -44,10 +41,10 @@ export class AdminDashboardComponent implements OnInit {
     this.dataService.getDegrees().subscribe(res => {
       this.degrees = res;
       this.countDegrees = res.length;
-      if (this.selectedOption === 'Cursos') this.data = this.degrees;
+      if (this.selectedOption === 'Degrees') this.data = this.degrees;
     });
 
-    // 2. Courses (Cadeiras)
+    // 2. Courses
     this.dataService.getCourses().subscribe(res => {
       this.courses = res.map(c => ({
         id: c.id,
@@ -57,25 +54,26 @@ export class AdminDashboardComponent implements OnInit {
         students: c.studentsCount
       }));
       this.countCourses = res.length;
-      if (this.selectedOption === 'Cadeiras') this.data = this.courses;
+      if (this.selectedOption === 'Courses') this.data = this.courses;
     });
 
     // 3. Students
     this.dataService.getStudents().subscribe(res => {
       this.students = res.map(s => ({
-        id: s.id, 
+        id: s.id,
         num: s.studentNumber,
         name: s.name,
         email: s.email
       }));
       this.countStudents = res.length;
-      if (this.selectedOption === 'Estudantes') this.data = this.students;
+      if (this.selectedOption === 'Students') this.data = this.students;
     });
 
+    // 4. Teachers
     this.dataService.getTeachers().subscribe(res => {
       this.teachers = res;
       this.countTeachers = res.length;
-      if (this.selectedOption === 'Professores') this.data = this.teachers;
+      if (this.selectedOption === 'Teachers') this.data = this.teachers;
     });
   }
 
@@ -85,57 +83,57 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   refreshTable() {
-    if(this.selectedOption === 'Cursos') {
+    if(this.selectedOption === 'Degrees') {
       this.data = this.degrees;
-    } else if(this.selectedOption === 'Cadeiras') {
+    } else if(this.selectedOption === 'Courses') {
       this.data = this.courses;
-    } else if(this.selectedOption === 'Estudantes') {
+    } else if(this.selectedOption === 'Students') {
       this.data = this.students;
-    } else if(this.selectedOption === 'Professores'){
+    } else if(this.selectedOption === 'Teachers'){
       this.data = this.teachers;
     }
   }
 
   onAddClick() {
-    if (this.selectedOption === 'Cursos') {
+    if (this.selectedOption === 'Degrees') {
       this.router.navigate(['/admin-dashboard/register-degree']);
-    } else if (this.selectedOption === 'Cadeiras') {
+    } else if (this.selectedOption === 'Courses') {
       this.router.navigate(['/admin-dashboard/register-course']);
-    } else if (this.selectedOption === 'Estudantes') {
+    } else if (this.selectedOption === 'Students') {
       this.router.navigate(['/admin-dashboard/register-student']);
-    } else if (this.selectedOption === 'Professores') {
+    } else if (this.selectedOption === 'Teachers') {
       this.router.navigate(['/admin-dashboard/register-teacher']);
     }
   }
 
   handleEdit(row: any) {
-    if (this.selectedOption === 'Cursos') {
-      this.router.navigate(['/admin-dashboard/degree', row.code]); 
-    } else if (this.selectedOption === 'Cadeiras') {
+    if (this.selectedOption === 'Degrees') {
+      this.router.navigate(['/admin-dashboard/degree', row.code || row.id]); 
+    } else if (this.selectedOption === 'Courses') {
       this.router.navigate(['/admin-dashboard/course', row.code]); 
-    } else if (this.selectedOption === 'Estudantes') {
+    } else if (this.selectedOption === 'Students') {
       this.router.navigate(['/admin-dashboard/student', row.num]);
-    } else if (this.selectedOption === 'Professores') {
-      this.router.navigate(['/admin-dashboard/teacher', row.email]);
+    } else if (this.selectedOption === 'Teachers') {
+      this.router.navigate(['/admin-dashboard/teacher', row.id]);
     }
   }
 
   // --- DELETE LOGIC ---
   
   handleDelete(row: any) {
-    const confirmMessage = `Tem a certeza que deseja eliminar: ${row.name}?`;
+    const confirmMessage = `Are you sure you want to delete: ${row.name}?`;
     if (!confirm(confirmMessage)) return;
 
-    if (this.selectedOption === 'Cursos') {
+    if (this.selectedOption === 'Degrees') {
       this.dataService.deleteDegree(row.id).subscribe(success => this.postDeleteAction(success));
     
-    } else if (this.selectedOption === 'Cadeiras') {
+    } else if (this.selectedOption === 'Courses') {
       this.dataService.deleteCourse(row.id).subscribe(success => this.postDeleteAction(success));
     
-    } else if (this.selectedOption === 'Estudantes') {
+    } else if (this.selectedOption === 'Students') {
       this.dataService.deleteStudent(row.id).subscribe(success => this.postDeleteAction(success));
     
-    } else if (this.selectedOption === 'Professores') {
+    } else if (this.selectedOption === 'Teachers') {
       this.dataService.deleteTeacher(row.id).subscribe(success => this.postDeleteAction(success));
     }
   }
@@ -144,7 +142,7 @@ export class AdminDashboardComponent implements OnInit {
     if (success) {
       this.loadAllData(); 
     } else {
-      alert('Erro ao eliminar elemento.');
+      alert('Error deleting item.');
     }
   }
 }

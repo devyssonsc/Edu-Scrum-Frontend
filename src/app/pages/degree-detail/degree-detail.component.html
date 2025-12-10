@@ -2,30 +2,30 @@
     
     <div class="header-row">
         <button class="btn-back" routerLink="/admin-dashboard">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Gerir Curso: <span class="highlight">{{ courseId }}</span></h1>
+        <h1>Manage Degree: <span class="highlight">{{ courseId }}</span></h1>
     </div>
 
     <div class="stats-row">
         <app-stats-card 
-            title="Estudantes" 
+            title="Students" 
             [value]="mockDegreeData.stats.studentsCount" 
-            description="inscritos neste curso"
+            description="enrolled in this degree"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
-            title="Professores" 
+            title="Teachers" 
             [value]="mockDegreeData.stats.teachersCount" 
-            description="a lecionar neste curso"
+            description="teaching in this degree"
             iconClass="bi bi-person-badge-fill">
         </app-stats-card>
 
         <app-stats-card 
-            title="Cadeiras" 
+            title="Courses" 
             [value]="mockDegreeData.stats.coursesCount" 
-            description="total no plano"
+            description="total in syllabus"
             iconClass="bi bi-book">
         </app-stats-card>
     </div>
@@ -33,28 +33,28 @@
     <form [formGroup]="degreeForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
         <div class="section-header">
-            <h3>Dados do Curso</h3>
+            <h3>Degree Data</h3>
             <button type="submit" class="btn btn-primary" [disabled]="degreeForm.invalid || !degreeForm.dirty">
-                Guardar Alterações
+                Save Changes
             </button>
         </div>
 
         <div class="form-group-main">
-            <label>Designação do Curso</label>
+            <label>Degree Name</label>
             <input type="text" formControlName="name" class="main-input">
         </div>
 
         <hr class="divider">
 
-        <h4 class="table-title">Gestão de Cadeiras</h4>
+        <h4 class="table-title">Manage Courses</h4>
         
         <div class="table-container">
             <table class="edit-table">
                 <thead>
                     <tr>
-                        <th style="width: 15%;">Código</th>
-                        <th>Nome da Cadeira</th>
-                        <th style="width: 50px;">Ações</th>
+                        <th style="width: 15%;">Code</th>
+                        <th>Course Name</th>
+                        <th style="width: 50px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="cadeiras">

@@ -1,23 +1,23 @@
 <div class="div-container">
     <div class="stats-cards">
-        <app-stats-card title="Cursos" [value]="countDegrees" description="cursos registados"
+        <app-stats-card title="Degrees" [value]="countDegrees" description="registered degrees"
             iconClass="bi bi-mortarboard-fill"></app-stats-card>
-        <app-stats-card title="Cadeiras" [value]="countCourses" description="cadeiras disponíveis"
+        <app-stats-card title="Courses" [value]="countCourses" description="available courses"
             iconClass="bi bi-book"></app-stats-card>
-        <app-stats-card title="Estudantes" [value]="countStudents" description="estudantes inscritos"
+        <app-stats-card title="Students" [value]="countStudents" description="enrolled students"
             iconClass="bi bi-people-fill"></app-stats-card>
-        <app-stats-card title="Professores" [value]="countTeachers" description="professores ativos"
+        <app-stats-card title="Teachers" [value]="countTeachers" description="active teachers"
             iconClass="bi bi-person-badge-fill"></app-stats-card>
     </div>
     
-    <app-section-selector [options]="['Cursos', 'Cadeiras', 'Estudantes', 'Professores']"
+    <app-section-selector [options]="['Degrees', 'Courses', 'Students', 'Teachers']"
         (selectedOption)="onSelectOption($event)">
     </app-section-selector>
     
     <div class="card show-all">
         <div class="content">
-            <h3>Gestão de {{ selectedOption }}</h3>
-            <p>Registar e gerir {{ selectedOption.toLowerCase() }} da universidade</p>
+            <h3>Manage {{ selectedOption }}</h3>
+            <p>Register and manage university {{ selectedOption.toLowerCase() }}</p>
             
             <div class="div-table">
                 <app-show-table 
@@ -29,7 +29,7 @@
                 </app-show-table>
             </div>
             
-            <button class="btn btn-primary" (click)="onAddClick()">Adicionar {{ selectedOption }}</button>
+            <button class="btn btn-primary" (click)="onAddClick()">Add {{ selectedOption }}</button>
         </div>
     </div>
 </div>

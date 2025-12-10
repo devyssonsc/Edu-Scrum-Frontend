@@ -2,30 +2,30 @@
     
     <div class="header-row">
         <button class="btn-back" routerLink="/admin-dashboard">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Gerir Estudante: <span class="highlight">{{ studentId }}</span></h1>
+        <h1>Manage Student: <span class="highlight">{{ studentId }}</span></h1>
     </div>
 
     <div class="stats-row">
         <app-stats-card 
-            title="ECTS Completos" 
+            title="Completed ECTS" 
             [value]="mockStudentData.stats.ectsCompleted" 
-            description="créditos acumulados"
+            description="accumulated credits"
             iconClass="bi bi-check-circle-fill">
         </app-stats-card>
 
         <app-stats-card 
-            title="Média Atual" 
+            title="Current Average" 
             [value]="mockStudentData.stats.avgGrade" 
-            description="valores"
+            description="grade points"
             iconClass="bi bi-graph-up-arrow">
         </app-stats-card>
 
         <app-stats-card 
-            title="Inscrições" 
+            title="Enrollments" 
             [value]="mockStudentData.stats.enrolledCourses" 
-            description="cadeiras ativas"
+            description="active courses"
             iconClass="bi bi-book-half">
         </app-stats-card>
     </div>
@@ -33,41 +33,41 @@
     <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
         <div class="section-header">
-            <h3>Dados Pessoais</h3>
+            <h3>Personal Data</h3>
             <button type="submit" class="btn btn-primary" [disabled]="studentForm.invalid || !studentForm.dirty">
-                Guardar Alterações
+                Save Changes
             </button>
         </div>
 
         <div class="form-row-grid">
             <div class="form-group-main">
-                <label>Nome Completo</label>
+                <label>Full Name</label>
                 <input type="text" formControlName="name" class="main-input">
             </div>
             
             <div class="form-group-main">
-                <label>Email Institucional</label>
+                <label>Institutional Email</label>
                 <input type="text" formControlName="email" class="main-input">
             </div>
 
             <div class="form-group-main">
-                <label>Curso Atual</label>
+                <label>Current Degree</label>
                 <input type="text" formControlName="degree" class="main-input">
             </div>
         </div>
 
         <hr class="divider">
 
-        <h4 class="table-title">Inscrições em Cadeiras</h4>
+        <h4 class="table-title">Course Enrollments</h4>
         
         <div class="table-container">
             <table class="edit-table">
                 <thead>
                     <tr>
-                        <th style="width: 15%">Código</th>
-                        <th>Cadeira</th>
-                        <th style="width: 15%">Nota Final</th>
-                        <th style="width: 50px;">Ações</th>
+                        <th style="width: 15%">Code</th>
+                        <th>Course</th>
+                        <th style="width: 15%">Final Grade</th>
+                        <th style="width: 50px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="courses">

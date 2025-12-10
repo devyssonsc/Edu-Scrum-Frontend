@@ -2,24 +2,24 @@
     
     <div class="header-row">
         <button class="btn-back" routerLink="/admin-dashboard">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Gerir Professor: <span class="highlight">{{ teacherId }}</span></h1>
+        <h1>Manage Teacher: <span class="highlight">{{ teacherId }}</span></h1>
     </div>
 
 
     <div class="stats-row">
         <app-stats-card 
-            title="Cadeiras" 
+            title="Courses" 
             [value]="mockTeacherData.stats.coursesCount" 
-            description="lecionadas atualmente"
+            description="currently teaching"
             iconClass="bi bi-book">
         </app-stats-card>
 
         <app-stats-card 
-            title="Total Alunos" 
+            title="Total Students" 
             [value]="mockTeacherData.stats.totalStudents" 
-            description="nas suas turmas"
+            description="in all classes"
             iconClass="bi bi-people">
         </app-stats-card>
     </div>
@@ -28,35 +28,35 @@
     <form [formGroup]="teacherForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
         <div class="section-header">
-            <h3>Dados do Docente</h3>
+            <h3>Teacher Data</h3>
             <button type="submit" class="btn btn-primary" [disabled]="teacherForm.invalid || !teacherForm.dirty">
-                Guardar Alterações
+                Save Changes
             </button>
         </div>
 
     
         <div class="form-row-grid" style="grid-template-columns: 1fr 1fr;">
             <div class="form-group-main">
-                <label>Nome Completo</label>
+                <label>Full Name</label>
                 <input type="text" formControlName="name" class="main-input">
             </div>
             
             <div class="form-group-main">
-                <label>Email Institucional</label>
+                <label>Institutional Email</label>
                 <input type="text" formControlName="email" class="main-input">
             </div>
         </div>
 
         <hr class="divider">
 
-        <h4 class="table-title">Cadeiras Lecionadas</h4>
+        <h4 class="table-title">Courses Taught</h4>
         
         <div class="table-container">
             <table class="edit-table">
                 <thead>
                     <tr>
-                        <th style="width: 15%">Código</th>
-                        <th>Cadeira</th>
+                        <th style="width: 15%">Code</th>
+                        <th>Course</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="courses">
