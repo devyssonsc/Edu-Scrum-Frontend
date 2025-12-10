@@ -2,12 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DataService, StudentLite } from '../../services/dataService';
+import { DataService, StudentLite, Degree } from '../../services/dataService';
 
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink], // REMOVIDO: StatsCardComponent
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss'
 })
@@ -20,21 +20,23 @@ export class StudentDetailComponent implements OnInit {
 
   studentForm: FormGroup;
   studentId: number | null = null;
-  
   studentName: string = '';
-
-  // REMOVIDO: mockStats
+  allDegrees: Degree[] = [];
 
   constructor() {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      degree: ['', Validators.required],
+      degreeId: [null, Validators.required],
       courses: this.fb.array([]) 
     });
   }
 
   ngOnInit() {
+    this.dataService.getDegrees().subscribe(degrees => {
+      this.allDegrees = degrees;
+    });
+
     const rawId = this.route.snapshot.paramMap.get('id');
     
     if (rawId) {
@@ -55,7 +57,7 @@ export class StudentDetailComponent implements OnInit {
         this.studentForm.patchValue({
           name: student.name,
           email: student.email,
-          degree: 'Computer Engineering' 
+          degreeId: student.degreeId 
         });
         
         this.loadMockCourses();
@@ -92,9 +94,30 @@ export class StudentDetailComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.studentForm.valid) {
-      console.log('Update student logic here...', this.studentForm.value);
-      this.router.navigate(['/admin-dashboard']);
+    if (this.studentForm.valid && this.studentId) {
+      
+      const payload = {
+        name: this.studentForm.value.name,
+        email: this.studentForm.value.email,
+        degreeId: Number(this.studentForm.value.degreeId)
+      };
+
+      this.dataService.updateStudent(this.studentId, payload).subscribe({
+        next: (success) => {
+            if(success) {
+                alert('Student updated successfully!');
+                this.router.navigate(['/admin-dashboard']);
+            }
+        },
+        error: (err) => {
+            if (err.status === 409) {
+                alert('Error: This email is already assigned to another student.');
+                this.studentForm.get('email')?.setErrors({ 'duplicate': true });
+            } else {
+                alert('An error occurred while updating the student.');
+            }
+        }
+      });
     }
   }
 }
