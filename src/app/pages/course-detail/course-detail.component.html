@@ -40,7 +40,6 @@
             
             <div class="form-group-main">
                 <label>Associated Degree</label>
-                
                 <select formControlName="degreeId" class="main-input">
                     <option [ngValue]="null" disabled>Select a Degree...</option>
                     @for (degree of allDegrees; track degree.id) {
@@ -53,6 +52,21 @@
         <hr class="divider">
 
         <h4 class="table-title">Teaching Team</h4>
+
+        <div class="add-section">
+            <div class="inline-add">
+                <select [formControl]="selectedTeacherId" class="inline-select">
+                    <option [ngValue]="null" disabled>Select a teacher to add...</option>
+                    @for (t of availableTeachersToAdd; track t.id) {
+                        <option [ngValue]="t.id">{{ t.name }}</option>
+                    }
+                </select>
+                <button type="button" class="btn-icon add-btn" (click)="addTeacher()" 
+                        [disabled]="!selectedTeacherId.value" title="Add Teacher">
+                    <i class="bi bi-plus-circle-fill"></i>
+                </button>
+            </div>
+        </div>
         
         <div class="table-container">
             <table class="edit-table">
@@ -60,17 +74,26 @@
                     <tr>
                         <th>Teacher Name</th>
                         <th>Institutional Email</th>
+                        <th style="width: 50px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="teachers">
                     @for (item of teachers.controls; track $index; let i = $index) {
                         <tr [formGroupName]="i">
                             <td>
-                                <input type="text" formControlName="name" class="table-input">
+                                <input type="text" formControlName="name" class="table-input" readonly>
                             </td>
                             <td>
-                                <input type="text" formControlName="email" class="table-input">
+                                <input type="text" formControlName="email" class="table-input" readonly>
                             </td>
+                            <td class="actions">
+                                <i class="bi bi-trash delete-icon" (click)="removeTeacher(i)"></i>
+                            </td>
+                        </tr>
+                    }
+                    @if (teachers.length === 0) {
+                        <tr>
+                            <td colspan="3" class="empty-row">No teachers assigned to this course.</td>
                         </tr>
                     }
                 </tbody>
