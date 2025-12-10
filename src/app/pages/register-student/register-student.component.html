@@ -2,13 +2,13 @@
     
     <form class="card form-card" [formGroup]="studentForm" (ngSubmit)="onSubmit()">
         
-        <h2 class="form-title">Adicionar Estudante</h2>
+        <h2 class="form-title">Register Student</h2>
 
         <div class="form-group">
-            <label for="name">Nome Completo</label>
+            <label for="name">Full Name</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Ana Silva">
             @if (studentForm.get('name')?.invalid && studentForm.get('name')?.touched) {
-                <small class="error-msg">O nome é obrigatório.</small>
+                <small class="error-msg">This field is required</small>
             }
         </div>
 
@@ -16,38 +16,33 @@
             <label for="email">Email</label>
             <input type="email" id="email" formControlName="email" placeholder="Ex: ana.silva@email.com">
             @if (studentForm.get('email')?.invalid && studentForm.get('email')?.touched) {
-                <small class="error-msg">Por favor, insira um email válido.</small>
+                <small class="error-msg">Please, insert a valid email</small>
             }
         </div>
 
-        <div class="form-group">
-            <label for="studentNumber">Nº de Aluno</label>
-            <input type="text" id="studentNumber" formControlName="studentNumber" placeholder="Ex: 2024001">
-            @if (studentForm.get('studentNumber')?.invalid && studentForm.get('studentNumber')?.touched) {
-                <small class="error-msg">O número de aluno é obrigatório.</small>
-            }
-        </div>
 
         <div class="form-group">
-            <label for="degree">Curso (Degree)</label>
+
+            <label for="degree">Degree</label>
             <select
                 [formControl]="selectedDegreeId"
                 class="inline-input"
                 [class.invalid]="selectedDegreeId.invalid && selectedDegreeId.touched"
                 (change)="selectDegree()">
-                <option [ngValue]="null" disabled>Selecione um curso...</option>
+                <option [ngValue]="null" disabled>Select a degree...</option>
                 @for (degree of allDegrees; track degree.id) {
                     <option [value]="degree.id">
                         {{ degree.name }}
                     </option>
                 }
             </select>
+
         </div>
 
         <hr class="divider">
 
         <button type="submit" class="btn btn-primary" [disabled]="studentForm.invalid">
-            Registar Estudante
+            Register Student
         </button>
     </form>
 </div>
