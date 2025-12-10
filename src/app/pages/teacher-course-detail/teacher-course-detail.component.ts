@@ -40,7 +40,9 @@ export class TeacherCourseDetailComponent implements OnInit {
 
     this.dataService.getProjectsByCourse(code).subscribe(data => {
       this.projectsView = data.map(p => ({
-        id: p.id,
+      
+        id: p.id, 
+        
         name: p.name,
         startDate: p.startDate,
         endDate: p.endDate,
@@ -50,15 +52,15 @@ export class TeacherCourseDetailComponent implements OnInit {
   }
 
   handleProjectClick(row: any) {
-    console.log('Open project:', row.name);
-
+    // CORREÇÃO: Navegar para a página de detalhe usando o ID do projeto
+    console.log('Navigating to project:', row.id);
+    this.router.navigate(['/teacher-dashboard/project', row.id]);
   }
 
   handleDeleteProject(row: any) {
     if(confirm(`Are you sure you want to delete project "${row.name}"?`)) {
       this.dataService.deleteProject(row.name).subscribe(success => {
         if(success) {
-          // Se apagou com sucesso, recarrega os dados para atualizar a tabela visualmente
           if (this.courseId) this.loadCourseData(this.courseId);
         }
       });
