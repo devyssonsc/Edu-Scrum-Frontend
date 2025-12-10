@@ -245,20 +245,15 @@ export class DataService {
     }
     return of(false);
   }
-
-  // NOVO: Atualizar Professor com validação de email
   updateTeacher(id: number, updatedData: { name: string, email: string }): Observable<boolean> {
     const teacher = this.teachers.find(t => t.id === id);
     
     if (teacher) {
-        // Validação: Verificar se o email já existe noutro professor
         const emailExists = this.teachers.some(t => t.email === updatedData.email && t.id !== id);
         
         if (emailExists) {
             return throwError(() => ({ status: 409, message: 'Email already exists.' }));
         }
-
-        // Atualiza os dados
         teacher.name = updatedData.name;
         teacher.email = updatedData.email;
         return of(true);
