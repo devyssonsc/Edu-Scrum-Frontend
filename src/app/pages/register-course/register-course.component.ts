@@ -1,85 +1,49 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-
-import { FormArray, FormControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { enviroments } from '../../../enviroments/enviroments';
+import { Router, RouterLink } from '@angular/router'; // Importar RouterLink
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { DataService, Degree } from '../../services/dataService';
 
 @Component({
   selector: 'app-register-course',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink], // Adicionar aqui
   templateUrl: './register-course.component.html',
   styleUrl: './register-course.component.scss'
 })
 export class RegisterCourseComponent implements OnInit {
 
   private fb = inject(FormBuilder);
-  courseForm: FormGroup;
-  showDegreeList = false;
+  private dataService = inject(DataService);
+  private router = inject(Router);
 
-  constructor(private httpClient: HttpClient) {
+  courseForm: FormGroup;
+  allDegrees: Degree[] = [];
+  selectedDegreeId = new FormControl(null, [Validators.required]);
+
+  constructor() {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
-      degreeId: [null, Validators.required]
-
+      degreeId: this.selectedDegreeId
     });
   }
 
-  selectedDegreeId = new FormControl<number | null>(null, Validators.required);
-
-  ngOnInit(): void {
-    this.loadDegrees();
-  }
-
-  allDegrees: any[] = [];
-  loadDegrees() {
-  const token = localStorage.getItem('token');
-
-  this.httpClient.get<any[]>(`${enviroments.apiUrl}/degrees`)
-    .subscribe({
-      next: (degrees) => {
-        this.allDegrees = degrees;  
-      },
-      error: (err) => {
-        console.error('Erro ao carregar degrees:', err);
-      }
+  ngOnInit() {
+    this.dataService.getDegrees().subscribe(data => {
+      this.allDegrees = data;
     });
-}
+  }
 
   selectDegree() {
-  this.selectedDegreeId.markAsTouched();
-
-  if (this.selectedDegreeId.invalid) return;
-
-  const degreeId = Number(this.selectedDegreeId.value);
-
-  this.courseForm.patchValue({ degreeId });  
-}
+    // Lógica extra se necessário ao selecionar grau
+  }
 
   onSubmit() {
     if (this.courseForm.valid) {
-      console.log('Formulário Válido (Course):', this.courseForm.value);
-
-      this.httpClient.post(`${enviroments.apiUrl}/degrees/${this.courseForm.value.degreeId}/courses`, this.courseForm.value).subscribe(r => {
-        console.log("Course criado:", r);
-        alert("The Course was successfully registered.");
-        
-    },
-        (err: HttpErrorResponse) => {
-          if(err.status === 409) {
-            alert('This Course Already Exists.');
-          } else {
-            alert(`An error has ocurred. Try again later.`);
-          }
-        });
+      console.log('Course Data:', this.courseForm.value);
+      alert('Course registered successfully!');
+      this.router.navigate(['/admin-dashboard']);
     } else {
-      console.log('Formulário Inválido');
       this.courseForm.markAllAsTouched();
     }
   }

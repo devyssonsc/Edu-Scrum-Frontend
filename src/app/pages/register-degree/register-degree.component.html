@@ -1,66 +1,80 @@
 <div class="div-container">
     
+    <div style="text-align: left; margin-bottom: 1rem;">
+        <button class="btn-back" routerLink="/admin-dashboard">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+
     <form class="card form-card" [formGroup]="degreeForm" (ngSubmit)="onSubmit()">
         
-        <h2 class="form-title">Register Degree</h2> 
+        <h2 class="form-title">Register Degree</h2>
 
         <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" formControlName="name" placeholder="Ex: Informatics Engineering">
+            <label for="name">Degree Name</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ex: Computer Engineering">
             @if (degreeForm.get('name')?.invalid && degreeForm.get('name')?.touched) {
-                <small class="error-msg">This field is required</small>
+                <small class="error-msg">Name is required.</small>
             }
-        </div>  
-            
-        <div class="form-group">
-            <label>Courses</label>
+        </div>
 
-            <div formArrayName="courses" class="cadeiras-list">
-                @for(course of courses.controls; track $index; let i = $index) {
-                    <div class="cadeira-item">
-                        <span class="name">{{ course.value }}</span>
-                        <i class="bi bi-trash" (click)="removeCourse(i)"></i>
+        <div class="form-group">
+            <label>Courses in Degree</label>
+            
+            <div class="courses-list" formArrayName="courses">
+                @for(courseGroup of courses.controls; track $index; let i = $index) {
+                    <div class="course-item" [formGroupName]="i">
+                        <div class="info">
+                            <span class="name">{{ courseGroup.value.name }}</span>
+                        </div>
+                        <i class="bi bi-trash" (click)="removecourse(i)"></i>
                     </div>
                 }
-
-                @if(courses.length === 0 && !showAddInput) {
-                    <p class="empty-list-msg">Add courses to this degree</p>
+                @if(courses.controls.length === 0 && !showAddInputs) {
+                    <p class="empty-list-msg">Add courses to this degree.</p>
                 }
             </div>
-
             
-            @if (showAddInput) {
+            @if (showAddInputs) {
                 <div class="inline-add-form">
-                    <input 
-                        type="text"
-                        [formControl]="newCourseName"
-                        placeholder="Ex: Software Quality"
-                        class="inline-input"
-                        [class.invalid]="newCourseName.invalid && newCourseName.touched"
-                    >
-
-                    <button type="button" class="btn-icon" (click)="addCourse()" [disabled]="newCourseName.invalid">
+                    <div class="inline-input-group flex-grow">
+                        <select 
+                            [formControl]="selectedCourseId" 
+                            class="inline-input"
+                            [class.invalid]="selectedCourseId.invalid && selectedCourseId.touched">
+                            <option [ngValue]="null" disabled>Select a course...</option>
+                            @for (course of allCourses; track course.id) {
+                                <option [value]="course.id">
+                                    {{ course.name }}
+                                </option>
+                            }
+                        </select>
+                        @if (selectedCourseId.invalid && selectedCourseId.touched) {
+                            <small class="inline-error-msg">
+                                @if (selectedCourseId.hasError('required')) { Required. }
+                                @if (selectedCourseId.hasError('duplicate')) { Already added. }
+                            </small>
+                        }
+                    </div>
+                    <button type="button" class="btn-icon" (click)="confirmAddCourse()" [disabled]="selectedCourseId.invalid">
                         <i class="bi bi-check-lg"></i>
                     </button>
-
-                    <button type="button" class="btn-icon btn-cancel" (click)="showAddInput = false">
+                    <button type="button" class="btn-icon btn-cancel" (click)="cancelAddCourse()">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
             }
-
             
-            @if (!showAddInput) {
+            @if (!showAddInputs) {
                 <div class="add-button-container">
-                    <button type="button" class="btn-add" (click)="showAddInput = true">
+                    <button type="button" class="btn-add" (click)="showAddCourseFields()">
                         <i class="bi bi-plus-circle-fill"></i>
                     </button>
                 </div>
             }
 
-            
-            @if (courses.invalid && (courses.touched || isSubmitted)) {
-                <small class="error-msg">At least one course is required</small>
+            @if (courses.invalid && (courses.touched || isSubmitted) && !showAddInputs) {
+                <small class="error-msg">At least one course is required.</small>
             }
         </div>
 

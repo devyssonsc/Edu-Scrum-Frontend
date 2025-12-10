@@ -1,145 +1,98 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; 
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { enviroments } from '../../../enviroments/enviroments';
-
-interface Course {
-  id: number;
-  name: string;
-}
+import { DataService, Course } from '../../services/dataService';
 
 @Component({
   selector: 'app-register-teacher',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register-teacher.component.html',
   styleUrl: './register-teacher.component.scss'
 })
-export class RegisterTeacherComponent implements OnInit {
+export class RegisterTeacherComponent {
 
   private fb = inject(FormBuilder);
-  teacherForm: FormGroup;
-  isSubmitted = false;
-  selectedCourseId = new FormControl<number | null>(null, Validators.required);
-  showAddInputs = false;
+  private dataService = inject(DataService);
+  private router = inject(Router);
 
-  constructor(private httpClient: HttpClient) {
+  teacherForm: FormGroup;
+  
+  allCourses: Course[] = [];
+  showAddInputs = false;
+  selectedCourseId = new FormControl(null, [Validators.required]);
+  isSubmitted = false;
+
+  constructor() {
     this.teacherForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      courses: this.fb.array([], [Validators.required, Validators.minLength(1)]),
-      password: [''],
-      user_type: ['TEACHER'],  
-      role: ['TEACHER']   
+      courses: this.fb.array([], Validators.minLength(1))
     });
-  }
 
-    ngOnInit(): void {
-      this.loadCourses();
-    }
-  
-    allCourses: Course[] = [];
-    loadCourses() {
-  
-    this.httpClient.get<any[]>(`${enviroments.apiUrl}/courses`)
-      .subscribe({
-        next: (courses) => {
-          this.allCourses = courses;  
-        },
-        error: (err) => {
-          console.error('Erro ao carregar courses:', err);
-        }
-      });
+    this.dataService.getCourses().subscribe(data => {
+      this.allCourses = data;
+    });
   }
 
   get courses() {
     return this.teacherForm.get('courses') as FormArray;
   }
 
-  newCourseGroup(name: string, id: number): FormGroup {
-    return this.fb.group({
-      name: [name],
-      courseId: [id]
-    });
-  }
 
   showAddCourseFields() {
-    this.selectedCourseId.reset(null);
     this.showAddInputs = true;
+    this.selectedCourseId.reset();
   }
 
-  
   cancelAddCourse() {
     this.showAddInputs = false;
+    this.selectedCourseId.reset();
   }
 
   confirmAddCourse() {
-    this.selectedCourseId.markAsTouched();
+    if (this.selectedCourseId.valid && this.selectedCourseId.value) {
+      const courseId = Number(this.selectedCourseId.value);
+      
+      const alreadyAdded = this.courses.controls.some(
+        ctrl => ctrl.value.id === courseId
+      );
 
-    if (this.selectedCourseId.invalid) {
-      return;
+      if (alreadyAdded) {
+        this.selectedCourseId.setErrors({ duplicate: true });
+        return;
+      }
+
+      const course = this.allCourses.find(c => c.id === courseId);
+      if (course) {
+        this.addCourseToForm(course);
+        this.showAddInputs = false;
+        this.selectedCourseId.reset();
+      }
     }
-    
-    const courseId = Number(this.selectedCourseId.value);
-    const selectedCourse = this.allCourses.find(c => c.id === courseId);
+  }
 
-    if (!selectedCourse) return;
-
-    const isDuplicate = this.courses.controls.some(control => 
-      control.value.name === selectedCourse.name
-    );
-
-    if (isDuplicate) {
-      this.selectedCourseId.setErrors({ 'duplicate': true });
-    } else {
-      this.courses.push(this.newCourseGroup(selectedCourse.name, selectedCourse.id));
-      this.cancelAddCourse();
-    }
+  addCourseToForm(course: Course) {
+    const courseGroup = this.fb.group({
+      id: [course.id],
+      name: [course.name]
+    });
+    this.courses.push(courseGroup);
   }
 
   removecourse(index: number) {
     this.courses.removeAt(index);
   }
 
-  generatePassword(){
-      const firstName = this.teacherForm.value.name.trim().split(' ')[0];
-      this.teacherForm.value.password = firstName + "12345"
-  }
-
   onSubmit() {
-
-    this.generatePassword();
-
-    this.isSubmitted = true; 
-    this.teacherForm.markAllAsTouched();
-    
+    this.isSubmitted = true;
     if (this.teacherForm.valid) {
-      console.log('Formulário Válido:', this.teacherForm.value);
-      this.httpClient.post(`${enviroments.apiUrl}/users`, this.teacherForm.value).subscribe((response: any) => {
-        console.log('Resposta do servidor:', response);
-        alert('The student was successfully registered.');
-
-        this.courses.controls.forEach((course: any) => {
-            this.httpClient.post(`${enviroments.apiUrl}/courses/${course.value.courseId}/teachers/${response.id}`, {}).subscribe(r => {
-            console.log('Resposta do servidor:', r);
-            })
-        });
-       },
-         (err: HttpErrorResponse) => {
-           if(err.status === 409) {
-             alert('This Teacher Already Exists.');
-           } else {
-             alert(`An error has ocurred. Try again later.`);
-           }
-         });
+      console.log('Teacher Data:', this.teacherForm.value);
+      alert('Teacher registered successfully!');
+      this.router.navigate(['/admin-dashboard']);
     } else {
-      console.log('Formulário Inválido');
+      this.teacherForm.markAllAsTouched();
     }
   }
 }

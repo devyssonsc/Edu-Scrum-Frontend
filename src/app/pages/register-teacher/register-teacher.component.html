@@ -1,5 +1,11 @@
 <div class="div-container">
 
+    <div style="text-align: left; margin-bottom: 1rem;">
+        <button class="btn-back" routerLink="/admin-dashboard">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+
     <form class="card form-card" [formGroup]="teacherForm" (ngSubmit)="onSubmit()">
 
         <h2 class="form-title">Register Teacher</h2>
@@ -8,7 +14,7 @@
             <label for="name">Full Name</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Carlos Santos">
             @if (teacherForm.get('name')?.invalid && teacherForm.get('name')?.touched) {
-            <small class="error-msg">This field is required.</small>
+            <small class="error-msg">Name is required.</small>
             }
         </div>
 
@@ -16,31 +22,29 @@
             <label for="email">Email</label>
             <input type="email" id="email" formControlName="email" placeholder="Ex: carlos.santos@email.com">
             @if (teacherForm.get('email')?.invalid && teacherForm.get('email')?.touched) {
-            <small class="error-msg">Please, insert a valid email.</small>
+            <small class="error-msg">Please enter a valid email.</small>
             }
         </div>
 
         <div class="form-group">
-            <label>Courses</label>
+            <label>Teacher's Courses</label>
 
             <div class="courses-list" formArrayName="courses">
                 @for(courseGroup of courses.controls; track $index; let i = $index) {
                 <div class="course-item" [formGroupName]="i">
                     <div class="info">
-                        <span class="code">{{ courseGroup.value.code }}</span>
                         <span class="name">{{ courseGroup.value.name }}</span>
                     </div>
                     <i class="bi bi-trash" (click)="removecourse(i)"></i>
                 </div>
                 }
                 @if(courses.controls.length === 0 && !showAddInputs) {
-                <p class="empty-list-msg">Add courses to this Teacher.</p>
+                <p class="empty-list-msg">Assign courses to this teacher.</p>
                 }
             </div>
 
             @if (showAddInputs) {
             <div class="inline-add-form">
-
                 <div class="inline-input-group flex-grow">
                     <select [formControl]="selectedCourseId" class="inline-input"
                         [class.invalid]="selectedCourseId.invalid && selectedCourseId.touched">
@@ -51,7 +55,6 @@
                         </option>
                         }
                     </select>
-
                     @if (selectedCourseId.invalid && selectedCourseId.touched) {
                     <small class="inline-error-msg">
                         @if (selectedCourseId.hasError('required')) { Required. }
@@ -59,7 +62,6 @@
                     </small>
                     }
                 </div>
-
                 <button type="button" class="btn-icon" (click)="confirmAddCourse()"
                     [disabled]="selectedCourseId.invalid">
                     <i class="bi bi-check-lg"></i>

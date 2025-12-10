@@ -1,107 +1,95 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
-import { RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { enviroments } from '../../../enviroments/enviroments';
-
-interface Course {
-  id: number;
-  code: string;
-  name: string;
-}
-
-interface DegreeResponse {
-  id: number;
-  name: string;
-}
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router'; 
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { DataService, Course } from '../../services/dataService';
 
 @Component({
   selector: 'app-register-degree',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink], 
   templateUrl: './register-degree.component.html',
   styleUrl: './register-degree.component.scss'
 })
-export class RegisterDegreeComponent implements OnInit {
-
+export class RegisterDegreeComponent {
+  
   private fb = inject(FormBuilder);
+  private dataService = inject(DataService);
+  private router = inject(Router);
+
   degreeForm: FormGroup;
-  newCourseName = this.fb.control('', Validators.required);
-  showAddInput = false;
+  
+  allCourses: Course[] = [];
+  showAddInputs = false;
+  selectedCourseId = new FormControl(null, [Validators.required]);
   isSubmitted = false;
 
-  selectedCourseId = new FormControl<number | null>(null, Validators.required);
-  
-  constructor(private httpClient: HttpClient) {
+  constructor() {
     this.degreeForm = this.fb.group({
       name: ['', Validators.required],
-      courses: this.fb.array([], Validators.minLength(0)) 
+      courses: this.fb.array([], Validators.minLength(1)) 
     });
-  }
 
-  ngOnInit(): void {
+    this.dataService.getCourses().subscribe(data => {
+      this.allCourses = data;
+    });
   }
 
   get courses() {
     return this.degreeForm.get('courses') as FormArray;
   }
 
-  newCourseGroup(name: string): FormGroup {
-    return this.fb.group({
-      name: [name],
+  showAddCourseFields() {
+    this.showAddInputs = true;
+    this.selectedCourseId.reset();
+  }
+
+  cancelAddCourse() {
+    this.showAddInputs = false;
+    this.selectedCourseId.reset();
+  }
+
+  confirmAddCourse() {
+    if (this.selectedCourseId.valid && this.selectedCourseId.value) {
+      const courseId = Number(this.selectedCourseId.value);
+      const alreadyAdded = this.courses.controls.some(
+        ctrl => ctrl.value.id === courseId
+      );
+
+      if (alreadyAdded) {
+        this.selectedCourseId.setErrors({ duplicate: true });
+        return;
+      }
+
+      const course = this.allCourses.find(c => c.id === courseId);
+      if (course) {
+        this.addCourseToForm(course);
+        this.showAddInputs = false;
+        this.selectedCourseId.reset();
+      }
+    }
+  }
+
+  addCourseToForm(course: Course) {
+    const courseGroup = this.fb.group({
+      id: [course.id],
+      name: [course.name]
     });
+    this.courses.push(courseGroup);
   }
 
-   addCourse() {
-    const name = this.newCourseName.value?.trim();
-
-    this.courses.push(this.fb.control(name));
-
-    this.newCourseName.reset();
-    this.showAddInput = false;
-  }
-
-  removeCourse(index: number) {
+  removecourse(index: number) {
     this.courses.removeAt(index);
   }
 
   onSubmit() {
-    this.isSubmitted = true; 
-    this.degreeForm.markAllAsTouched();
-
-    
-    
+    this.isSubmitted = true;
     if (this.degreeForm.valid) {
-      
-      const newCourses = this.degreeForm.value.courses
-
-      delete this.degreeForm.value.courses
-      console.log('Formulário Válido:', this.degreeForm.value);
-      this.httpClient.post<DegreeResponse>(`${enviroments.apiUrl}/degrees`, this.degreeForm.value).subscribe(response => {
-          console.log('Resposta do servidor:', response);
-          alert('The Degree was successfully registered.');
-
-          newCourses.forEach((courseName: String) => {
-            this.httpClient.post(`${enviroments.apiUrl}/degrees/${response.id}/courses`, {
-            degreeId: response.id,
-            name: courseName
-          }).subscribe(r => console.log("Course criado:", r));
-        });
-      },
-        (err: HttpErrorResponse) => {
-          if(err.status === 409) {
-            alert('This Degree Already Exists.');
-          } else {
-            alert(`An error has ocurred. Try again later.`);
-          }
-        });
+      console.log('Degree Data:', this.degreeForm.value);
+      alert('Degree registered successfully!'); 
+      this.router.navigate(['/admin-dashboard']);
     } else {
-      console.log('Formulário Inválido');
+      this.degreeForm.markAllAsTouched();
     }
   }
 }

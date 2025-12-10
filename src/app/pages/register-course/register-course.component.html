@@ -1,11 +1,16 @@
 <div class="div-container">
     
+    <div style="text-align: left; margin-bottom: 1rem;">
+        <button class="btn-back" routerLink="/admin-dashboard">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+
     <form class="card form-card" [formGroup]="courseForm" (ngSubmit)="onSubmit()">
         
         <h2 class="form-title">Register Course</h2>
 
         <div class="form-group">
-
             <label for="name">Name</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Software Quality">
             @if (courseForm.get('name')?.invalid && courseForm.get('name')?.touched) {
@@ -14,7 +19,6 @@
         </div>
 
         <div class="form-group">
-
             <label for="degree">Degree</label>
             <select
                 [formControl]="selectedDegreeId"
