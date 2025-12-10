@@ -7,29 +7,6 @@
         <h1>Manage Student: <span class="highlight">{{ studentName }}</span></h1>
     </div>
 
-    <div class="stats-row">
-        <app-stats-card 
-            title="Completed ECTS" 
-            [value]="mockStats.ectsCompleted" 
-            description="accumulated credits"
-            iconClass="bi bi-check-circle-fill">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Current Average" 
-            [value]="mockStats.avgGrade" 
-            description="grade points"
-            iconClass="bi bi-graph-up-arrow">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Enrollments" 
-            [value]="mockStats.enrolledCourses" 
-            description="active courses"
-            iconClass="bi bi-book-half">
-        </app-stats-card>
-    </div>
-
     <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
         <div class="section-header">

@@ -2,13 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
 import { DataService, StudentLite } from '../../services/dataService';
 
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, StatsCardComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink], // REMOVIDO: StatsCardComponent
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss'
 })
@@ -21,12 +20,10 @@ export class StudentDetailComponent implements OnInit {
 
   studentForm: FormGroup;
   studentId: number | null = null;
-  studentName: string = ''
-  mockStats = {
-    ectsCompleted: 120,
-    avgGrade: 15.2,
-    enrolledCourses: 6
-  };
+  
+  studentName: string = '';
+
+  // REMOVIDO: mockStats
 
   constructor() {
     this.studentForm = this.fb.group({
@@ -60,6 +57,7 @@ export class StudentDetailComponent implements OnInit {
           email: student.email,
           degree: 'Computer Engineering' 
         });
+        
         this.loadMockCourses();
       }
     });
@@ -70,14 +68,13 @@ export class StudentDetailComponent implements OnInit {
     coursesArray.clear();
 
     const mockEnrollments = [
-      { code: 'QS', name: 'Software Quality', grade: '---' }, 
-      { code: 'IA', name: 'Artificial Intelligence', grade: '16' },
-      { code: 'PWEB', name: 'Web Programming', grade: '14' }
+      { name: 'Software Quality', grade: '---' }, 
+      { name: 'Artificial Intelligence', grade: '16' },
+      { name: 'Web Programming', grade: '14' }
     ];
 
     mockEnrollments.forEach(c => {
       const group = this.fb.group({
-        code: [c.code],
         name: [c.name],
         grade: [c.grade] 
       });
