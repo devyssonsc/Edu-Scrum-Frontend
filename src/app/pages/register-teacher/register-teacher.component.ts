@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 interface Course {
   id: number;
@@ -23,38 +25,47 @@ export class RegisterTeacherComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   teacherForm: FormGroup;
-  showCourseList = false; 
-
   isSubmitted = false;
+  selectedCourseId = new FormControl<number | null>(null, Validators.required);
+  showAddInputs = false;
 
-  allCourses: Course[] = [
-    { id: 1, name: 'Qualidade de Software' },
-    { id: 2, name: 'Inteligência Artificial' },
-    { id: 3, name: 'Prog. Web' },
-    { id: 4, name: 'Bases de Dados' },
-    { id: 5, name: 'Sistemas Operativos' }
-  ];
-
-    selectedCourseId = new FormControl<number | null>(null, Validators.required);
-    showAddInputs = false;
-
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.teacherForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      courses: this.fb.array([], [Validators.required, Validators.minLength(1)])
+      courses: this.fb.array([], [Validators.required, Validators.minLength(1)]),
+      password: [''],
+      user_type: ['TEACHER'],  
+      role: ['TEACHER']   
     });
   }
 
-  ngOnInit(): void { }
+    ngOnInit(): void {
+      this.loadCourses();
+    }
+  
+    allCourses: Course[] = [];
+    loadCourses() {
+  
+    this.httpClient.get<any[]>(`${enviroments.apiUrl}/courses`)
+      .subscribe({
+        next: (courses) => {
+          this.allCourses = courses;  
+        },
+        error: (err) => {
+          console.error('Erro ao carregar courses:', err);
+        }
+      });
+  }
 
   get courses() {
     return this.teacherForm.get('courses') as FormArray;
   }
 
-  newCourseGroup(name: string): FormGroup {
+  newCourseGroup(name: string, id: number): FormGroup {
     return this.fb.group({
-      name: [name]
+      name: [name],
+      courseId: [id]
     });
   }
 
@@ -87,7 +98,7 @@ export class RegisterTeacherComponent implements OnInit {
     if (isDuplicate) {
       this.selectedCourseId.setErrors({ 'duplicate': true });
     } else {
-      this.courses.push(this.newCourseGroup(selectedCourse.name));
+      this.courses.push(this.newCourseGroup(selectedCourse.name, selectedCourse.id));
       this.cancelAddCourse();
     }
   }
@@ -96,12 +107,29 @@ export class RegisterTeacherComponent implements OnInit {
     this.courses.removeAt(index);
   }
 
+  generatePassword(){
+      const firstName = this.teacherForm.value.name.trim().split(' ')[0];
+      this.teacherForm.value.password = firstName + "12345"
+  }
+
   onSubmit() {
+
+    this.generatePassword();
+
     this.isSubmitted = true; 
     this.teacherForm.markAllAsTouched();
     
     if (this.teacherForm.valid) {
       console.log('Formulário Válido:', this.teacherForm.value);
+      this.httpClient.post(`${enviroments.apiUrl}/users`, this.teacherForm.value).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
+
+        this.courses.controls.forEach((course: any) => {
+            this.httpClient.post(`${enviroments.apiUrl}/courses/${course.value.courseId}/teachers/${response.id}`, {}).subscribe(r => {
+            console.log('Resposta do servidor:', r);
+            })
+        });
+       })
     } else {
       console.log('Formulário Inválido');
     }
