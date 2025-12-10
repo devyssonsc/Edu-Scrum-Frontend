@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { FormArray, FormControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
@@ -65,8 +65,19 @@ export class RegisterCourseComponent implements OnInit {
   onSubmit() {
     if (this.courseForm.valid) {
       console.log('Formulário Válido (Course):', this.courseForm.value);
-      this.httpClient.post(`${enviroments.apiUrl}/degrees/${this.courseForm.value.degreeId}/courses`, this.courseForm.value).subscribe(r => 
-        console.log("Course criado:", r));
+
+      this.httpClient.post(`${enviroments.apiUrl}/degrees/${this.courseForm.value.degreeId}/courses`, this.courseForm.value).subscribe(r => {
+        console.log("Course criado:", r);
+        alert("The Course was successfully registered.");
+        
+    },
+        (err: HttpErrorResponse) => {
+          if(err.status === 409) {
+            alert('This Course Already Exists.');
+          } else {
+            alert(`An error has ocurred. Try again later.`);
+          }
+        });
     } else {
       console.log('Formulário Inválido');
       this.courseForm.markAllAsTouched();

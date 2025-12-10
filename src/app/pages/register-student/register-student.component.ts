@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
 
@@ -74,12 +74,20 @@ export class RegisterStudentComponent{
       console.log('Formulário Válido (Student):', this.studentForm.value);
       this.httpClient.post(`${enviroments.apiUrl}/users`, this.studentForm.value).subscribe((response: any) => {
               console.log('Resposta do servidor:', response);
+              alert('The Student was successfully registered.');
 
               this.httpClient.post(`${enviroments.apiUrl}/degrees/${this.studentForm.value.degree}/students/${response.id}`, this.studentForm.value).subscribe(response => {
               console.log('Resposta do servidor:', response);
               })
             
-            })
+            },
+             (err: HttpErrorResponse) => {
+               if(err.status === 409) {
+                 alert('This Student Already Exists.');
+               } else {
+                 alert(`An error has ocurred. Try again later.`);
+               }
+             });
     } else {
       console.log('Formulário Inválido');
       this.studentForm.markAllAsTouched();

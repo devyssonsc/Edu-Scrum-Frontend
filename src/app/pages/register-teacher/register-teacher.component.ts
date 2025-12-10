@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
 interface Course {
@@ -123,13 +123,21 @@ export class RegisterTeacherComponent implements OnInit {
       console.log('Formulário Válido:', this.teacherForm.value);
       this.httpClient.post(`${enviroments.apiUrl}/users`, this.teacherForm.value).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
+        alert('The student was successfully registered.');
 
         this.courses.controls.forEach((course: any) => {
             this.httpClient.post(`${enviroments.apiUrl}/courses/${course.value.courseId}/teachers/${response.id}`, {}).subscribe(r => {
             console.log('Resposta do servidor:', r);
             })
         });
-       })
+       },
+         (err: HttpErrorResponse) => {
+           if(err.status === 409) {
+             alert('This Teacher Already Exists.');
+           } else {
+             alert(`An error has ocurred. Try again later.`);
+           }
+         });
     } else {
       console.log('Formulário Inválido');
     }

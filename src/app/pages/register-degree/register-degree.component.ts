@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
 interface Course {
@@ -84,6 +84,7 @@ export class RegisterDegreeComponent implements OnInit {
       console.log('Formulário Válido:', this.degreeForm.value);
       this.httpClient.post<DegreeResponse>(`${enviroments.apiUrl}/degrees`, this.degreeForm.value).subscribe(response => {
           console.log('Resposta do servidor:', response);
+          alert('The Degree was successfully registered.');
 
           newCourses.forEach((courseName: String) => {
             this.httpClient.post(`${enviroments.apiUrl}/degrees/${response.id}/courses`, {
@@ -91,7 +92,14 @@ export class RegisterDegreeComponent implements OnInit {
             name: courseName
           }).subscribe(r => console.log("Course criado:", r));
         });
-      })
+      },
+        (err: HttpErrorResponse) => {
+          if(err.status === 409) {
+            alert('This Degree Already Exists.');
+          } else {
+            alert(`An error has ocurred. Try again later.`);
+          }
+        });
     } else {
       console.log('Formulário Inválido');
     }
