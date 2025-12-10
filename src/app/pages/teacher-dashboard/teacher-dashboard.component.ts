@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
-import { DataService, Course, Project, Award } from '../../services/dataService';
+import { DataService, Award } from '../../services/dataService';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -36,7 +36,7 @@ export class TeacherDashboardComponent implements OnInit {
     // 1. Cursos
     this.dataService.getCourses().subscribe(data => {
       this.coursesView = data.map(c => ({
-        code: c.code,
+        id: c.id, 
         name: c.name,
         degree: c.degree?.name,
         students: c.studentsCount,
@@ -48,7 +48,7 @@ export class TeacherDashboardComponent implements OnInit {
     // 2. Projetos
     this.dataService.getAllProjects().subscribe(data => {
       this.projectsView = data.map(p => ({
-        id: p.id, // O ID é fundamental aqui
+        id: p.id, 
         name: p.name,
         course: p.courseName,
         startDate: p.startDate,
@@ -83,11 +83,10 @@ export class TeacherDashboardComponent implements OnInit {
 
   handleRowClick(row: any) {
     if (this.selectedTab === 'Courses') {
-      console.log('Navigate to course:', row.code);
-      this.router.navigate(['/teacher-dashboard/course', row.code]);
+      console.log('Navigate to course:', row.id);
+      this.router.navigate(['/teacher-dashboard/course', row.id]);
     
     } else if (this.selectedTab === 'Projects') {
-      // CORREÇÃO CRÍTICA: Navegar pelo ID, não pelo nome!
       console.log('Navigate to project:', row.id);
       this.router.navigate(['/teacher-dashboard/project', row.id]);
     
@@ -125,7 +124,6 @@ export class TeacherDashboardComponent implements OnInit {
     } 
     else if (this.selectedTab === 'Awards') {
         const originalAward = this.rawAwards.find(a => a.name === row.name);
-        
         if (originalAward && originalAward.isOwner) {
             if(confirm(`Delete award "${row.name}"?`)) {
                 this.dataService.deleteAward(row.name).subscribe(success => {
@@ -134,8 +132,6 @@ export class TeacherDashboardComponent implements OnInit {
                     }
                 });
             }
-        } else {
-            alert('You can only delete awards created by you (type "Course").');
         }
     }
   }
