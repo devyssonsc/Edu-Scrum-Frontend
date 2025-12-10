@@ -20,8 +20,8 @@ export class DegreeDetailComponent implements OnInit {
   private dataService = inject(DataService);
 
   degreeForm: FormGroup;
-  
   degreeId: number | null = null;
+  degreeName: string = '';
 
   stats = {
     studentsCount: 0, 
@@ -58,6 +58,8 @@ export class DegreeDetailComponent implements OnInit {
             this.stats.studentsCount = degree.studentsCount || 0;
             this.stats.teachersCount = degree.teachersCount || 0;
             this.stats.coursesCount = degree.coursesCount || 0;
+
+            this.degreeName = degree.name;
 
             this.degreeForm.patchValue({ name: degree.name });
             this.loadCourses(id);
