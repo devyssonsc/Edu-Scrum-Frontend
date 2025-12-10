@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
-import { DataService, Course, Project } from '../../services/dataService';
+import { DataService, Course } from '../../services/dataService';
 
 @Component({
   selector: 'app-course-detail',
@@ -26,8 +26,7 @@ export class CourseDetailComponent implements OnInit {
   mockCourseData = {
     stats: {
       studentsCount: 0,
-      teachersCount: 0,
-      avgGrade: 0
+      teachersCount: 0
     }
   };
 
