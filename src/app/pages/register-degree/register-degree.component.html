@@ -28,7 +28,7 @@
                 }
             </div>
 
-            <!-- INPUT DE ADICIONAR CADEIRA -->
+            
             @if (showAddInput) {
                 <div class="inline-add-form">
                     <input 
@@ -49,7 +49,7 @@
                 </div>
             }
 
-            <!-- BOTÃO DE MOSTRAR INPUT -->
+            
             @if (!showAddInput) {
                 <div class="add-button-container">
                     <button type="button" class="btn-add" (click)="showAddInput = true">
@@ -58,7 +58,7 @@
                 </div>
             }
 
-            <!-- ERRO SE NÃO HOUVER NENHUMA CADEIRA -->
+            
             @if (courses.invalid && (courses.touched || isSubmitted)) {
                 <small class="error-msg">At least one course is required</small>
             }
