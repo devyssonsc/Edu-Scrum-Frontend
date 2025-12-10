@@ -1,9 +1,12 @@
 <div class="selector-container" [style.--options-count]="options.length">
-    <div class="selected" [style.left.%]="selectedIndex * (100 / options.length)"></div>
     
-    @for(opt of options; track opt; let i = $index) {
-        <div class="option" (click)="onSelectOption(i)" [class.active]="selectedIndex === i">
-            <p>{{ opt }}</p>
+    <div class="selected" [style.left]="getLeftPosition()"></div>
+
+    @for (option of options; track option) {
+        <div class="option" 
+             [class.active]="option === activeOption"
+             (click)="selectOption(option)">
+            <p>{{ option }}</p>
         </div>
     }
 </div>

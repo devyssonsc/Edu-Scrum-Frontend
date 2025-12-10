@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router'; 
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
@@ -16,18 +16,17 @@ export class AdminDashboardComponent implements OnInit {
   
   private dataService = inject(DataService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  // Data Holders
   degrees: any[] = [];
   courses: any[] = [];
   students: any[] = [];
   teachers: any[] = [];
 
-  // Table Data
+
   data: any[] = [];
-  selectedOption: string = 'Degrees';
-  
-  // Stats
+  selectedOption: string = 'Degrees'; 
+
   countDegrees = 0;
   countCourses = 0;
   countStudents = 0;
@@ -36,7 +35,12 @@ export class AdminDashboardComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this.loadAllData();
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.selectedOption = params['tab'];
+      }
+      this.loadAllData();
+    });
   }
 
   loadAllData() {
@@ -93,6 +97,11 @@ export class AdminDashboardComponent implements OnInit {
   onSelectOption(event: any) {
     this.selectedOption = event;
     this.refreshTable();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: this.selectedOption },
+      queryParamsHandling: 'merge'
+    });
   }
 
   refreshTable() {
@@ -119,25 +128,18 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
-  // --- EDIT LOGIC ---
   handleEdit(row: any) {
-
     if (this.selectedOption === 'Degrees') {
       this.router.navigate(['/admin-dashboard/degree', row.id]); 
-    
     } else if (this.selectedOption === 'Courses') {
       this.router.navigate(['/admin-dashboard/course', row.id]); 
-    
     } else if (this.selectedOption === 'Students') {
-
       this.router.navigate(['/admin-dashboard/student', row.id]);
-    
     } else if (this.selectedOption === 'Teachers') {
       this.router.navigate(['/admin-dashboard/teacher', row.id]);
     }
   }
 
-  // --- DELETE LOGIC ---
   handleDelete(row: any) {
     const confirmMessage = `Are you sure you want to delete: ${row.Name}?`;
     if (!confirm(confirmMessage)) return;

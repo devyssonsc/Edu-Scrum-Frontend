@@ -1,7 +1,7 @@
 <div class="detail-container">
     
     <div class="header-row">
-        <button class="btn-back" routerLink="/admin-dashboard">
+        <button class="btn-back" routerLink="/admin-dashboard" [queryParams]="{ tab: 'Degrees' }">
             <i class="bi bi-arrow-left"></i> Back
         </button>
         <h1>Manage Degree: <span class="highlight">{{ degreeName }}</span></h1>

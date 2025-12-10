@@ -10,7 +10,9 @@
             iconClass="bi bi-person-badge-fill"></app-stats-card>
     </div>
     
-    <app-section-selector [options]="['Degrees', 'Courses', 'Students', 'Teachers']"
+    <app-section-selector 
+        [options]="['Degrees', 'Courses', 'Students', 'Teachers']"
+        [activeOption]="selectedOption"
         (selectedOption)="onSelectOption($event)">
     </app-section-selector>
     
