@@ -1,11 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common'; 
 import { RouterLink } from '@angular/router';
-
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
 import { HttpClient } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
-
 
 interface Course {
   id: number;
@@ -29,7 +27,7 @@ interface DegreeResponse {
   templateUrl: './register-degree.component.html',
   styleUrl: './register-degree.component.scss'
 })
-export class RegisterDegreeComponent {
+export class RegisterDegreeComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   degreeForm: FormGroup;
@@ -46,10 +44,12 @@ export class RegisterDegreeComponent {
     });
   }
 
+  ngOnInit(): void {
+  }
+
   get courses() {
     return this.degreeForm.get('courses') as FormArray;
   }
-
 
   newCourseGroup(name: string): FormGroup {
     return this.fb.group({
@@ -57,40 +57,16 @@ export class RegisterDegreeComponent {
     });
   }
 
-  showAddCourseFields() {
-    this.selectedCourseId.reset(null);
-    this.showAddInputs = true;
+   addCourse() {
+    const name = this.newCourseName.value?.trim();
+
+    this.courses.push(this.fb.control(name));
+
+    this.newCourseName.reset();
+    this.showAddInput = false;
   }
 
-  cancelAddCourse() {
-    this.showAddInputs = false;
-  }
-
-  confirmAddCourse() {
-    this.selectedCourseId.markAsTouched();
-
-    if (this.selectedCourseId.invalid) {
-      return;
-    }
-    
-    const courseId = Number(this.selectedCourseId.value);
-    const selectedCourse = this.allCourses.find(c => c.id === courseId);
-
-    if (!selectedCourse) return;
-
-    const isDuplicate = this.courses.controls.some(control => 
-      control.value.name === selectedCourse.name
-    );
-
-    if (isDuplicate) {
-      this.selectedCourseId.setErrors({ 'duplicate': true });
-    } else {
-      this.courses.push(this.newCourseGroup(selectedCourse.name));
-      this.cancelAddCourse();
-    }
-  }
-
-  removecourse(index: number) {
+  removeCourse(index: number) {
     this.courses.removeAt(index);
   }
 
