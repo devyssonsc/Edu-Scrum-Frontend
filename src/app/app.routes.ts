@@ -12,6 +12,7 @@ import {TeacherDashboardComponent} from './pages/teacher-dashboard/teacher-dashb
 import { TeacherCourseDetailComponent } from './pages/teacher-course-detail/teacher-course-detail.component';
 import { TeacherCreateProjectComponent } from './pages/teacher-create-project/teacher-create-project.component';
 import { LoginComponent } from './pages/login/login.component';
+import { TeacherProjectDetailComponent } from './pages/teacher-project-detail/teacher-project-detail.component';
 
 export const routes: Routes = [
     {
@@ -65,5 +66,9 @@ export const routes: Routes = [
     {
         path: 'teacher-dashboard/course/:courseId/create-project',
         component: TeacherCreateProjectComponent
+    },
+    {
+        path: 'teacher-dashboard/project/:id',
+        component: TeacherProjectDetailComponent
     }
 ];

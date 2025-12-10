@@ -48,7 +48,7 @@ export class TeacherDashboardComponent implements OnInit {
     // 2. Projetos
     this.dataService.getAllProjects().subscribe(data => {
       this.projectsView = data.map(p => ({
-        id: p.id, 
+        id: p.id, // O ID é fundamental aqui
         name: p.name,
         course: p.courseName,
         startDate: p.startDate,
@@ -87,9 +87,9 @@ export class TeacherDashboardComponent implements OnInit {
       this.router.navigate(['/teacher-dashboard/course', row.code]);
     
     } else if (this.selectedTab === 'Projects') {
-      console.log('Navigate to project:', row.name);
-
-      this.router.navigate(['/teacher-dashboard/project', row.name]);
+      // CORREÇÃO CRÍTICA: Navegar pelo ID, não pelo nome!
+      console.log('Navigate to project:', row.id);
+      this.router.navigate(['/teacher-dashboard/project', row.id]);
     
     } else if (this.selectedTab === 'Awards') {
       this.handleAwardAction(row);
