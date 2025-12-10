@@ -17,14 +17,17 @@ export class AdminDashboardComponent implements OnInit {
   private dataService = inject(DataService);
   private router = inject(Router);
 
+  // Data Holders
   degrees: any[] = [];
   courses: any[] = [];
   students: any[] = [];
   teachers: any[] = [];
 
+  // Table Data
   data: any[] = [];
   selectedOption: string = 'Degrees';
   
+  // Stats
   countDegrees = 0;
   countCourses = 0;
   countStudents = 0;
@@ -37,9 +40,10 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadAllData() {
+    // 1. Degrees
     this.dataService.getDegrees().subscribe(res => {
       this.degrees = res.map(d => ({
-        id: d.id,
+        id: d.id, 
         Name: d.name,
         Courses: d.coursesCount,
         Teachers: d.teachersCount,
@@ -49,11 +53,10 @@ export class AdminDashboardComponent implements OnInit {
       if (this.selectedOption === 'Degrees') this.data = this.degrees;
     });
 
-    // 2. Courses 
+    // 2. Courses
     this.dataService.getCourses().subscribe(res => {
       this.courses = res.map(c => ({
         id: c.id,
-        code: c.code, 
         Name: c.name,
         Degree: c.degreeName || 'N/A',
         Students: c.studentsCount
@@ -66,7 +69,6 @@ export class AdminDashboardComponent implements OnInit {
     this.dataService.getStudents().subscribe(res => {
       this.students = res.map(s => ({
         id: s.id,
-        num: s.studentNumber,
         Number: s.studentNumber, 
         Name: s.name,
         Email: s.email
@@ -117,18 +119,25 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  // --- EDIT LOGIC ---
   handleEdit(row: any) {
+
     if (this.selectedOption === 'Degrees') {
       this.router.navigate(['/admin-dashboard/degree', row.id]); 
+    
     } else if (this.selectedOption === 'Courses') {
-      this.router.navigate(['/admin-dashboard/course', row.code]); 
+      this.router.navigate(['/admin-dashboard/course', row.id]); 
+    
     } else if (this.selectedOption === 'Students') {
-      this.router.navigate(['/admin-dashboard/student', row.num]);
+
+      this.router.navigate(['/admin-dashboard/student', row.id]);
+    
     } else if (this.selectedOption === 'Teachers') {
       this.router.navigate(['/admin-dashboard/teacher', row.id]);
     }
   }
 
+  // --- DELETE LOGIC ---
   handleDelete(row: any) {
     const confirmMessage = `Are you sure you want to delete: ${row.Name}?`;
     if (!confirm(confirmMessage)) return;
