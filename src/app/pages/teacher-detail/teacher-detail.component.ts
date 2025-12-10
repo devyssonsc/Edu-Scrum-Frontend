@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
-import { DataService, Teacher } from '../../services/dataService'; 
+import { DataService, Teacher, Course } from '../../services/dataService';
 
 @Component({
   selector: 'app-teacher-detail',
@@ -17,21 +17,12 @@ export class TeacherDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private dataService = inject(DataService);
 
   teacherForm: FormGroup;
-  teacherId: string | null = null; 
-
-  mockTeacherData = {
-    name: 'Fátima Leal',
-    email: 'fatimal@upt.pt',
-    stats: {
-      coursesCount: 3
-    },
-    teachingCourses: [
-      { code: 'QS', name: 'Software Quality' },
-      { code: 'ES', name: 'Software Engineering' },
-      { code: 'GPS', name: 'Project Management' }
-    ]
+  teacherId: number | null = null; 
+  stats = {
+    coursesCount: 0
   };
 
   constructor() {
@@ -43,28 +34,45 @@ export class TeacherDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.teacherId = this.route.snapshot.paramMap.get('id');
+    const rawId = this.route.snapshot.paramMap.get('id');
     
-    if (this.teacherId) {
-      this.loadData();
+    if (rawId) {
+      this.teacherId = Number(rawId);
+      if(!isNaN(this.teacherId)) {
+        this.loadData(this.teacherId);
+      } else {
+        this.router.navigate(['/admin-dashboard']);
+      }
     }
   }
 
-  loadData() {
-    this.teacherForm.patchValue({
-      name: this.mockTeacherData.name,
-      email: this.mockTeacherData.email
+  loadData(id: number) {
+    this.dataService.getTeacherById(id).subscribe((teacher: Teacher | undefined) => {
+      if (teacher) {
+        this.stats.coursesCount = teacher.coursesCount;
+        this.teacherForm.patchValue({
+          name: teacher.name,
+          email: teacher.email
+        });
+        this.loadTeacherCourses(teacher.courseIds);
+      }
     });
-    
+  }
+
+  loadTeacherCourses(courseIds: number[]) {
     const coursesArray = this.teacherForm.get('courses') as FormArray;
     coursesArray.clear();
-
-    this.mockTeacherData.teachingCourses.forEach(c => {
-      const group = this.fb.group({
-        code: [c.code],
-        name: [c.name]
-      });
-      coursesArray.push(group);
+    this.dataService.getCourses().subscribe(allCourses => {
+        const teacherCourses = allCourses.filter(c => courseIds.includes(c.id));
+        
+        teacherCourses.forEach(c => {
+            const group = this.fb.group({
+                id: [c.id],
+                name: [c.name]
+            });
+            coursesArray.push(group);
+        });
+        this.stats.coursesCount = teacherCourses.length;
     });
   }
 
@@ -74,11 +82,7 @@ export class TeacherDetailComponent implements OnInit {
 
   onSubmit() {
     if (this.teacherForm.valid) {
-      console.log('Dados do Professor a salvar:', {
-        originalId: this.teacherId,
-        ...this.teacherForm.value
-      });
-      alert('Professor updated successfully!');
+      alert('Teacher updated successfully!');
       this.router.navigate(['/admin-dashboard']);
     }
   }

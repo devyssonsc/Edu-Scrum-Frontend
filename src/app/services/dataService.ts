@@ -125,7 +125,6 @@ export class DataService {
     { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 }
   ];
 
-  // Students (Agora com degreeId)
   private students: StudentLite[] = [
     { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt', degreeId: 1 },
     { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt', degreeId: 1 },
@@ -176,6 +175,10 @@ export class DataService {
   
   getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
   
+  getTeacherById(id: number): Observable<Teacher | undefined> {
+    return of(this.teachers.find(t => t.id === id));
+  }
+
   getTeachersByCourseId(courseId: number): Observable<Teacher[]> {
     return of(this.teachers.filter(t => t.courseIds.includes(courseId)));
   }
@@ -227,17 +230,14 @@ export class DataService {
     }
     return of(false);
   }
+
   updateStudent(id: number, updatedData: { name: string, email: string, degreeId: number }): Observable<boolean> {
     const student = this.students.find(s => s.id === id);
     
     if (student) {
         const emailExists = this.students.some(s => s.email === updatedData.email && s.id !== id);
-        
-        if (emailExists) {
-            return throwError(() => ({ status: 409, message: 'Email already exists.' }));
-        }
+        if (emailExists) return throwError(() => ({ status: 409, message: 'Email already exists.' }));
 
-        // Atualiza os dados
         student.name = updatedData.name;
         student.email = updatedData.email;
         student.degreeId = updatedData.degreeId;
