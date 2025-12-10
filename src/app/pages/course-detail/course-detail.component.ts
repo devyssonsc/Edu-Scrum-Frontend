@@ -2,12 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
+import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
+import { DataService, Course, Project } from '../../services/dataService';
 
 @Component({
   selector: 'app-course-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, StatsCardComponent],
+  imports: [CommonModule, RouterLink, StatsCardComponent, ReactiveFormsModule],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.scss'
 })
@@ -15,56 +16,54 @@ export class CourseDetailComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private dataService = inject(DataService);
   private fb = inject(FormBuilder);
 
   courseForm: FormGroup;
-  courseId: string | null = null;
+  courseId: number | null = null;
+  courseName: string = '';
 
   mockCourseData = {
-    code: 'QS',
-    name: 'Qualidade de Software',
-    degree: 'Engenharia Informática',
     stats: {
-      studentsCount: 52,
-      teachersCount: 2,
-      avgGrade: 14.5
-    },
-    teachers: [
-      { name: 'Fátima Leal', email: 'fatimal@upt.pt' },
-      { name: 'Bruno Cunha', email: 'bruninho@upt.pt' }
-    ]
+      studentsCount: 0,
+      teachersCount: 0,
+      avgGrade: 0
+    }
   };
 
   constructor() {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
       degree: ['', Validators.required],
-      teachers: this.fb.array([]) 
+      teachers: this.fb.array([])
     });
   }
 
   ngOnInit() {
-    this.courseId = this.route.snapshot.paramMap.get('id');
-    if (this.courseId) {
-      this.loadData();
+    const rawId = this.route.snapshot.paramMap.get('id');
+    
+    if (rawId) {
+      this.courseId = Number(rawId);
+      if (!isNaN(this.courseId)) {
+        this.loadCourseData(this.courseId);
+      } else {
+        this.router.navigate(['/admin-dashboard']);
+      }
     }
   }
 
-  loadData() {
-    this.courseForm.patchValue({
-      name: this.mockCourseData.name,
-      degree: this.mockCourseData.degree
-    });
-    
-    const teachersArray = this.courseForm.get('teachers') as FormArray;
-    teachersArray.clear();
+  loadCourseData(id: number) {
+    this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
+      if (data) {
+        this.courseName = data.name;
 
-    this.mockCourseData.teachers.forEach(t => {
-      const group = this.fb.group({
-        name: [t.name, Validators.required],
-        email: [t.email, [Validators.required, Validators.email]]
-      });
-      teachersArray.push(group);
+        this.mockCourseData.stats.studentsCount = data.studentsCount || 0;
+        
+        this.courseForm.patchValue({
+          name: data.name,
+          degree: data.degreeName 
+        });
+      }
     });
   }
 
@@ -72,18 +71,9 @@ export class CourseDetailComponent implements OnInit {
     return this.courseForm.get('teachers') as FormArray;
   }
 
-  removeTeacher(index: number) {
-    this.teachers.removeAt(index);
-    this.courseForm.markAsDirty();
-  }
-
   onSubmit() {
     if (this.courseForm.valid) {
-      console.log('Dados da Cadeira a salvar:', {
-        originalCode: this.courseId,
-        ...this.courseForm.value
-      });
-      alert('Cadeira atualizada com sucesso!');
+      console.log('Update course logic here...');
       this.router.navigate(['/admin-dashboard']);
     }
   }
