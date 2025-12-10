@@ -162,23 +162,19 @@ export class DataService {
   getCourseById(id: number): Observable<Course | undefined> { 
       return of(this.courses.find(c => c.id === id)); 
   }
-  
   getCoursesByDegreeId(degreeId: number): Observable<Course[]> {
     return of(this.courses.filter(c => c.degree?.id === degreeId));
   }
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
-  
   getStudentById(id: number): Observable<StudentLite | undefined> {
     return of(this.students.find(s => s.id === id));
   }
   
   getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
-  
   getTeacherById(id: number): Observable<Teacher | undefined> {
     return of(this.teachers.find(t => t.id === id));
   }
-
   getTeachersByCourseId(courseId: number): Observable<Teacher[]> {
     return of(this.teachers.filter(t => t.courseIds.includes(courseId)));
   }
@@ -245,15 +241,14 @@ export class DataService {
     }
     return of(false);
   }
+
   updateTeacher(id: number, updatedData: { name: string, email: string }): Observable<boolean> {
     const teacher = this.teachers.find(t => t.id === id);
     
     if (teacher) {
         const emailExists = this.teachers.some(t => t.email === updatedData.email && t.id !== id);
-        
-        if (emailExists) {
-            return throwError(() => ({ status: 409, message: 'Email already exists.' }));
-        }
+        if (emailExists) return throwError(() => ({ status: 409, message: 'Email already exists.' }));
+
         teacher.name = updatedData.name;
         teacher.email = updatedData.email;
         return of(true);
@@ -310,8 +305,30 @@ export class DataService {
 
   deleteStudent(id: number): Observable<boolean> {
     const index = this.students.findIndex(s => s.id === id);
+    
     if (index !== -1) {
+      const student = this.students[index];
+      if (student.degreeId) {
+        const degree = this.degrees.find(d => d.id === student.degreeId);
+        if (degree && degree.studentsCount && degree.studentsCount > 0) {
+            degree.studentsCount--;
+        }
+        this.courses.forEach(c => {
+            if (c.degree && c.degree.id === student.degreeId) {
+                if (c.studentsCount && c.studentsCount > 0) {
+                    c.studentsCount--;
+                }
+            }
+        });
+      }
+      this.teams.forEach(team => {
+        const memberIndex = team.members.findIndex(m => m.student.id === id);
+        if (memberIndex !== -1) {
+            team.members.splice(memberIndex, 1);
+        }
+      });
       this.students.splice(index, 1);
+      
       return of(true);
     }
     return of(false);
