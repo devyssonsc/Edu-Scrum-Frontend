@@ -7,7 +7,6 @@
         <h1>Manage Teacher: <span class="highlight">{{ teacherId }}</span></h1>
     </div>
 
-
     <div class="stats-row">
         <app-stats-card 
             title="Courses" 
@@ -15,15 +14,7 @@
             description="currently teaching"
             iconClass="bi bi-book">
         </app-stats-card>
-
-        <app-stats-card 
-            title="Total Students" 
-            [value]="mockTeacherData.stats.totalStudents" 
-            description="in all classes"
-            iconClass="bi bi-people">
-        </app-stats-card>
     </div>
-
 
     <form [formGroup]="teacherForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
@@ -33,7 +24,6 @@
                 Save Changes
             </button>
         </div>
-
     
         <div class="form-row-grid" style="grid-template-columns: 1fr 1fr;">
             <div class="form-group-main">

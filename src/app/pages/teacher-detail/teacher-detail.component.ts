@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
+import { DataService, Teacher } from '../../services/dataService'; 
 
 @Component({
   selector: 'app-teacher-detail',
@@ -24,13 +25,12 @@ export class TeacherDetailComponent implements OnInit {
     name: 'Fátima Leal',
     email: 'fatimal@upt.pt',
     stats: {
-      coursesCount: 3,       
-      totalStudents: 145,    
+      coursesCount: 3
     },
     teachingCourses: [
-      { code: 'QS', name: 'Qualidade de Software' },
-      { code: 'ES', name: 'Engenharia de Software' },
-      { code: 'GPS', name: 'Gestão de Projetos' }
+      { code: 'QS', name: 'Software Quality' },
+      { code: 'ES', name: 'Software Engineering' },
+      { code: 'GPS', name: 'Project Management' }
     ]
   };
 
@@ -78,7 +78,7 @@ export class TeacherDetailComponent implements OnInit {
         originalId: this.teacherId,
         ...this.teacherForm.value
       });
-      alert('Professor atualizado com sucesso!');
+      alert('Professor updated successfully!');
       this.router.navigate(['/admin-dashboard']);
     }
   }
