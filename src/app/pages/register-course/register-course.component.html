@@ -15,13 +15,13 @@
 
         <div class="form-group">
 
-            <label for="degree">Curso (Degree)</label>
+            <label for="degree">Degree</label>
             <select
                 [formControl]="selectedDegreeId"
                 class="inline-input"
                 [class.invalid]="selectedDegreeId.invalid && selectedDegreeId.touched"
                 (change)="selectDegree()">
-                <option [ngValue]="null" disabled>Selecione um curso...</option>
+                <option [ngValue]="null" disabled>Select a Degree...</option>
                 @for (degree of allDegrees; track degree.id) {
                     <option [value]="degree.id">
                         {{ degree.name }}

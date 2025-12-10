@@ -2,13 +2,13 @@
 
     <form class="card form-card" [formGroup]="teacherForm" (ngSubmit)="onSubmit()">
 
-        <h2 class="form-title">Adicionar Professor</h2>
+        <h2 class="form-title">Register Teacher</h2>
 
         <div class="form-group">
-            <label for="name">Nome Completo</label>
+            <label for="name">Full Name</label>
             <input type="text" id="name" formControlName="name" placeholder="Ex: Carlos Santos">
             @if (teacherForm.get('name')?.invalid && teacherForm.get('name')?.touched) {
-            <small class="error-msg">O nome é obrigatório.</small>
+            <small class="error-msg">This field is required.</small>
             }
         </div>
 
@@ -16,12 +16,12 @@
             <label for="email">Email</label>
             <input type="email" id="email" formControlName="email" placeholder="Ex: carlos.santos@email.com">
             @if (teacherForm.get('email')?.invalid && teacherForm.get('email')?.touched) {
-            <small class="error-msg">Por favor, insira um email válido.</small>
+            <small class="error-msg">Please, insert a valid email.</small>
             }
         </div>
 
         <div class="form-group">
-            <label>Cadeiras do Professor</label>
+            <label>Courses</label>
 
             <div class="courses-list" formArrayName="courses">
                 @for(courseGroup of courses.controls; track $index; let i = $index) {
@@ -34,7 +34,7 @@
                 </div>
                 }
                 @if(courses.controls.length === 0 && !showAddInputs) {
-                <p class="empty-list-msg">Adicione cadeiras a este professor.</p>
+                <p class="empty-list-msg">Add courses to this Teacher.</p>
                 }
             </div>
 
@@ -44,7 +44,7 @@
                 <div class="inline-input-group flex-grow">
                     <select [formControl]="selectedCourseId" class="inline-input"
                         [class.invalid]="selectedCourseId.invalid && selectedCourseId.touched">
-                        <option [ngValue]="null" disabled>Selecione uma course...</option>
+                        <option [ngValue]="null" disabled>Select a course...</option>
                         @for (course of allCourses; track course.id) {
                         <option [value]="course.id">
                             {{ course.name }}
@@ -54,8 +54,8 @@
 
                     @if (selectedCourseId.invalid && selectedCourseId.touched) {
                     <small class="inline-error-msg">
-                        @if (selectedCourseId.hasError('required')) { Obrigatório. }
-                        @if (selectedCourseId.hasError('duplicate')) { Já adicionada. }
+                        @if (selectedCourseId.hasError('required')) { Required. }
+                        @if (selectedCourseId.hasError('duplicate')) { Already added. }
                     </small>
                     }
                 </div>
@@ -79,14 +79,14 @@
             }
 
             @if (courses.invalid && (courses.touched || isSubmitted) && !showAddInputs) {
-            <small class="error-msg">Pelo menos uma course é obrigatória.</small>
+            <small class="error-msg">At least one course is required.</small>
             }
         </div>
 
         <hr class="divider">
 
         <button type="submit" class="btn btn-primary btn-submit" [disabled]="teacherForm.invalid">
-            Registar Professor
+            Register Teacher
         </button>
     </form>
 </div>
