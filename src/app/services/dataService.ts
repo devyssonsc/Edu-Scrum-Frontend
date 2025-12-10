@@ -48,7 +48,7 @@ export interface Course {
   id: number;
   name: string;
   degree?: Degree; 
-  degreeName?: string; // Flattened for UI
+  degreeName?: string; 
   code: string; 
   studentsCount?: number;
   projectsCount?: number;
@@ -158,10 +158,19 @@ export class DataService {
   // --- GETTERS ---
 
   getDegrees(): Observable<Degree[]> { return of(this.degrees); }
+  getDegreeById(id: number): Observable<Degree | undefined> { 
+    return of(this.degrees.find(d => d.id === id)); 
+  }
+  getDegreeByCode(code: string): Observable<Degree | undefined> { 
+    return of(this.degrees.find(d => d.code === code)); 
+  }
   
   getCourses(): Observable<Course[]> { return of(this.courses); }
   getCourseByCode(code: string): Observable<Course | undefined> { 
       return of(this.courses.find(c => c.code === code)); 
+  }
+  getCoursesByDegreeId(degreeId: number): Observable<Course[]> {
+    return of(this.courses.filter(c => c.degree?.id === degreeId));
   }
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
@@ -184,6 +193,27 @@ export class DataService {
   }
 
   getAwards(): Observable<Award[]> { return of([]); }
+
+  // --- UPDATE METHODS ---
+
+  updateDegree(id: number, updatedData: { name: string }): Observable<boolean> {
+    const degree = this.degrees.find(d => d.id === id);
+    
+    if (degree) {
+
+      degree.name = updatedData.name;
+
+      this.courses.forEach(course => {
+        if (course.degree && course.degree.id === id) {
+          course.degree.name = updatedData.name; 
+          course.degreeName = updatedData.name;  
+        }
+      });
+
+      return of(true);
+    }
+    return of(false);
+  }
 
   // --- DELETE METHODS ---
 

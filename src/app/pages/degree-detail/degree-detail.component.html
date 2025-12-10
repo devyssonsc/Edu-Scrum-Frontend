@@ -4,27 +4,27 @@
         <button class="btn-back" routerLink="/admin-dashboard">
             <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Manage Degree: <span class="highlight">{{ courseId }}</span></h1>
+        <h1>Manage Degree: <span class="highlight">{{ degreeCodeDisplay }}</span></h1>
     </div>
 
     <div class="stats-row">
         <app-stats-card 
             title="Students" 
-            [value]="mockDegreeData.stats.studentsCount" 
+            [value]="stats.studentsCount" 
             description="enrolled in this degree"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Teachers" 
-            [value]="mockDegreeData.stats.teachersCount" 
+            [value]="stats.teachersCount" 
             description="teaching in this degree"
             iconClass="bi bi-person-badge-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Courses" 
-            [value]="mockDegreeData.stats.coursesCount" 
+            [value]="stats.coursesCount" 
             description="total in syllabus"
             iconClass="bi bi-book">
         </app-stats-card>

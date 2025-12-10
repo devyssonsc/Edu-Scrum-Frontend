@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
+import { DataService } from '../../services/dataService';
 
 @Component({
   selector: 'app-degree-detail',
@@ -16,24 +17,17 @@ export class DegreeDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private dataService = inject(DataService);
 
   degreeForm: FormGroup;
-  courseId: string | null = null;
   
-  mockDegreeData = {
-    code: 'EI',
-    name: 'Engenharia Informática',
-    stats: {
-      studentsCount: 217, 
-      teachersCount: 15,    
-      coursesCount: 30      
-    },
-    cadeiras: [
-      { code: 'IA', name: 'Inteligência Artificial' },
-      { code: 'QS', name: 'Qualidade de Software' },
-      { code: 'BD', name: 'Bases de Dados' },
-      { code: 'PWEB', name: 'Programação Web' }
-    ]
+  degreeId: number | null = null;
+  degreeCodeDisplay: string = '';
+
+  stats = {
+    studentsCount: 0, 
+    teachersCount: 0,    
+    coursesCount: 0      
   };
 
   constructor() {
@@ -44,34 +38,57 @@ export class DegreeDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.courseId = this.route.snapshot.paramMap.get('id');
-  
-    if (this.courseId) {
-      this.loadData();
+    const routeParam = this.route.snapshot.paramMap.get('id');
+    
+    if (routeParam) {
+        const parsedId = Number(routeParam);
+        
+        if (!isNaN(parsedId)) {
+            this.degreeId = parsedId;
+            this.loadDataById(this.degreeId);
+        } else {
+            this.dataService.getDegreeByCode(routeParam).subscribe(d => {
+                if (d) {
+                    this.degreeId = d.id;
+                    this.loadDataById(d.id);
+                }
+            });
+        }
     }
   }
 
-  loadData() {
-    this.degreeForm.patchValue({ name: this.mockDegreeData.name });
-    
+  loadDataById(id: number) {
+    this.dataService.getDegreeById(id).subscribe(degree => {
+        if (degree) {
+            this.degreeCodeDisplay = degree.code;
+            this.stats.studentsCount = degree.studentsCount || 0;
+            this.stats.teachersCount = degree.teachersCount || 0;
+            this.stats.coursesCount = degree.coursesCount || 0;
 
-    const cadeirasArray = this.degreeForm.get('cadeiras') as FormArray;
-    cadeirasArray.clear();
-
-    this.mockDegreeData.cadeiras.forEach(c => {
-      const group = this.fb.group({
-        code: [c.code, Validators.required],
-        name: [c.name, Validators.required]
-      });
-      cadeirasArray.push(group);
+            this.degreeForm.patchValue({ name: degree.name });
+            this.loadCourses(id);
+        }
     });
   }
 
+  loadCourses(degreeId: number) {
+    const cadeirasArray = this.degreeForm.get('cadeiras') as FormArray;
+    cadeirasArray.clear();
+
+    this.dataService.getCoursesByDegreeId(degreeId).subscribe(courses => {
+        courses.forEach(c => {
+            const group = this.fb.group({
+                code: [c.code, Validators.required],
+                name: [c.name, Validators.required]
+            });
+            cadeirasArray.push(group);
+        });
+    });
+  }
 
   get cadeiras() {
     return this.degreeForm.get('cadeiras') as FormArray;
   }
-
 
   removeCadeira(index: number) {
     this.cadeiras.removeAt(index);
@@ -79,16 +96,18 @@ export class DegreeDetailComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.degreeForm.valid) {
-      console.log('Dados a salvar:', {
-        originalCode: this.courseId,
-        newName: this.degreeForm.value.name,
-        cadeiras: this.degreeForm.value.cadeiras
-      });
+    if (this.degreeForm.valid && this.degreeId) {
       
-    
-      alert('Alterações guardadas!');
-      this.router.navigate(['/admin-dashboard']);
+      const newName = this.degreeForm.value.name;
+
+      this.dataService.updateDegree(this.degreeId, { name: newName }).subscribe(success => {
+        if (success) {
+            alert('Degree updated successfully!');
+            this.router.navigate(['/admin-dashboard']);
+        } else {
+            alert('Error updating degree.');
+        }
+      });
     }
   }
 }
