@@ -61,10 +61,10 @@
                     @for (item of cadeiras.controls; track $index; let i = $index) {
                         <tr [formGroupName]="i">
                             <td>
-                                <input type="text" formControlName="code" class="table-input code-input">
+                                <input type="text" formControlName="code" class="table-input code-input" readonly>
                             </td>
                             <td>
-                                <input type="text" formControlName="name" class="table-input">
+                                <input type="text" formControlName="name" class="table-input" readonly>
                             </td>
                             <td class="actions">
                                 <i class="bi bi-trash delete-icon" (click)="removeCadeira(i)"></i>
