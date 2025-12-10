@@ -22,13 +22,9 @@ export class CourseDetailComponent implements OnInit {
   courseForm: FormGroup;
   courseId: number | null = null;
   courseName: string = '';
-
-  // Data Sources
   allDegrees: Degree[] = [];
   availableTeachersToAdd: Teacher[] = []; 
-  currentTeachers: Teacher[] = [];        
-
-  // Controls
+  currentTeachers: Teacher[] = [];       
   selectedTeacherId = new FormControl<number | null>(null);
 
   mockCourseData = {
@@ -78,7 +74,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   loadTeachers(courseId: number) {
-    // 1. Get Teachers ALREADY in the course
     this.dataService.getTeachersByCourseId(courseId).subscribe(teachers => {
         this.currentTeachers = teachers;
         this.mockCourseData.stats.teachersCount = teachers.length;
@@ -92,8 +87,6 @@ export class CourseDetailComponent implements OnInit {
                 email: [t.email]
             }));
         });
-
-        // 2. Get ALL teachers to calculate who is available to add
         this.dataService.getTeachers().subscribe(all => {
             const currentIds = this.currentTeachers.map(t => t.id);
             this.availableTeachersToAdd = all.filter(t => !currentIds.includes(t.id));
@@ -116,8 +109,6 @@ export class CourseDetailComponent implements OnInit {
                 this.loadTeachers(this.courseId!); 
                 this.selectedTeacherId.reset();
                 this.selectedTeacherId.setValue(null);
-                
-                // CORREÇÃO: Força o formulário a ficar "Dirty" para ativar o botão Save
                 this.courseForm.markAsDirty();
             } else {
                 alert('Could not add teacher.');
