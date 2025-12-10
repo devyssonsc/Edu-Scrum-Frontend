@@ -30,7 +30,6 @@ export interface StudentLite {
 
 export interface Degree {
   id: number;
-  // REMOVIDO: code: string;
   name: string;
   coursesCount?: number;
   teachersCount?: number;
@@ -49,7 +48,6 @@ export interface Course {
   name: string;
   degree?: Degree; 
   degreeName?: string; 
-  // REMOVIDO: code: string; 
   studentsCount?: number;
   projectsCount?: number;
 }
@@ -61,8 +59,7 @@ export interface Project {
   startDate: string;
   endDate: string;
   course?: Course;
-  // REMOVIDO: courseCode?: string; 
-  courseId?: number; // ADICIONADO: substitui o código para ligação interna
+  courseId?: number; 
   courseName?: string;
   teamsCount?: number;
 }
@@ -115,20 +112,17 @@ export class DataService {
 
   // --- MOCK DATA ---
   
-  // Degrees 
   private degrees: Degree[] = [
     { id: 1, name: 'Computer Engineering', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
     { id: 2, name: 'Information Systems', coursesCount: 25, teachersCount: 10, studentsCount: 150 }
   ];
 
-  // Courses 
   private courses: Course[] = [
     { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
     { id: 2, name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 60, projectsCount: 2 },
     { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 }
   ];
 
-  // Students
   private students: StudentLite[] = [
     { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt' },
     { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt' },
@@ -137,14 +131,12 @@ export class DataService {
     { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt' }
   ];
 
-  // Teachers
   private teachers: Teacher[] = [
     { id: 1, name: 'Fátima Leal', email: 'fatimal@upt.pt', coursesCount: 3 },
     { id: 2, name: 'Bruno Cunha', email: 'bruninho@upt.pt', coursesCount: 4 },
     { id: 3, name: 'Joaquim Silva', email: 'joaquim@upt.pt', coursesCount: 2 }
   ];
 
-  // Projects 
   private projects: Project[] = [
     { 
       id: 1, name: 'Final Project 2025', description: 'Gamified Scrum Platform.', 
@@ -199,10 +191,8 @@ export class DataService {
 
   updateDegree(id: number, updatedData: { name: string }): Observable<boolean> {
     const degree = this.degrees.find(d => d.id === id);
-    
     if (degree) {
       degree.name = updatedData.name;
-      // Cascade Update
       this.courses.forEach(course => {
         if (course.degree && course.degree.id === id) {
           course.degree.name = updatedData.name; 
@@ -212,6 +202,20 @@ export class DataService {
       return of(true);
     }
     return of(false);
+  }
+
+  updateCourse(id: number, updatedData: { name: string, degreeId: number }): Observable<boolean> {
+    const course = this.courses.find(c => c.id === id);
+    const degree = this.degrees.find(d => d.id === updatedData.degreeId);
+
+    if (course && degree) {
+      course.name = updatedData.name;
+      course.degree = degree;         
+      course.degreeName = degree.name; 
+      return of(true);
+    }
+    
+    return of(false); 
   }
 
   // --- DELETE METHODS ---

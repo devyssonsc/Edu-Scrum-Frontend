@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
-import { DataService, Course } from '../../services/dataService';
+import { DataService, Course, Degree } from '../../services/dataService';
 
 @Component({
   selector: 'app-course-detail',
@@ -22,6 +22,7 @@ export class CourseDetailComponent implements OnInit {
   courseForm: FormGroup;
   courseId: number | null = null;
   courseName: string = '';
+  allDegrees: Degree[] = [];
 
   mockCourseData = {
     stats: {
@@ -33,14 +34,17 @@ export class CourseDetailComponent implements OnInit {
   constructor() {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
-      degree: ['', Validators.required],
+      degreeId: [null, Validators.required], 
       teachers: this.fb.array([])
     });
   }
 
   ngOnInit() {
+    this.dataService.getDegrees().subscribe(degrees => {
+      this.allDegrees = degrees;
+    });
+
     const rawId = this.route.snapshot.paramMap.get('id');
-    
     if (rawId) {
       this.courseId = Number(rawId);
       if (!isNaN(this.courseId)) {
@@ -55,12 +59,10 @@ export class CourseDetailComponent implements OnInit {
     this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
       if (data) {
         this.courseName = data.name;
-
         this.mockCourseData.stats.studentsCount = data.studentsCount || 0;
-        
         this.courseForm.patchValue({
           name: data.name,
-          degree: data.degreeName 
+          degreeId: data.degree?.id 
         });
       }
     });
@@ -71,9 +73,21 @@ export class CourseDetailComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.courseForm.valid) {
-      console.log('Update course logic here...');
-      this.router.navigate(['/admin-dashboard']);
+    if (this.courseForm.valid && this.courseId) {
+      
+      const payload = {
+        name: this.courseForm.value.name,
+        degreeId: Number(this.courseForm.value.degreeId)
+      };
+
+      this.dataService.updateCourse(this.courseId, payload).subscribe(success => {
+        if (success) {
+          alert('Course updated successfully!');
+          this.router.navigate(['/admin-dashboard']);
+        } else {
+          alert('Error updating course. Degree might not exist.');
+        }
+      });
     }
   }
 }

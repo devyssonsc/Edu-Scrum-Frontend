@@ -21,8 +21,7 @@
             description="teachers"
             iconClass="bi bi-person-badge-fill">
         </app-stats-card>
-
-        </div>
+    </div>
 
     <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
@@ -41,7 +40,13 @@
             
             <div class="form-group-main">
                 <label>Associated Degree</label>
-                <input type="text" formControlName="degree" class="main-input">
+                
+                <select formControlName="degreeId" class="main-input">
+                    <option [ngValue]="null" disabled>Select a Degree...</option>
+                    @for (degree of allDegrees; track degree.id) {
+                        <option [value]="degree.id">{{ degree.name }}</option>
+                    }
+                </select>
             </div>
         </div>
 
