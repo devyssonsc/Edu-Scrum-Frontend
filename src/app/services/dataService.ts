@@ -116,8 +116,6 @@ export class DataService {
   // --- MOCK DATA ---
   
   private degrees: Degree[] = [
-    { id: 1, name: 'Computer Engineering', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
-    { id: 2, name: 'Information Systems', coursesCount: 25, teachersCount: 10, studentsCount: 150 }
   ];
 
   private courses: Course[] = [
@@ -197,6 +195,12 @@ export class DataService {
   }
 
   getAwards(): Observable<Award[]> { return of([]); }
+
+  // --- SETTERS ---
+
+  setDegrees(degrees: Degree[]){
+    this.degrees = degrees;
+  }
 
   // --- UPDATE METHODS ---
 

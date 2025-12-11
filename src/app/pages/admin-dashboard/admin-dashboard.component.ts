@@ -3,7 +3,10 @@ import { Router } from '@angular/router';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
-import { DataService } from '../../services/dataService';
+import { DataService, Degree } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -33,11 +36,65 @@ export class AdminDashboardComponent implements OnInit {
   countStudents = 0;
   countTeachers = 0;
 
-  constructor() {}
+  constructor(private httpClient: HttpClient) {}
 
   ngOnInit() {
-    this.loadAllData();
+    this.getData();
   }
+
+  getData(){
+  //get all count Numbers
+  this.httpClient.get<any>(`${enviroments.apiUrl}/stats/global`)
+  .subscribe(res => {
+    console.log("Status globais: ", res);
+    this.countCourses = res.totalCourses;
+    this.countStudents = res.totalStudents;
+    this.countDegrees = res.totalDegrees;
+    this.countTeachers = res.totalTeachers;
+    this.loadAllData();
+  });
+
+  //get all Degrees & Stats
+  this.httpClient.get<Degree[]>(`${enviroments.apiUrl}/degrees`)
+    .subscribe({
+      next: (degrees) => {
+
+        // Criar array de observables (uma requisição por degree)
+        const statsRequests = degrees.map(d =>
+          this.httpClient.get(`${enviroments.apiUrl}/stats/degrees/${d.id}`)
+        );
+
+        // Fazer todas as requisições em paralelo
+        forkJoin(statsRequests).subscribe({
+          next: (statsArray: any[]) => {
+
+            // Juntar degree + stats
+            const mergedDegrees: Degree[] = degrees.map((degree, index) => ({
+              ...degree,
+              coursesCount: statsArray[index].coursesCount,
+              teachersCount: statsArray[index].teachersCount,
+              studentsCount: statsArray[index].studentsCount
+            }));
+
+            // Enviar para o dataService
+            this.dataService.setDegrees(mergedDegrees);
+            this.loadAllData();
+          },
+          error: (err) => {
+            console.error('Erro ao carregar estatísticas:', err);
+          }
+        });
+      },
+
+      error: (err) => {
+        console.error('Erro ao carregar degrees:', err);
+      }
+    });
+
+
+    
+}
+  
 
   loadAllData() {
     // 1. Degrees
@@ -49,7 +106,6 @@ export class AdminDashboardComponent implements OnInit {
         Teachers: d.teachersCount,
         Students: d.studentsCount
       }));
-      this.countDegrees = res.length;
       if (this.selectedOption === 'Degrees') this.data = this.degrees;
     });
 
@@ -61,7 +117,6 @@ export class AdminDashboardComponent implements OnInit {
         Degree: c.degreeName || 'N/A',
         Students: c.studentsCount
       }));
-      this.countCourses = res.length;
       if (this.selectedOption === 'Courses') this.data = this.courses;
     });
 
@@ -73,7 +128,6 @@ export class AdminDashboardComponent implements OnInit {
         Name: s.name,
         Email: s.email
       }));
-      this.countStudents = res.length;
       if (this.selectedOption === 'Students') this.data = this.students;
     });
 
@@ -85,7 +139,6 @@ export class AdminDashboardComponent implements OnInit {
         Email: t.email,
         Courses: t.coursesCount
       }));
-      this.countTeachers = res.length;
       if (this.selectedOption === 'Teachers') this.data = this.teachers;
     });
   }
