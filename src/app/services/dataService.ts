@@ -9,6 +9,7 @@ import { delay } from 'rxjs/operators';
 export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type TeamRole = 'PRODUCT_OWNER' | 'SCRUM_MASTER' | 'DEVELOPER';
 export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED';
+export type AwardType = 'GLOBAL' | 'COURSE'; // New AwardType
 
 // ==========================================
 // 2. INTERFACES
@@ -86,15 +87,41 @@ export interface Team {
   name: string;
   projectId: number;
   members: TeamMember[];
-  sprints: Sprint[];
+  sprints: Sprint[]; // simplified
 }
 
+// New interfaces for Awards
 export interface Award {
   id: number;
   name: string;
-  type: 'Global' | 'Course';
+  description: string;
   points: number;
-  isOwner: boolean;
+  type: AwardType;
+  icon?: string;
+  courseId?: number;
+  isOwner?: boolean; // Keep for compatibility if used elsewhere, though logic suggests type/courseId handles this
+}
+
+export interface StudentAward {
+  id: number;
+  studentId: number;
+  awardId: number;
+  date: string;
+  courseId?: number;
+}
+
+export interface TeamAward {
+  id: number;
+  teamId: number;
+  awardId: number;
+  date: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  points: number;
+  entityType: 'STUDENT' | 'TEAM';
 }
 
 export interface CreateTeamRequest {
@@ -149,6 +176,19 @@ export class DataService {
 
   private teams: Team[] = []; 
 
+  // --- MOCK AWARDS ---
+  private awards: Award[] = [
+    { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 10, type: 'GLOBAL', icon: 'bi-lightning-charge-fill', isOwner: false },
+    { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 20, type: 'GLOBAL', icon: 'bi-layers-fill', isOwner: false },
+    { id: 3, name: 'Bug Hunter', description: 'Found a critical bug', points: 15, type: 'GLOBAL', icon: 'bi-bug-fill', isOwner: false },
+    // Award Específico de Cadeira (Software Quality)
+    { id: 101, name: 'Best Pitch', description: 'Best project presentation', points: 50, type: 'COURSE', courseId: 1, icon: 'bi-mic-fill', isOwner: true }
+  ];
+
+  // Tabelas de Ligação
+  private studentAwards: StudentAward[] = [];
+  private teamAwards: TeamAward[] = [];
+
   constructor() { }
 
   // --- GETTERS ---
@@ -190,12 +230,152 @@ export class DataService {
   getTeamsByProject(projectId: number): Observable<Team[]> {
     return of(this.teams.filter(t => t.projectId === projectId));
   }
+  
+  getTeamsByCourseId(courseId: number): Observable<Team[]> {
+    // Helper para encontrar equipas de um curso (através dos projetos)
+    const projectIds = this.projects.filter(p => p.courseId === courseId).map(p => p.id);
+    return of(this.teams.filter(t => projectIds.includes(t.projectId)));
+  }
 
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
     return of(this.students);
   }
 
-  getAwards(): Observable<Award[]> { return of([]); }
+  // Modified getAwards to return all mock awards
+  getAwards(): Observable<Award[]> { return of(this.awards); }
+  
+  // --- GAMIFICATION METHODS ---
+
+  // Obter prémios disponíveis (Globais + Da Cadeira)
+  getAwardsByCourse(courseId: number): Observable<Award[]> {
+    const courseAwards = this.awards.filter(a => a.type === 'GLOBAL' || a.courseId === courseId);
+    return of(courseAwards);
+  }
+
+  // Obter prémios globais apenas
+  getGlobalAwards(): Observable<Award[]> {
+    return of(this.awards.filter(a => a.type === 'GLOBAL'));
+  }
+
+  // Criar Prémio Personalizado
+  createAward(awardData: { name: string, description: string, points: number, courseId: number }): Observable<boolean> {
+    const newId = this.awards.length > 0 ? Math.max(...this.awards.map(a => a.id)) + 1 : 1;
+    const newAward: Award = {
+      id: newId,
+      name: awardData.name,
+      description: awardData.description,
+      points: awardData.points,
+      type: 'COURSE',
+      courseId: awardData.courseId,
+      icon: null, // Frontend deve tratar ícone genérico
+      isOwner: true
+    };
+    this.awards.push(newAward);
+    return of(true);
+  }
+
+  // Atribuir a Aluno
+  assignAwardToStudent(studentId: number, awardId: number, courseId: number): Observable<boolean> {
+    const newId = this.studentAwards.length > 0 ? Math.max(...this.studentAwards.map(sa => sa.id)) + 1 : 1;
+    this.studentAwards.push({
+      id: newId,
+      studentId: studentId,
+      awardId: awardId,
+      courseId: courseId,
+      date: new Date().toISOString()
+    });
+    return of(true);
+  }
+
+  // Atribuir a Equipa (Cria registo na equipa E nos alunos individualmente)
+  assignAwardToTeam(teamId: number, awardId: number, courseId: number): Observable<boolean> {
+    const team = this.teams.find(t => t.id === teamId);
+    if (!team) return of(false);
+
+    // 1. Registo na Tabela TeamAward
+    const newTeamAwardId = this.teamAwards.length > 0 ? Math.max(...this.teamAwards.map(ta => ta.id)) + 1 : 1;
+    this.teamAwards.push({
+      id: newTeamAwardId,
+      teamId: teamId,
+      awardId: awardId,
+      date: new Date().toISOString()
+    });
+
+    // 2. Registo na Tabela StudentAward (para cada membro)
+    team.members.forEach(member => {
+      this.assignAwardToStudent(member.student.id, awardId, courseId);
+    });
+
+    return of(true);
+  }
+
+  // --- RANKINGS ---
+
+  // Ranking Individual (Top Alunos)
+  getStudentRankings(): Observable<LeaderboardEntry[]> {
+    const rankings: LeaderboardEntry[] = [];
+
+    this.students.forEach(student => {
+      // Soma pontos de todos os prémios atribuídos a este aluno
+      const studentAssignments = this.studentAwards.filter(sa => sa.studentId === student.id);
+      let totalPoints = 0;
+      
+      studentAssignments.forEach(sa => {
+        const award = this.awards.find(a => a.id === sa.awardId);
+        if (award) totalPoints += award.points;
+      });
+
+      if (totalPoints > 0) {
+        rankings.push({
+          rank: 0, // Será calculado a seguir
+          name: student.name,
+          points: totalPoints,
+          entityType: 'STUDENT'
+        });
+      }
+    });
+
+    // Ordenar e atribuir rank
+    rankings.sort((a, b) => b.points - a.points);
+    rankings.forEach((entry, index) => entry.rank = index + 1);
+
+    return of(rankings);
+  }
+
+  // Ranking de Equipas
+  getTeamRankings(courseId: number): Observable<LeaderboardEntry[]> {
+    const rankings: LeaderboardEntry[] = [];
+    
+    // Obter equipas deste curso (via projetos)
+    const projectIds = this.projects.filter(p => p.courseId === courseId).map(p => p.id);
+    const courseTeams = this.teams.filter(t => projectIds.includes(t.projectId));
+
+    courseTeams.forEach(team => {
+      // Soma pontos dos prémios atribuídos À EQUIPA
+      const teamAssignments = this.teamAwards.filter(ta => ta.teamId === team.id);
+      let totalPoints = 0;
+
+      teamAssignments.forEach(ta => {
+        const award = this.awards.find(a => a.id === ta.awardId);
+        if (award) totalPoints += award.points;
+      });
+
+      // Se quisermos apenas pontos totais da equipa:
+      if (totalPoints > 0) {
+        rankings.push({
+          rank: 0,
+          name: team.name,
+          points: totalPoints,
+          entityType: 'TEAM'
+        });
+      }
+    });
+
+    rankings.sort((a, b) => b.points - a.points);
+    rankings.forEach((entry, index) => entry.rank = index + 1);
+
+    return of(rankings);
+  }
 
   // --- UPDATE METHODS ---
 
@@ -352,7 +532,14 @@ export class DataService {
     return of(false);
   }
   
-  deleteAward(name: string): Observable<boolean> { return of(true); }
+  deleteAward(name: string): Observable<boolean> {
+    const index = this.awards.findIndex(a => a.name === name);
+    if (index !== -1 && this.awards[index].type === 'COURSE') {
+      this.awards.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
 
   // --- CREATE METHODS ---
 
