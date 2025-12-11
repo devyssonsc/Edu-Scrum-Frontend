@@ -10,9 +10,10 @@
             iconClass="bi bi-book"></app-stats-card>
         <app-stats-card title="Projects" [value]="countProjects" description="ongoing projects"
             iconClass="bi bi-kanban"></app-stats-card>
-        </div>
+    </div>
     
-    <app-section-selector [options]="['Courses', 'Projects', 'Awards']"
+    <app-section-selector 
+        [options]="['Courses', 'Projects', 'Awards']"
         (selectedOption)="onSelectOption($event)">
     </app-section-selector>
     
@@ -31,6 +32,11 @@
                 </app-show-table>
             </div>
             
-            </div>
+            @if (selectedOption === 'Awards') {
+                <button class="btn btn-primary" (click)="navigateToCreateAward()">
+                    Create Award
+                </button>
+            }
+        </div>
     </div>
 </div>

@@ -27,17 +27,17 @@ export class TeacherDashboardComponent implements OnInit {
   
   private rawAwards: Award[] = [];
 
+  // Table Data
   data: any[] = [];
   selectedOption: string = 'Courses';
 
+  // Stats
   countCourses = 0;
   countProjects = 0;
 
   constructor() {}
 
   ngOnInit() {
-    // 1. LER O URL AO INICIAR
-    // Se vier do botão voltar com ?tab=Projects, o selectedOption muda aqui.
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
         this.selectedOption = params['tab'];
@@ -90,8 +90,6 @@ export class TeacherDashboardComponent implements OnInit {
     this.selectedOption = event;
     this.refreshTable();
     
-    // 2. ATUALIZAR O URL AO MUDAR DE ABA
-    // Isto garante que a navegação fica guardada no histórico do browser
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab: this.selectedOption },
@@ -109,11 +107,13 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
-  // --- EDIT NAVIGATION ---
+  navigateToCreateAward() {
+    this.router.navigate(['/teacher-dashboard/create-award']);
+  }
+
+  // --- EDIT / NAVIGATION LOGIC ---
   
   handleEdit(row: any) {
-    // Ao navegar, não precisamos de fazer nada especial aqui, 
-    // porque o URL já tem ?tab=Projects devido ao onSelectOption
     if (this.selectedOption === 'Courses') {
       this.router.navigate(['/teacher-dashboard/course', row.id]);
     
@@ -125,17 +125,20 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
-  // ... (Resto do código: handleDelete, etc. mantém-se igual)
+  // --- DELETE LOGIC ---
+
   handleDelete(row: any) {
     if (this.selectedOption === 'Courses') {
       alert('Teachers cannot delete Courses.');
       return;
     }
+
     const confirmMessage = `Are you sure you want to delete: ${row.Name}?`;
     if (!confirm(confirmMessage)) return;
 
     if (this.selectedOption === 'Projects') {
       this.dataService.deleteProject(row.Name).subscribe(success => this.postDeleteAction(success));
+    
     } else if (this.selectedOption === 'Awards') {
       this.handleAwardDelete(row);
     }
