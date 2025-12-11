@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
+import { DataService, Course, Degree, Teacher } from '../../services/dataService';
 
 @Component({
   selector: 'app-course-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, StatsCardComponent],
+  imports: [CommonModule, RouterLink, StatsCardComponent, ReactiveFormsModule],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.scss'
 })
@@ -15,56 +16,81 @@ export class CourseDetailComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private dataService = inject(DataService);
   private fb = inject(FormBuilder);
 
   courseForm: FormGroup;
-  courseId: string | null = null;
+  courseId: number | null = null;
+  courseName: string = '';
+  allDegrees: Degree[] = [];
+  availableTeachersToAdd: Teacher[] = []; 
+  currentTeachers: Teacher[] = [];       
+  selectedTeacherId = new FormControl<number | null>(null);
 
   mockCourseData = {
-    code: 'QS',
-    name: 'Qualidade de Software',
-    degree: 'Engenharia Informática',
     stats: {
-      studentsCount: 52,
-      teachersCount: 2,
-      avgGrade: 14.5
-    },
-    teachers: [
-      { name: 'Fátima Leal', email: 'fatimal@upt.pt' },
-      { name: 'Bruno Cunha', email: 'bruninho@upt.pt' }
-    ]
+      studentsCount: 0,
+      teachersCount: 0
+    }
   };
 
   constructor() {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
-      degree: ['', Validators.required],
+      degreeId: [null, Validators.required],
       teachers: this.fb.array([]) 
     });
   }
 
   ngOnInit() {
-    this.courseId = this.route.snapshot.paramMap.get('id');
-    if (this.courseId) {
-      this.loadData();
+    this.dataService.getDegrees().subscribe(degrees => {
+      this.allDegrees = degrees;
+    });
+
+    const rawId = this.route.snapshot.paramMap.get('id');
+    if (rawId) {
+      this.courseId = Number(rawId);
+      if (!isNaN(this.courseId)) {
+        this.loadCourseData(this.courseId);
+        this.loadTeachers(this.courseId);
+      } else {
+        this.router.navigate(['/admin-dashboard']);
+      }
     }
   }
 
-  loadData() {
-    this.courseForm.patchValue({
-      name: this.mockCourseData.name,
-      degree: this.mockCourseData.degree
+  loadCourseData(id: number) {
+    this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
+      if (data) {
+        this.courseName = data.name;
+        this.mockCourseData.stats.studentsCount = data.studentsCount || 0;
+        
+        this.courseForm.patchValue({
+          name: data.name,
+          degreeId: data.degree?.id
+        });
+      }
     });
-    
-    const teachersArray = this.courseForm.get('teachers') as FormArray;
-    teachersArray.clear();
+  }
 
-    this.mockCourseData.teachers.forEach(t => {
-      const group = this.fb.group({
-        name: [t.name, Validators.required],
-        email: [t.email, [Validators.required, Validators.email]]
-      });
-      teachersArray.push(group);
+  loadTeachers(courseId: number) {
+    this.dataService.getTeachersByCourseId(courseId).subscribe(teachers => {
+        this.currentTeachers = teachers;
+        this.mockCourseData.stats.teachersCount = teachers.length;
+        
+        const teachersArray = this.courseForm.get('teachers') as FormArray;
+        teachersArray.clear();
+        teachers.forEach(t => {
+            teachersArray.push(this.fb.group({
+                id: [t.id],
+                name: [t.name],
+                email: [t.email]
+            }));
+        });
+        this.dataService.getTeachers().subscribe(all => {
+            const currentIds = this.currentTeachers.map(t => t.id);
+            this.availableTeachersToAdd = all.filter(t => !currentIds.includes(t.id));
+        });
     });
   }
 
@@ -72,19 +98,57 @@ export class CourseDetailComponent implements OnInit {
     return this.courseForm.get('teachers') as FormArray;
   }
 
+  // --- ACTIONS ---
+
+  addTeacher() {
+    const teacherId = Number(this.selectedTeacherId.value);
+    
+    if (teacherId && this.courseId) {
+        this.dataService.addTeacherToCourse(this.courseId, teacherId).subscribe(success => {
+            if (success) {
+                this.loadTeachers(this.courseId!); 
+                this.selectedTeacherId.reset();
+                this.selectedTeacherId.setValue(null);
+                this.courseForm.markAsDirty();
+            } else {
+                alert('Could not add teacher.');
+            }
+        });
+    }
+  }
+
   removeTeacher(index: number) {
-    this.teachers.removeAt(index);
-    this.courseForm.markAsDirty();
+    const teacherGroup = this.teachers.at(index);
+    const teacherId = teacherGroup.value.id;
+    
+    if (this.courseId && teacherId) {
+        if(confirm('Remove this teacher from the course?')) {
+            this.dataService.removeTeacherFromCourse(this.courseId, teacherId).subscribe(success => {
+                if (success) {
+                    this.loadTeachers(this.courseId!);
+        
+                    this.courseForm.markAsDirty();
+                }
+            });
+        }
+    }
   }
 
   onSubmit() {
-    if (this.courseForm.valid) {
-      console.log('Dados da Cadeira a salvar:', {
-        originalCode: this.courseId,
-        ...this.courseForm.value
+    if (this.courseForm.valid && this.courseId) {
+      const payload = {
+        name: this.courseForm.value.name,
+        degreeId: Number(this.courseForm.value.degreeId)
+      };
+
+      this.dataService.updateCourse(this.courseId, payload).subscribe(success => {
+        if (success) {
+          alert('Course updated successfully!');
+          this.router.navigate(['/admin-dashboard']);
+        } else {
+          alert('Error updating course.');
+        }
       });
-      alert('Cadeira atualizada com sucesso!');
-      this.router.navigate(['/admin-dashboard']);
     }
   }
 }
