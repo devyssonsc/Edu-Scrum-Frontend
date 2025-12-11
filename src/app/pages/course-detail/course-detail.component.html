@@ -2,76 +2,98 @@
 
     <div class="header-row">
         <button class="btn-back" routerLink="/admin-dashboard">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Gerir Cadeira: <span class="highlight">{{ courseId }}</span></h1>
+        <h1>Manage Course: <span class="highlight">{{ courseName }}</span></h1>
     </div>
 
     <div class="stats-row">
         <app-stats-card 
-            title="Estudantes" 
+            title="Students" 
             [value]="mockCourseData.stats.studentsCount" 
-            description="inscritos"
+            description="enrolled"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
-            title="Equipa Docente" 
+            title="Teaching Team" 
             [value]="mockCourseData.stats.teachersCount" 
-            description="professores"
+            description="teachers"
             iconClass="bi bi-person-badge-fill">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Média Atual" 
-            [value]="mockCourseData.stats.avgGrade" 
-            description="valores"
-            iconClass="bi bi-graph-up">
         </app-stats-card>
     </div>
 
     <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
         <div class="section-header">
-            <h3>Dados da Cadeira</h3>
+            <h3>Course Data</h3>
             <button type="submit" class="btn btn-primary" [disabled]="courseForm.invalid || !courseForm.dirty">
-                Guardar Alterações
+                Save Changes
             </button>
         </div>
 
         <div class="form-row-grid">
             <div class="form-group-main">
-                <label>Nome da Cadeira</label>
+                <label>Course Name</label>
                 <input type="text" formControlName="name" class="main-input">
             </div>
             
             <div class="form-group-main">
-                <label>Curso Associado</label>
-                <input type="text" formControlName="degree" class="main-input">
+                <label>Associated Degree</label>
+                <select formControlName="degreeId" class="main-input">
+                    <option [ngValue]="null" disabled>Select a Degree...</option>
+                    @for (degree of allDegrees; track degree.id) {
+                        <option [value]="degree.id">{{ degree.name }}</option>
+                    }
+                </select>
             </div>
         </div>
 
         <hr class="divider">
 
-        <h4 class="table-title">Equipa Docente</h4>
+        <h4 class="table-title">Teaching Team</h4>
+
+        <div class="add-section">
+            <div class="inline-add">
+                <select [formControl]="selectedTeacherId" class="inline-select">
+                    <option [ngValue]="null" disabled>Select a teacher to add...</option>
+                    @for (t of availableTeachersToAdd; track t.id) {
+                        <option [ngValue]="t.id">{{ t.name }}</option>
+                    }
+                </select>
+                <button type="button" class="btn-icon add-btn" (click)="addTeacher()" 
+                        [disabled]="!selectedTeacherId.value" title="Add Teacher">
+                    <i class="bi bi-plus-circle-fill"></i>
+                </button>
+            </div>
+        </div>
         
         <div class="table-container">
             <table class="edit-table">
                 <thead>
                     <tr>
-                        <th>Nome do Professor</th>
-                        <th>Email Institucional</th>
+                        <th>Teacher Name</th>
+                        <th>Institutional Email</th>
+                        <th style="width: 50px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="teachers">
                     @for (item of teachers.controls; track $index; let i = $index) {
                         <tr [formGroupName]="i">
                             <td>
-                                <input type="text" formControlName="name" class="table-input">
+                                <input type="text" formControlName="name" class="table-input" readonly>
                             </td>
                             <td>
-                                <input type="text" formControlName="email" class="table-input">
+                                <input type="text" formControlName="email" class="table-input" readonly>
                             </td>
+                            <td class="actions">
+                                <i class="bi bi-trash delete-icon" (click)="removeTeacher(i)"></i>
+                            </td>
+                        </tr>
+                    }
+                    @if (teachers.length === 0) {
+                        <tr>
+                            <td colspan="3" class="empty-row">No teachers assigned to this course.</td>
                         </tr>
                     }
                 </tbody>

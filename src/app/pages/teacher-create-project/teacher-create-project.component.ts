@@ -80,6 +80,7 @@ export class TeacherCreateProjectComponent implements OnInit {
       this.dataService.createProject(newProject).subscribe((success: boolean) => {
         if (success) {
           alert('Project created successfully!');
+
           this.router.navigate(['/teacher-dashboard/course', this.courseId]);
         }
 

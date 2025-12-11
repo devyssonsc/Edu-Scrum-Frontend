@@ -2,80 +2,61 @@
     
     <div class="header-row">
         <button class="btn-back" routerLink="/admin-dashboard">
-            <i class="bi bi-arrow-left"></i> Voltar
+            <i class="bi bi-arrow-left"></i> Back
         </button>
-        <h1>Gerir Estudante: <span class="highlight">{{ studentId }}</span></h1>
-    </div>
-
-    <div class="stats-row">
-        <app-stats-card 
-            title="ECTS Completos" 
-            [value]="mockStudentData.stats.ectsCompleted" 
-            description="créditos acumulados"
-            iconClass="bi bi-check-circle-fill">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Média Atual" 
-            [value]="mockStudentData.stats.avgGrade" 
-            description="valores"
-            iconClass="bi bi-graph-up-arrow">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Inscrições" 
-            [value]="mockStudentData.stats.enrolledCourses" 
-            description="cadeiras ativas"
-            iconClass="bi bi-book-half">
-        </app-stats-card>
+        <h1>Manage Student: <span class="highlight">{{ studentName }}</span></h1>
     </div>
 
     <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
         <div class="section-header">
-            <h3>Dados Pessoais</h3>
+            <h3>Personal Data</h3>
             <button type="submit" class="btn btn-primary" [disabled]="studentForm.invalid || !studentForm.dirty">
-                Guardar Alterações
+                Save Changes
             </button>
         </div>
 
         <div class="form-row-grid">
             <div class="form-group-main">
-                <label>Nome Completo</label>
+                <label>Full Name</label>
                 <input type="text" formControlName="name" class="main-input">
             </div>
             
             <div class="form-group-main">
-                <label>Email Institucional</label>
+                <label>Institutional Email</label>
                 <input type="text" formControlName="email" class="main-input">
+                @if (studentForm.get('email')?.hasError('duplicate')) {
+                    <small style="color: #e74c3c; font-size: 0.8rem;">Email already in use.</small>
+                }
             </div>
 
             <div class="form-group-main">
-                <label>Curso Atual</label>
-                <input type="text" formControlName="degree" class="main-input">
+                <label>Current Degree</label>
+                <select formControlName="degreeId" class="main-input">
+                    <option [ngValue]="null" disabled>Select a Degree...</option>
+                    @for (degree of allDegrees; track degree.id) {
+                        <option [value]="degree.id">{{ degree.name }}</option>
+                    }
+                </select>
             </div>
         </div>
 
         <hr class="divider">
 
-        <h4 class="table-title">Inscrições em Cadeiras</h4>
+        <h4 class="table-title">Course Enrollments</h4>
         
         <div class="table-container">
             <table class="edit-table">
                 <thead>
                     <tr>
-                        <th style="width: 15%">Código</th>
-                        <th>Cadeira</th>
-                        <th style="width: 15%">Nota Final</th>
-                        <th style="width: 50px;">Ações</th>
+                        <th>Course</th>
+                        <th style="width: 15%">Final Grade</th>
+                        <th style="width: 50px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody formArrayName="courses">
                     @for (item of courses.controls; track $index; let i = $index) {
                         <tr [formGroupName]="i">
-                            <td>
-                                <input type="text" formControlName="code" class="table-input code-input" readonly>
-                            </td>
                             <td>
                                 <input type="text" formControlName="name" class="table-input" readonly>
                             </td>

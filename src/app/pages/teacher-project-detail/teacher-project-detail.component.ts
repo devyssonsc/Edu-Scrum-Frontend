@@ -22,23 +22,18 @@ export class TeacherProjectDetailComponent implements OnInit {
   teams: Team[] = [];
   availableStudents: StudentLite[] = [];
 
-  // Form State
   showCreateTeamForm = false;
   teamForm: FormGroup;
-  
-  // Controls for the "Add Member" section
   selectedStudentId = new FormControl<number | null>(null);
 
   constructor() {
-    // Form initializes empty. Members are added via button.
     this.teamForm = this.fb.group({
       name: ['', Validators.required],
-      members: this.fb.array([], Validators.minLength(1)) // At least 1 member required
+      members: this.fb.array([], Validators.minLength(1))
     });
   }
 
   ngOnInit() {
-    // Get Project ID from URL
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
     
     if (projectId) {
@@ -47,28 +42,24 @@ export class TeacherProjectDetailComponent implements OnInit {
   }
 
   loadData(projectId: number) {
-    // 1. Load Project Details
     this.dataService.getProjectById(projectId).subscribe(p => {
       this.project = p;
-      if (p && p.courseCode) {
-        // 2. Load Students from the Course (for the dropdown)
-        this.loadStudents(p.courseCode);
+
+      if (p && p.courseId) {
+        this.loadStudents(p.courseId);
       }
     });
 
-    // 3. Load Teams associated with this Project
     this.dataService.getTeamsByProject(projectId).subscribe(t => {
       this.teams = t;
     });
   }
 
-  loadStudents(courseCode: string) {
-    this.dataService.getStudentsByCourse(courseCode).subscribe(students => {
+  loadStudents(courseId: number) {
+    this.dataService.getStudentsByCourseId(courseId).subscribe((students: StudentLite[]) => {
       this.availableStudents = students;
     });
   }
-
-  // --- Form Getters & Helpers ---
 
   get members() {
     return this.teamForm.get('members') as FormArray;
@@ -89,13 +80,12 @@ export class TeacherProjectDetailComponent implements OnInit {
     const student = this.availableStudents.find(s => s.id === studentId);
     if (!student) return;
 
-    // Check if student is already added to THIS form
     const isAlreadyInForm = this.members.controls.some(ctrl => ctrl.value.student.id === student.id);
     
     if (!isAlreadyInForm) {
       const memberGroup = this.fb.group({
-        student: [student], // Store full object for UI display
-        role: ['DEVELOPER', Validators.required] // Default role
+        student: [student], 
+        role: ['DEVELOPER', Validators.required] 
       });
       
       this.members.push(memberGroup);
@@ -109,15 +99,10 @@ export class TeacherProjectDetailComponent implements OnInit {
     this.members.removeAt(index);
   }
 
-  // --- Submit Logic ---
-
   onSubmitTeam() {
     if (this.teamForm.valid && this.project) {
-      
-      // Prepare Payload (DTO)
       const formValue = this.teamForm.value;
       
-      // Transform form data to match backend expectations (IDs and Enums)
       const payload: CreateTeamRequest = {
         name: formValue.name,
         projectId: this.project.id,
@@ -132,11 +117,10 @@ export class TeacherProjectDetailComponent implements OnInit {
           if (success) {
             alert(`Team "${payload.name}" created successfully!`);
             this.toggleCreateForm();
-            this.loadData(this.project!.id); // Refresh grid
+            this.loadData(this.project!.id); 
           }
         },
         error: (err) => {
-          // Handle 409 Conflict (Business Rule: Student already in a team)
           if (err.status === 409) {
             alert('Conflict: One or more students are already in a team for this project.');
           } else {

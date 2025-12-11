@@ -60,15 +60,14 @@
     }
 }
 
-// Layout em Grid para os inputs de topo
 .form-row-grid {
     display: grid;
-    grid-template-columns: 2fr 2fr 1fr; // Nome maior, Curso maior, ECTS pequeno
+    grid-template-columns: 2fr 2fr 1fr; 
     gap: 1.5rem;
     margin-bottom: 1rem;
 
     @media (max-width: 768px) {
-        grid-template-columns: 1fr; // Em mobile fica um por linha
+        grid-template-columns: 1fr; 
     }
 }
 
@@ -153,4 +152,38 @@
         transition: color 0.2s;
         &:hover { color: #e74c3c; }
     }
+    .add-section {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end; 
+
+    .inline-add {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+
+        .inline-select {
+            padding: 0.4rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            min-width: 250px;
+        }
+
+        .add-btn {
+            color: #545454;
+            font-size: 1.5rem;
+            cursor: pointer;
+            &:disabled { color: #ccc; cursor: not-allowed; }
+            &:hover:not(:disabled) { transform: scale(1.1); }
+        }
+    }
+}
+
+.empty-row {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 1rem;
+}
 }
