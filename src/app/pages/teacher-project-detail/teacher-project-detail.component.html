@@ -61,7 +61,7 @@
                     <select [formControl]="selectedStudentId">
                         <option [ngValue]="null" disabled>Select a student...</option>
                         @for (student of availableStudents; track student.id) {
-                            <option [value]="student.id">{{ student.name }} ({{ student.studentNumber }})</option>
+                            <option [value]="student.id">{{ student.name }}</option>
                         }
                     </select>
                     <button type="button" class="btn-icon add-btn" (click)="addMemberToForm()" 

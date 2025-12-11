@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
-import { DataService, Degree } from '../../services/dataService';
+import { Course, DataService, Degree, StudentLite, Teacher } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 import { forkJoin } from 'rxjs';
@@ -36,6 +36,9 @@ export class AdminDashboardComponent implements OnInit {
   countStudents = 0;
   countTeachers = 0;
 
+  pendingRequests: number = 0
+  DataRequestsQuantity: number = 4
+
   constructor(private httpClient: HttpClient) {}
 
   ngOnInit() {
@@ -43,6 +46,8 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   getData(){
+  this.pendingRequests = this.DataRequestsQuantity
+
   //get all count Numbers
   this.httpClient.get<any>(`${enviroments.apiUrl}/stats/global`)
   .subscribe(res => {
@@ -51,7 +56,6 @@ export class AdminDashboardComponent implements OnInit {
     this.countStudents = res.totalStudents;
     this.countDegrees = res.totalDegrees;
     this.countTeachers = res.totalTeachers;
-    this.loadAllData();
   });
 
   //get all Degrees & Stats
@@ -78,7 +82,10 @@ export class AdminDashboardComponent implements OnInit {
 
             // Enviar para o dataService
             this.dataService.setDegrees(mergedDegrees);
-            this.loadAllData();
+            this.pendingRequests--;
+            if (this.pendingRequests === 0) {
+                this.loadAllData();
+            }
           },
           error: (err) => {
             console.error('Erro ao carregar estatísticas:', err);
@@ -92,10 +99,101 @@ export class AdminDashboardComponent implements OnInit {
     });
 
 
-    
-}
-  
 
+  //get all Courses & Stats
+  this.httpClient.get<Course[]>(`${enviroments.apiUrl}/courses`)
+    .subscribe({
+      next: (courses) => {
+
+        // Criar array de observables (uma requisição por course)
+        const statsRequests = courses.map(c =>
+          this.httpClient.get(`${enviroments.apiUrl}/stats/courses/${c.id}`)
+        );
+
+        // Fazer todas as requisições em paralelo
+        forkJoin(statsRequests).subscribe({
+          next: (statsArray: any[]) => {
+
+            // Juntar degree + stats
+            const mergedCourses: Course[] = courses.map((course, index) => ({
+              ...course,
+              degreeName: statsArray[index].degreeName,
+              teachersCount: statsArray[index].teachersCount,
+              studentsCount: statsArray[index].studentsCount
+            }));
+
+            // Enviar para o dataService
+            this.dataService.setCourses(mergedCourses);
+            this.pendingRequests--;
+            if (this.pendingRequests === 0) {
+                this.loadAllData();
+            }
+          },
+          error: (err) => {
+            console.error('Erro ao carregar estatísticas:', err);
+          }
+        });
+      },
+
+      error: (err) => {
+        console.error('Erro ao carregar courses:', err);
+      }
+    });
+
+    //get all Students
+    this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/users/students`)
+    .subscribe({
+      next: (students) => {
+        this.dataService.setStudents(students); 
+        this.pendingRequests--;
+        if (this.pendingRequests === 0) {
+           this.loadAllData();
+          }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar Students:', err);
+      }
+    });
+
+    //get all Teachers
+      this.httpClient.get<Teacher[]>(`${enviroments.apiUrl}/users/teachers`)
+    .subscribe({
+      next: (teachers) => {
+
+        // Criar array de observables (uma requisição por course)
+        const statsRequests = teachers.map(t =>
+          this.httpClient.get(`${enviroments.apiUrl}/stats/teachers/${t.id}`)
+        );
+
+        // Fazer todas as requisições em paralelo
+        forkJoin(statsRequests).subscribe({
+          next: (statsArray: any[]) => {
+
+            // Juntar degree + stats
+            const mergedTeachers: Teacher[] = teachers.map((teacher, index) => ({
+              ...teacher,
+              coursesCount: statsArray[index].coursesCount,
+            }));
+
+            // Enviar para o dataService
+            this.dataService.setTeachers(mergedTeachers);
+            this.pendingRequests--;
+            if (this.pendingRequests === 0) {
+                this.loadAllData();
+            }
+          },
+          error: (err) => {
+            console.error('Erro ao carregar estatísticas:', err);
+          }
+        });
+      },
+
+      error: (err) => {
+        console.error('Erro ao carregar courses:', err);
+      }
+    });
+
+}
   loadAllData() {
     // 1. Degrees
     this.dataService.getDegrees().subscribe(res => {
@@ -124,7 +222,6 @@ export class AdminDashboardComponent implements OnInit {
     this.dataService.getStudents().subscribe(res => {
       this.students = res.map(s => ({
         id: s.id,
-        Number: s.studentNumber, 
         Name: s.name,
         Email: s.email
       }));

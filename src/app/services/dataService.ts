@@ -24,7 +24,6 @@ export interface User {
 export interface StudentLite {
   id: number;
   name: string;
-  studentNumber: string;
   email: string;
   degreeId?: number; 
 }
@@ -119,17 +118,17 @@ export class DataService {
   ];
 
   private courses: Course[] = [
-    { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
+/*     { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
     { id: 2, name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 60, projectsCount: 2 },
-    { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 }
+    { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 } */
   ];
 
   private students: StudentLite[] = [
-    { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt', degreeId: 1 },
-    { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt', degreeId: 1 },
-    { id: 3, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt', degreeId: 1 },
-    { id: 4, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt', degreeId: 1 },
-    { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt', degreeId: 2 }
+    { id: 1, name: 'Tiago Silva', email: '50440@upt.pt', degreeId: 1 },
+    { id: 2, name: 'David Aroso', email: '50441@upt.pt', degreeId: 1 },
+    { id: 3, name: 'Ana Pereira', email: '50442@upt.pt', degreeId: 1 },
+    { id: 4, name: 'João Santos', email: '50443@upt.pt', degreeId: 1 },
+    { id: 5, name: 'Beatriz Costa', email: '50444@upt.pt', degreeId: 2 }
   ];
 
   private teachers: Teacher[] = [
@@ -175,7 +174,7 @@ export class DataService {
     return of(this.teachers.find(t => t.id === id));
   }
   getTeachersByCourseId(courseId: number): Observable<Teacher[]> {
-    return of(this.teachers.filter(t => t.courseIds.includes(courseId)));
+    return of(this.teachers.filter(t => (t.courseIds ?? []).includes(courseId)));
   }
 
   getAllProjects(): Observable<Project[]> { return of(this.projects); }
@@ -200,6 +199,21 @@ export class DataService {
 
   setDegrees(degrees: Degree[]){
     this.degrees = degrees;
+  }
+
+  setCourses(courses: Course[]){
+    this.courses = courses;
+  }
+
+  setStudents(students: StudentLite[]){
+    this.students = students;
+  }
+
+  setTeachers(teachers: Teacher[]){
+     this.teachers = teachers.map(t => ({
+    ...t,
+    courseIds: t.courseIds ?? []
+  }));
   }
 
   // --- UPDATE METHODS ---
