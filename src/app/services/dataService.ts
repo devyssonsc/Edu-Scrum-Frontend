@@ -100,6 +100,7 @@ export interface Award {
 export interface CreateTeamRequest {
   name: string;
   projectId: number;
+  groupNumber: number;
   members: { studentId: number; teamRole: TeamRole }[];
 }
 

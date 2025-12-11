@@ -76,15 +76,14 @@ export class TeacherCreateProjectComponent implements OnInit {
       this.httpClient.post(`${enviroments.apiUrl}/courses/${newProject.courseId}/projects`, newProject).subscribe((response: any) => {
       console.log("Resposta do Servidor:" + response)
 
+       this.dataService.createProject(newProject).subscribe((success: boolean) => {
+         if (success) {
+           alert('Project created successfully!');
 
-      this.dataService.createProject(newProject).subscribe((success: boolean) => {
-        if (success) {
-          alert('Project created successfully!');
+           this.router.navigate(['/teacher-dashboard/course', this.courseId]);
+         }
 
-          this.router.navigate(['/teacher-dashboard/course', this.courseId]);
-        }
-
-      });
+       });
     });
     } else {
       this.projectForm.markAllAsTouched();

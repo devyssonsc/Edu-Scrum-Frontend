@@ -4,6 +4,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Project, Team, StudentLite, CreateTeamRequest } from '../../services/dataService';
+import { HttpClient } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-teacher-project-detail',
@@ -26,9 +28,10 @@ export class TeacherProjectDetailComponent implements OnInit {
   teamForm: FormGroup;
   selectedStudentId = new FormControl<number | null>(null);
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.teamForm = this.fb.group({
       name: ['', Validators.required],
+      number: ['', Validators.required],
       members: this.fb.array([], Validators.minLength(1))
     });
   }
@@ -106,13 +109,29 @@ export class TeacherProjectDetailComponent implements OnInit {
       const payload: CreateTeamRequest = {
         name: formValue.name,
         projectId: this.project.id,
+        groupNumber: formValue.number,
         members: formValue.members.map((m: any) => ({
           studentId: m.student.id,
           teamRole: m.role
         }))
       };
 
-      this.dataService.createTeam(payload).subscribe({
+      this.httpClient.post(`${enviroments.apiUrl}/projects/${this.project.id}/teams`, payload).subscribe((response: any) => {
+        console.log("Team criado:", response);
+
+        payload.members.forEach((member) => {
+          this.httpClient.post(`${enviroments.apiUrl}/teams/${response.id}/members`, {
+            teamRole: member.teamRole,
+            projectId: response.projectId,
+            studentId: 7
+
+          }).subscribe((response: any) => {
+            console.log("TeamMember registado:", response);
+          });
+        });
+      });
+
+/*       this.dataService.createTeam(payload).subscribe({
         next: (success) => {
           if (success) {
             alert(`Team "${payload.name}" created successfully!`);
@@ -128,7 +147,7 @@ export class TeacherProjectDetailComponent implements OnInit {
             alert('An error occurred while creating the team.');
           }
         }
-      });
+      }); */
     } else {
       this.teamForm.markAllAsTouched();
     }
