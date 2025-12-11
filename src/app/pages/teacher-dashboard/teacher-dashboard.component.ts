@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
@@ -16,6 +16,7 @@ export class TeacherDashboardComponent implements OnInit {
 
   private dataService = inject(DataService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   teacherName: string = 'Fátima Leal';
 
@@ -26,18 +27,23 @@ export class TeacherDashboardComponent implements OnInit {
   
   private rawAwards: Award[] = [];
 
-  // Table Data
   data: any[] = [];
   selectedOption: string = 'Courses';
 
-  // Stats
   countCourses = 0;
   countProjects = 0;
 
   constructor() {}
 
   ngOnInit() {
-    this.loadAllData();
+    // 1. LER O URL AO INICIAR
+    // Se vier do botão voltar com ?tab=Projects, o selectedOption muda aqui.
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.selectedOption = params['tab'];
+      }
+      this.loadAllData();
+    });
   }
 
   loadAllData() {
@@ -52,7 +58,6 @@ export class TeacherDashboardComponent implements OnInit {
       }));
       
       this.countCourses = res.length;
-
       if (this.selectedOption === 'Courses') this.data = this.courses;
     });
 
@@ -84,6 +89,14 @@ export class TeacherDashboardComponent implements OnInit {
   onSelectOption(event: any) {
     this.selectedOption = event;
     this.refreshTable();
+    
+    // 2. ATUALIZAR O URL AO MUDAR DE ABA
+    // Isto garante que a navegação fica guardada no histórico do browser
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: this.selectedOption },
+      queryParamsHandling: 'merge'
+    });
   }
 
   refreshTable() {
@@ -96,9 +109,11 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
-  // --- EDIT / NAVIGATION LOGIC ---
+  // --- EDIT NAVIGATION ---
   
   handleEdit(row: any) {
+    // Ao navegar, não precisamos de fazer nada especial aqui, 
+    // porque o URL já tem ?tab=Projects devido ao onSelectOption
     if (this.selectedOption === 'Courses') {
       this.router.navigate(['/teacher-dashboard/course', row.id]);
     
@@ -110,20 +125,17 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
-  // --- DELETE LOGIC ---
-
+  // ... (Resto do código: handleDelete, etc. mantém-se igual)
   handleDelete(row: any) {
     if (this.selectedOption === 'Courses') {
       alert('Teachers cannot delete Courses.');
       return;
     }
-
     const confirmMessage = `Are you sure you want to delete: ${row.Name}?`;
     if (!confirm(confirmMessage)) return;
 
     if (this.selectedOption === 'Projects') {
       this.dataService.deleteProject(row.Name).subscribe(success => this.postDeleteAction(success));
-    
     } else if (this.selectedOption === 'Awards') {
       this.handleAwardDelete(row);
     }
