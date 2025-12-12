@@ -1,0 +1,99 @@
+<div class="div-container">
+    
+    <div class="header">
+        <button class="btn-back" routerLink="/teacher-dashboard" [queryParams]="{ tab: 'Awards' }">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+        
+        @if(award) {
+            <h1><span class="subtitle">Award:</span> {{ award.name }}</h1>
+            <p class="degree-name">{{ award.description }}</p>
+        }
+    </div>
+
+    <div class="stats-cards">
+        <app-stats-card 
+            title="Value" 
+            [value]="award?.points || 0" 
+            description="points earned"
+            iconClass="bi bi-star-fill">
+        </app-stats-card>
+    </div>
+
+    <div class="show-all">
+        <div class="content">
+            
+            @if (!showAssignForm) {
+                <div class="section-header">
+                    <h2>Award Actions</h2>
+                    <p>Assign this award to recognize achievement.</p>
+                </div>
+
+                <button class="btn btn-primary" (click)="toggleAssignForm()">
+                    Assign Award
+                </button>
+            } @else {
+                <div class="form-container">
+                    <div class="section-header">
+                        <h2>New Assignment</h2>
+                    </div>
+
+                    <p class="context-info">Award: <strong>{{ award?.name }}</strong> ({{ award?.points }} pts)</p>
+
+                    <form [formGroup]="assignForm" (ngSubmit)="onSubmitAssignment()">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="course">Course Context</label>
+                                <select id="course" formControlName="courseId" (change)="onCourseChange()">
+                                    <option [ngValue]="null" disabled>Select Course...</option>
+                                    @for (c of myCourses; track c.id) {
+                                        <option [value]="c.id">{{ c.name }}</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="type">Recipient Type</label>
+                                <select id="type" formControlName="recipientType" (change)="onTypeChange()">
+                                    <option value="STUDENT">Individual Student</option>
+                                    <option value="TEAM">Project Team</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="recipient">
+                                    Select {{ assignForm.get('recipientType')?.value | titlecase }}
+                                </label>
+                                <select id="recipient" formControlName="recipientId">
+                                    <option [ngValue]="null" disabled>Choose Recipient...</option>
+                                    
+                                    @if (assignForm.get('recipientType')?.value === 'STUDENT') {
+                                        @for (s of availableStudents; track s.id) {
+                                            <option [value]="s.id">{{ s.name }} ({{ s.studentNumber }})</option>
+                                        }
+                                    } @else {
+                                        @for (t of availableTeams; track t.id) {
+                                            <option [value]="t.id">{{ t.name }}</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <button type="submit" class="btn btn-primary btn-submit" [disabled]="assignForm.invalid">
+                            Confirm Assignment
+                        </button>
+                        
+                        <br>
+                        <button type="button" class="btn-cancel" (click)="toggleAssignForm()">Cancel</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>

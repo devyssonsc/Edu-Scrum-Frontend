@@ -377,6 +377,10 @@ export class DataService {
     return of(this.awards.filter((a) => a.type === 'GLOBAL'));
   } // Criar Prémio Personalizado
 
+  getAwardById(id: number): Observable<Award | undefined> {
+  return of(this.awards.find(a => a.id === id));
+}
+
   createAward(awardData: {
     name: string;
     description: string;

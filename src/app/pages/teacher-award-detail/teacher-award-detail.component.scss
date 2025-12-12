@@ -1,0 +1,146 @@
+@import "../../../styles/variables.scss";
+
+// --- BLOCO 1: Layout Principal ---
+.div-container {
+    width: 100%;
+    min-height: 100%;
+    background-color: $light-gray;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    padding: 2rem;
+
+    .header {
+        margin-bottom: 0.5rem;
+        .btn-back {
+            display: flex; align-items: center; gap: 0.5rem; background: none; border: none; font-family: $font-secondary; font-weight: 600; color: $dark-gray; cursor: pointer; margin-bottom: 1rem; padding: 0;
+            &:hover { color: #333; }
+        }
+        h1 {
+            font-family: $font-secondary; font-weight: 800; font-size: 2rem; color: $dark-gray; line-height: 1.2;
+            .subtitle { color: $dark-gray; opacity: 0.6; font-weight: 400; margin-right: 0.5rem; }
+        }
+        .degree-name { font-family: $font-secondary; font-size: 1rem; color: #666; margin-top: 0.2rem; }
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .show-all {
+        width: 100%;
+        flex: 1; 
+        min-height: 0; 
+        display: flex;
+        justify-content: flex-start;
+        padding: 20px 30px;
+        background: white; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+        .content {
+            width: 100%;
+            height: 100%; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 1rem;
+
+            .section-header {
+                h2 { font-family: $font-secondary; font-weight: 800; font-size: 1.5rem; color: $dark-gray; margin-bottom: 0.2rem; }
+                p { color: #777; font-family: $font-secondary; font-size: 0.9rem; }
+            }
+        }
+    }
+}
+
+
+.context-info {
+    color: #777;
+    margin-bottom: 1.5rem;
+    font-family: $font-secondary;
+    
+    strong {
+        color: $dark-gray;
+        font-weight: 700;
+    }
+}
+
+.form-container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 1rem;
+
+    .form-group {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        
+        label {
+            font-weight: 600;
+            color: #444;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+.btn-cancel {
+    margin-top: 1rem;
+    color: #777;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    padding: 0;
+    
+    &:hover { color: $dark-gray; }
+}
+
+input[type="text"], 
+input[type="number"],
+select {
+    width: 100%;
+    border: none; // Remove bordas laterais e topo
+    border-bottom: 2px solid $medium-gray; // Apenas borda inferior
+    padding: 0.5rem 0.25rem;
+    font-family: $font-secondary;
+    background: transparent;
+    outline: none;
+    
+    &:focus { border-color: $dark-gray; }
+}
+
+.divider {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid #eee;
+    width: 100%;
+}
+
+.btn-submit {
+    // Estilo base do botão submit se não estiver global
+    background-color: $dark-gray;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
