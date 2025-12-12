@@ -1,47 +1,42 @@
 <div class="div-container">
+
+    <div class="page-header">
+        <h1>Professor</h1>
+        <p class="subtitle">{{ teacherName }}</p>
+    </div>
+
+    <div class="stats-cards">
+        <app-stats-card title="Courses" [value]="countCourses.toString()" description="active courses"
+            iconClass="bi bi-book"></app-stats-card>
+        <app-stats-card title="Projects" [value]="countProjects.toString()" description="ongoing projects"
+            iconClass="bi bi-kanban"></app-stats-card>
+    </div>
     
-    <div class="header">
-        <h1>Professor <span class="highlight">{{ teacherName }}</span></h1>
-    </div>
-
-    <div class="nav-bar-container">
-        <div class="nav-pills">
-            @for (tab of tabs; track tab) {
-                <div 
-                    class="nav-item" 
-                    [class.active]="selectedTab === tab"
-                    (click)="selectTab(tab)">
-                    {{ tab }}
-                </div>
-            }
-        </div>
-    </div>
-
+    <app-section-selector 
+        [options]="['Courses', 'Projects', 'Awards']"
+        (selectedOption)="onSelectOption($event)">
+    </app-section-selector>
+    
     <div class="card show-all">
         <div class="content">
+            <h3>Manage {{ selectedOption }}</h3>
+            <p>Overview of your {{ selectedOption.toLowerCase() }}</p>
             
-            <div class="section-header">
-                @if (selectedTab === 'Courses') {
-                    <h2>Teaching Courses</h2>
-                    <p>List of courses</p>
-                } @else if (selectedTab === 'Projects') {
-                    <h2>My Projects</h2>
-                    <p>Manage active and past projects</p>
-                } @else {
-                    <h2>Awards Management</h2>
-                    <p>Gamification configuration</p>
-                }
-            </div>
-
             <div class="div-table">
                 <app-show-table 
-                    [data]="currentData"
-                    (editRow)="handleRowClick($event)"
-                    (deleteRow)="handleDelete($event)" 
-                    [showDelete]="selectedTab === 'Awards'">
+                    [data]="data" 
+                    (editRow)="handleEdit($event)"
+                    (deleteRow)="handleDelete($event)"
+                    [showEdit]="true"
+                    [showDelete]="selectedOption !== 'Courses'">
                 </app-show-table>
             </div>
-
+            
+            @if (selectedOption === 'Awards') {
+                <button class="btn btn-primary" (click)="navigateToCreateAward()">
+                    Create Award
+                </button>
+            }
         </div>
     </div>
 </div>

@@ -1,8 +1,8 @@
 <div class="div-container">
     
     <div class="header-row">
-        <button class="btn-back" routerLink="/teacher-dashboard">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        <button class="btn-back" routerLink="/teacher-dashboard" [queryParams]="{ tab: 'Projects' }">
+            <i class="bi bi-arrow-left"></i> Back
         </button>
         <div class="title-group">
             <h1>{{ project?.name }}</h1>

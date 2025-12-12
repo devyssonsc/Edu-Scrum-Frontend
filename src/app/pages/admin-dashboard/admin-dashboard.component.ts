@@ -303,6 +303,7 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+
   postDeleteAction(success: boolean) {
     if (success) {
       this.loadAllData(); 

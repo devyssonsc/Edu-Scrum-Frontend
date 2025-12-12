@@ -1,0 +1,54 @@
+<div class="form-page-container">
+    <form class="card form-card" [formGroup]="awardForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">New Award</h2>
+        <p class="context-info">Create a badge to gamify your courses.</p>
+
+        <div class="form-group">
+            <label for="course">Course</label>
+            <select id="course" formControlName="courseId">
+                <option [ngValue]="null" disabled>Select a Course...</option>
+                @for (course of myCourses; track course.id) {
+                    <option [value]="course.id">{{ course.name }}</option>
+                }
+            </select>
+            @if (awardForm.get('courseId')?.invalid && awardForm.get('courseId')?.touched) {
+                <small class="error-msg">Please select a course.</small>
+            }
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="name">Award Name</label>
+                <input type="text" id="name" formControlName="name" placeholder="Ex: Best Presentation">
+                @if (awardForm.get('name')?.invalid && awardForm.get('name')?.touched) {
+                    <small class="error-msg">Name is required.</small>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="points">Points Value</label>
+                <input type="number" id="points" formControlName="points" placeholder="1-5">
+                @if (awardForm.get('points')?.invalid && awardForm.get('points')?.touched) {
+                    <small class="error-msg">Min 1, Max 5 points.</small>
+                }
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="desc">Description</label>
+            <input type="text" id="desc" formControlName="description" placeholder="Brief description...">
+            @if (awardForm.get('description')?.invalid && awardForm.get('description')?.touched) {
+                <small class="error-msg">Description is required.</small>
+            }
+        </div>
+
+        <hr class="divider">
+
+        <button type="submit" class="btn btn-primary btn-submit" [disabled]="awardForm.invalid">
+            Create Award
+        </button>
+        
+        <a class="btn-cancel" routerLink="/teacher-dashboard" [queryParams]="{ tab: 'Courses' }">Cancel</a>
+    </form>
+</div>

@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
+import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
 import { DataService, Award } from '../../services/dataService';
 
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [CommonModule, ShowTableComponent],
+  imports: [StatsCardComponent, SectionSelectorComponent, ShowTableComponent],
   templateUrl: './teacher-dashboard.component.html',
   styleUrl: './teacher-dashboard.component.scss'
 })
@@ -15,124 +16,158 @@ export class TeacherDashboardComponent implements OnInit {
 
   private dataService = inject(DataService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  teacherName = "Fátima Leal";
-  
-  selectedTab: string = 'Courses';
-  tabs: string[] = ['Courses', 'Projects', 'Awards'];
+  teacherName: string = 'Fátima Leal';
 
-  coursesView: any[] = [];
-  projectsView: any[] = [];
-  awardsView: any[] = [];
+  // Data Holders
+  courses: any[] = [];
+  projects: any[] = [];
+  awards: any[] = [];
   
   private rawAwards: Award[] = [];
-  currentData: any[] = [];
+
+  // Table Data
+  data: any[] = [];
+  selectedOption: string = 'Courses';
+
+  // Stats
+  countCourses = 0;
+  countProjects = 0;
+
+  constructor() {}
 
   ngOnInit() {
-    this.loadAllData();
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.selectedOption = params['tab'];
+      }
+      this.loadAllData();
+    });
   }
 
   loadAllData() {
-    // 1. Cursos
-    this.dataService.getCourses().subscribe(data => {
-      this.coursesView = data.map(c => ({
-        id: c.id, 
-        name: c.name,
-        degree: c.degree?.name,
-        students: c.studentsCount,
-        projects: c.projectsCount
+    // 1. Courses
+    this.dataService.getCourses().subscribe(res => {
+      this.courses = res.map(c => ({
+        id: c.id,
+        Name: c.name,
+        Degree: c.degreeName || 'N/A',
+        Students: c.studentsCount,
+        Projects: c.projectsCount
       }));
-      if (this.selectedTab === 'Courses') this.currentData = this.coursesView;
+      
+      this.countCourses = res.length;
+      if (this.selectedOption === 'Courses') this.data = this.courses;
     });
 
-    // 2. Projetos
-    this.dataService.getAllProjects().subscribe(data => {
-      this.projectsView = data.map(p => ({
-        id: p.id, 
-        name: p.name,
-        course: p.courseName,
-        startDate: p.startDate,
-        endDate: p.endDate
+    // 2. Projects
+    this.dataService.getAllProjects().subscribe(res => {
+      this.projects = res.map(p => ({
+        id: p.id,
+        Name: p.name,
+        Course: p.courseName,
+        Teams: p.teamsCount
       }));
-      if (this.selectedTab === 'Projects') this.currentData = this.projectsView;
+      this.countProjects = res.length;
+      if (this.selectedOption === 'Projects') this.data = this.projects;
     });
 
-    // 3. Prémios
-    this.dataService.getAwards().subscribe(data => {
-      this.rawAwards = data;
-      this.awardsView = data.map(a => ({
-        name: a.name,
-        type: a.type,
-        points: a.points
+    // 3. Awards
+    this.dataService.getAwards().subscribe(res => {
+      this.rawAwards = res;
+      this.awards = res.map(a => ({
+        id: a.id,
+        Name: a.name,
+        Type: a.type,
+        Points: a.points
       }));
-      if (this.selectedTab === 'Awards') this.currentData = this.awardsView;
+      if (this.selectedOption === 'Awards') this.data = this.awards;
     });
   }
 
-  selectTab(tab: string) {
-    this.selectedTab = tab;
+  onSelectOption(event: any) {
+    this.selectedOption = event;
+    this.refreshTable();
     
-    if (tab === 'Courses') {
-      this.currentData = this.coursesView;
-    } else if (tab === 'Projects') {
-      this.currentData = this.projectsView;
-    } else if (tab === 'Awards') {
-      this.currentData = this.awardsView;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: this.selectedOption },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  refreshTable() {
+    if (this.selectedOption === 'Courses') {
+      this.data = this.courses;
+    } else if (this.selectedOption === 'Projects') {
+      this.data = this.projects;
+    } else if (this.selectedOption === 'Awards') {
+      this.data = this.awards;
     }
   }
 
-  handleRowClick(row: any) {
-    if (this.selectedTab === 'Courses') {
-      console.log('Navigate to course:', row.id);
-      this.router.navigate(['/teacher-dashboard/course', row.id]);
+  navigateToCreateAward() {
+    this.router.navigate(['/teacher-dashboard/create-award']);
+  }
+
+  // --- EDIT / NAVIGATION LOGIC ---
+  
+  handleEdit(row: any) {
+  if (this.selectedOption === 'Courses') {
+    this.router.navigate(['/teacher-dashboard/course', row.id]);
+  
+  } else if (this.selectedOption === 'Projects') {
+    this.router.navigate(['/teacher-dashboard/project', row.id]);
+  
+  } else if (this.selectedOption === 'Awards') {
+    // ALTERAÇÃO: Navegar para o detalhe do prémio
+    this.router.navigate(['/teacher-dashboard/award', row.id]);
+  }
+}
+
+  // --- DELETE LOGIC ---
+
+  handleDelete(row: any) {
+    if (this.selectedOption === 'Courses') {
+      alert('Teachers cannot delete Courses.');
+      return;
+    }
+
+    const confirmMessage = `Are you sure you want to delete: ${row.Name}?`;
+    if (!confirm(confirmMessage)) return;
+
+    if (this.selectedOption === 'Projects') {
+      this.dataService.deleteProject(row.Name).subscribe(success => this.postDeleteAction(success));
     
-    } else if (this.selectedTab === 'Projects') {
-      console.log('Navigate to project:', row.id);
-      this.router.navigate(['/teacher-dashboard/project', row.id]);
-    
-    } else if (this.selectedTab === 'Awards') {
-      this.handleAwardAction(row);
+    } else if (this.selectedOption === 'Awards') {
+      this.handleAwardDelete(row);
+    }
+  }
+
+  postDeleteAction(success: boolean) {
+    if (success) {
+      this.loadAllData();
+    } else {
+      alert('Error deleting item.');
     }
   }
 
   handleAwardAction(row: any) {
-    const originalAward = this.rawAwards.find(a => a.name === row.name);
-    
+    const originalAward = this.rawAwards.find(a => a.id === row.id || a.name === row.Name);
     if (originalAward && originalAward.isOwner) {
-      if(confirm('Do you want to delete this award?')) {
-        this.dataService.deleteAward(originalAward.name).subscribe(success => {
-          if(success) {
-            alert('Award deleted');
-            this.loadAllData();
-          }
-        });
-      }
+       alert('Edit award logic here');
     } else {
-      alert('You can only manage awards created by you.');
+       alert('You can only manage awards created by you.');
     }
   }
 
-  handleDelete(row: any) {
-    if (this.selectedTab === 'Projects') {
-        if(confirm(`Are you sure you want to delete project "${row.name}"?`)) {
-            this.dataService.deleteProject(row.name).subscribe(success => {
-                if(success) {
-                    this.loadAllData(); 
-                }
-            });
-        }
-    } 
-    else if (this.selectedTab === 'Awards') {
-        const originalAward = this.rawAwards.find(a => a.name === row.name);
-        if (originalAward && originalAward.isOwner) {
-            if(confirm(`Delete award "${row.name}"?`)) {
-                this.dataService.deleteAward(row.name).subscribe(success => {
-                    if(success) {
-                        this.loadAllData();
-                    }
-                });
-            }
-        }
+  handleAwardDelete(row: any) {
+    const originalAward = this.rawAwards.find(a => a.id === row.id || a.name === row.Name);
+    if (originalAward && originalAward.isOwner) {
+        this.dataService.deleteAward(originalAward.name).subscribe(success => this.postDeleteAction(success));
+    } else {
+        alert('You can only delete awards created by you.');
     }
   }
 }

@@ -10,14 +10,14 @@
     <div class="stats-row">
         <app-stats-card 
             title="Students" 
-            [value]="mockCourseData.stats.studentsCount" 
+            [value]="mockCourseData.stats.studentsCount.toString()" 
             description="enrolled"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Teaching Team" 
-            [value]="mockCourseData.stats.teachersCount" 
+            [value]="mockCourseData.stats.teachersCount.toString()" 
             description="teachers"
             iconClass="bi bi-person-badge-fill">
         </app-stats-card>
