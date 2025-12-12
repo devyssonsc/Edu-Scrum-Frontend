@@ -1,5 +1,13 @@
 @import "../../../styles/variables.scss";
 
+.form-page-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    background-color: $light-gray;
+}
 
 .context-info {
     color: #777;
@@ -23,11 +31,13 @@
 }
 
 .btn-cancel {
+    display: block; text-align: center; 
     margin-top: 1rem;
     color: #777;
     font-size: 0.9rem;
     cursor: pointer;
     text-decoration: underline;
+    background: none; border: none; width: 100%;
     
     &:hover { color: $dark-gray; }
 }
