@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -13,6 +13,9 @@ import { DataService, Award, Course, StudentLite, Team } from '../../services/da
   styleUrl: './teacher-award-detail.component.scss'
 })
 export class TeacherAwardDetailComponent implements OnInit {
+
+  // Referência ao formulário de atribuição para Auto-Scroll
+  @ViewChild('assignFormSection') assignFormSection: ElementRef | undefined;
 
   private route = inject(ActivatedRoute);
   private dataService = inject(DataService);
@@ -90,8 +93,16 @@ export class TeacherAwardDetailComponent implements OnInit {
     this.assignmentsCount = this.assignmentHistory.length;
   }
 
+  // --- Lógica de Scroll Automático Implementada ---
   toggleAssignForm() {
     this.showAssignForm = !this.showAssignForm;
+
+    if (this.showAssignForm) {
+      // Pequeno delay para garantir que o Angular renderiza o elemento @if antes de fazer scroll
+      setTimeout(() => {
+        this.assignFormSection?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
   }
 
   onTypeChange() {
@@ -133,7 +144,6 @@ export class TeacherAwardDetailComponent implements OnInit {
           const recipientName = recipientType === 'STUDENT' 
             ? this.availableStudents.find(s => s.id === rId)?.name 
             : this.availableTeams.find(t => t.id === rId)?.name;
-
 
           this.assignmentHistory.push({
             id: Math.floor(Math.random() * 1000),

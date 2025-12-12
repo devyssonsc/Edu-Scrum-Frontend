@@ -24,8 +24,8 @@
 
         <app-stats-card 
             title="Type" 
-            [value]="award?.type || 'N/A'"
-            description="award type"
+            [value]="award?.type || 'N/A'" 
+            description="award scope"
             iconClass="bi bi-globe">
         </app-stats-card>
     </div>
@@ -61,7 +61,7 @@
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Points Value</label>
-            <input type="text" formControlName="points" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+            <input type="number" formControlName="points" class="main-input" [readonly]="award?.type === 'GLOBAL'">
         </div>
 
         <hr class="divider">
@@ -109,13 +109,15 @@
     </form>
 
     @if (showAssignForm) {
-        <div class="card edit-section" style="margin-top: 0;">
+        <div class="card edit-section" style="margin-top: 0;" #assignFormSection>
+            
             <div class="section-header">
                 <h3>New Assignment</h3>
                 <button class="btn-cancel" (click)="toggleAssignForm()" style="background:none; border:none; cursor:pointer;">Cancel</button>
             </div>
             
             <form [formGroup]="assignForm" (ngSubmit)="onSubmitAssignment()">
+                
                 <div class="form-group-main">
                     <label>Recipient Type</label>
                     <select formControlName="recipientType" (change)="onTypeChange()" class="main-input">
@@ -128,6 +130,7 @@
                     <label>Select Recipient</label>
                     <select formControlName="recipientId" class="main-input">
                         <option [ngValue]="null" disabled>Choose...</option>
+                        
                         @if (assignForm.get('recipientType')?.value === 'STUDENT') {
                             @for (s of availableStudents; track s.id) {
                                 <option [value]="s.id">{{ s.name }}</option>
