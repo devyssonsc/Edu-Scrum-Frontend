@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Course, Degree, Teacher } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-course-detail',
@@ -34,7 +36,7 @@ export class CourseDetailComponent implements OnInit {
     }
   };
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
       degreeId: [null, Validators.required],
@@ -138,17 +140,13 @@ export class CourseDetailComponent implements OnInit {
     if (this.courseForm.valid && this.courseId) {
       const payload = {
         name: this.courseForm.value.name,
-        degreeId: Number(this.courseForm.value.degreeId)
       };
 
-      this.dataService.updateCourse(this.courseId, payload).subscribe(success => {
-        if (success) {
-          alert('Course updated successfully!');
-          this.router.navigate(['/admin-dashboard']);
-        } else {
-          alert('Error updating course.');
-        }
-      });
+      this.httpClient.put(`${enviroments.apiUrl}/courses/${this.courseId}`, payload).subscribe((response: any) => {
+              console.log('Resposta do servidor:', response);
+
+              //this.router.navigate(['/admin-dashboard']);
+            });
     }
   }
 }

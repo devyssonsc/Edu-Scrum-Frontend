@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../enviroments/enviroments';
 
 // ==========================================
 // 1. ENUMS & TYPES
@@ -118,9 +120,6 @@ export class DataService {
   ];
 
   private courses: Course[] = [
-/*     { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
-    { id: 2, name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 60, projectsCount: 2 },
-    { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 } */
   ];
 
   private students: StudentLite[] = [
@@ -147,7 +146,7 @@ export class DataService {
 
   private teams: Team[] = []; 
 
-  constructor() { }
+  constructor(private httpClient: HttpClient) { }
 
   // --- GETTERS ---
 
@@ -160,8 +159,8 @@ export class DataService {
   getCourseById(id: number): Observable<Course | undefined> { 
       return of(this.courses.find(c => c.id === id)); 
   }
-  getCoursesByDegreeId(degreeId: number): Observable<Course[]> {
-    return of(this.courses.filter(c => c.degree?.id === degreeId));
+  getCoursesByDegreeId(degreeId: number) {
+  return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/degrees/${degreeId}/courses`);
   }
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }

@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
 import { DataService } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-degree-detail',
@@ -29,7 +31,7 @@ export class DegreeDetailComponent implements OnInit {
     coursesCount: 0      
   };
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.degreeForm = this.fb.group({
       name: ['', Validators.required],
       cadeiras: this.fb.array([]) 
@@ -70,8 +72,11 @@ export class DegreeDetailComponent implements OnInit {
   loadCourses(degreeId: number) {
     const cadeirasArray = this.degreeForm.get('cadeiras') as FormArray;
     cadeirasArray.clear();
+    
+    
 
     this.dataService.getCoursesByDegreeId(degreeId).subscribe(courses => {
+        console.log(courses);
         courses.forEach(c => {
             const group = this.fb.group({
                 name: [c.name, Validators.required]
@@ -95,14 +100,13 @@ export class DegreeDetailComponent implements OnInit {
       
       const newName = this.degreeForm.value.name;
 
-      this.dataService.updateDegree(this.degreeId, { name: newName }).subscribe(success => {
-        if (success) {
-            alert('Degree updated successfully!');
-            this.router.navigate(['/admin-dashboard']);
-        } else {
-            alert('Error updating degree.');
-        }
+      this.httpClient.put(`${enviroments.apiUrl}/degrees/${this.degreeId}`, 
+        {
+          name: newName
+        }).subscribe((response: any) => {
+              console.log('Resposta do servidor:', response);
       });
+    
     }
   }
 }

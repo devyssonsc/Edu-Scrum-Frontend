@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataService, StudentLite, Degree } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-student-detail',
@@ -23,7 +25,7 @@ export class StudentDetailComponent implements OnInit {
   studentName: string = '';
   allDegrees: Degree[] = [];
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -54,6 +56,7 @@ export class StudentDetailComponent implements OnInit {
       if (student) {
         this.studentName = student.name;
 
+        console.log(student)
         this.studentForm.patchValue({
           name: student.name,
           email: student.email,
@@ -102,7 +105,11 @@ export class StudentDetailComponent implements OnInit {
         degreeId: Number(this.studentForm.value.degreeId)
       };
 
-      this.dataService.updateStudent(this.studentId, payload).subscribe({
+      this.httpClient.put(`${enviroments.apiUrl}/users/students/${this.studentId}`, payload).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
+      });
+
+      /* this.dataService.updateStudent(this.studentId, payload).subscribe({
         next: (success) => {
             if(success) {
                 alert('Student updated successfully!');
@@ -117,7 +124,7 @@ export class StudentDetailComponent implements OnInit {
                 alert('An error occurred while updating the student.');
             }
         }
-      });
+      }); */
     }
   }
 }
