@@ -90,7 +90,7 @@ export interface Team {
   sprints: Sprint[];
 }
 
-// New interfaces for Awards
+
 export interface Award {
   id: number;
   name: string;
@@ -99,6 +99,7 @@ export interface Award {
   type: AwardType;
   icon?: string;
   courseId?: number;
+  courseName?: string; 
   isOwner?: boolean;
 }
 
@@ -178,16 +179,16 @@ export class DataService {
     },
   ];
 
-  // --- NEW: MOCK TEAMS ---
+  // --- MOCK TEAMS ---
   private teams: Team[] = [
     {
       id: 101,
       name: 'Alpha Team',
       projectId: 1,
       members: [
-        { student: this.students[0], role: 'PRODUCT_OWNER' }, // Tiago
-        { student: this.students[1], role: 'SCRUM_MASTER' }, // David
-        { student: this.students[2], role: 'DEVELOPER' }     // Ana
+        { student: this.students[0], role: 'PRODUCT_OWNER' }, 
+        { student: this.students[1], role: 'SCRUM_MASTER' }, 
+        { student: this.students[2], role: 'DEVELOPER' }     
       ],
       sprints: []
     },
@@ -196,8 +197,8 @@ export class DataService {
       name: 'Beta Squad',
       projectId: 1,
       members: [
-        { student: this.students[3], role: 'PRODUCT_OWNER' }, // João
-        { student: this.students[4], role: 'DEVELOPER' }      // Beatriz
+        { student: this.students[3], role: 'PRODUCT_OWNER' }, 
+        { student: this.students[4], role: 'DEVELOPER' }      
       ],
       sprints: []
     }
@@ -207,7 +208,7 @@ export class DataService {
   private awards: Award[] = [
     { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', icon: 'bi-lightning-charge-fill', isOwner: false },
     { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', icon: 'bi-layers-fill', isOwner: false },
-    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, icon: 'bi-mic-fill', isOwner: true },
+    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, // Added courseName
   ];
 
   // Tabelas de Ligação
@@ -259,6 +260,9 @@ export class DataService {
 
   createAward(awardData: { name: string; description: string; points: number; courseId: number; }): Observable<boolean> {
     const newId = this.awards.length > 0 ? Math.max(...this.awards.map((a) => a.id)) + 1 : 1;
+    const course = this.courses.find(c => c.id === awardData.courseId);
+    const courseName = course ? course.name : 'Unknown';
+
     const newAward: Award = {
       id: newId,
       name: awardData.name,
@@ -266,6 +270,7 @@ export class DataService {
       points: awardData.points,
       type: 'COURSE',
       courseId: awardData.courseId,
+      courseName: courseName, 
       icon: undefined,
       isOwner: true,
     };

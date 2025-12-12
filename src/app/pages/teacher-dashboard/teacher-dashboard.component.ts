@@ -19,19 +19,15 @@ export class TeacherDashboardComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   teacherName: string = 'Fátima Leal';
-
-  // Data Holders
   courses: any[] = [];
   projects: any[] = [];
   awards: any[] = [];
   
   private rawAwards: Award[] = [];
 
-  // Table Data
   data: any[] = [];
   selectedOption: string = 'Courses';
 
-  // Stats
   countCourses = 0;
   countProjects = 0;
 
@@ -80,8 +76,10 @@ export class TeacherDashboardComponent implements OnInit {
         id: a.id,
         Name: a.name,
         Type: a.type,
+        Course: a.courseName || 'Global / All', 
         Points: a.points
       }));
+      
       if (this.selectedOption === 'Awards') this.data = this.awards;
     });
   }
@@ -111,20 +109,23 @@ export class TeacherDashboardComponent implements OnInit {
     this.router.navigate(['/teacher-dashboard/create-award']);
   }
 
+  navigateToAssignAward() {
+    this.router.navigate(['/teacher-dashboard/assign-award']);
+  }
+
   // --- EDIT / NAVIGATION LOGIC ---
   
   handleEdit(row: any) {
-  if (this.selectedOption === 'Courses') {
-    this.router.navigate(['/teacher-dashboard/course', row.id]);
-  
-  } else if (this.selectedOption === 'Projects') {
-    this.router.navigate(['/teacher-dashboard/project', row.id]);
-  
-  } else if (this.selectedOption === 'Awards') {
-    // ALTERAÇÃO: Navegar para o detalhe do prémio
-    this.router.navigate(['/teacher-dashboard/award', row.id]);
+    if (this.selectedOption === 'Courses') {
+      this.router.navigate(['/teacher-dashboard/course', row.id]);
+    
+    } else if (this.selectedOption === 'Projects') {
+      this.router.navigate(['/teacher-dashboard/project', row.id]);
+    
+    } else if (this.selectedOption === 'Awards') {
+      this.router.navigate(['/teacher-dashboard/award', row.id]);
+    }
   }
-}
 
   // --- DELETE LOGIC ---
 
@@ -150,15 +151,6 @@ export class TeacherDashboardComponent implements OnInit {
       this.loadAllData();
     } else {
       alert('Error deleting item.');
-    }
-  }
-
-  handleAwardAction(row: any) {
-    const originalAward = this.rawAwards.find(a => a.id === row.id || a.name === row.Name);
-    if (originalAward && originalAward.isOwner) {
-       alert('Edit award logic here');
-    } else {
-       alert('You can only manage awards created by you.');
     }
   }
 
