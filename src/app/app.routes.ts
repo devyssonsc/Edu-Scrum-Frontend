@@ -13,6 +13,7 @@ import { TeacherCourseDetailComponent } from './pages/teacher-course-detail/teac
 import { TeacherCreateProjectComponent } from './pages/teacher-create-project/teacher-create-project.component';
 import { LoginComponent } from './pages/login/login.component';
 import { TeacherProjectDetailComponent } from './pages/teacher-project-detail/teacher-project-detail.component';
+import { TeacherCreateAwardComponent } from './pages/teacher-create-award/teacher-create-award.component';
 
 export const routes: Routes = [
     {
@@ -70,5 +71,9 @@ export const routes: Routes = [
     {
         path: 'teacher-dashboard/project/:id',
         component: TeacherProjectDetailComponent
+    },
+    { 
+        path: 'teacher-dashboard/create-award', 
+        component: TeacherCreateAwardComponent 
     }
 ];
