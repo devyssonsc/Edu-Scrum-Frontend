@@ -13,6 +13,9 @@ import { DataService, Course, Project } from '../../services/dataService';
   styleUrl: './teacher-course-detail.component.scss'
 })
 export class TeacherCourseDetailComponent implements OnInit {
+String(arg0: number): string {
+throw new Error('Method not implemented.');
+}
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);

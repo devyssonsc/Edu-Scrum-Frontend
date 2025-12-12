@@ -10,21 +10,21 @@
     <div class="stats-row">
         <app-stats-card 
             title="Students" 
-            [value]="stats.studentsCount" 
+            value="{{ stats.studentsCount }}" 
             description="enrolled in this degree"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Teachers" 
-            [value]="stats.teachersCount" 
+            value="{{ stats.teachersCount }}" 
             description="teaching in this degree"
             iconClass="bi bi-person-badge-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Courses" 
-            [value]="stats.coursesCount" 
+            value="{{ stats.coursesCount }}" 
             description="total in syllabus"
             iconClass="bi bi-book">
         </app-stats-card>
