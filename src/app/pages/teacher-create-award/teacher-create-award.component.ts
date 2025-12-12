@@ -18,19 +18,18 @@ export class TeacherCreateAwardComponent implements OnInit {
   private router = inject(Router);
 
   awardForm: FormGroup;
-  myCourses: Course[] = []; 
+  myCourses: Course[] = [];
 
   constructor() {
     this.awardForm = this.fb.group({
       courseId: [null, Validators.required],
       name: ['', Validators.required],
       description: ['', Validators.required],
-      points: [10, [Validators.required, Validators.min(1)]]
+      points: [1, [Validators.required, Validators.min(1), Validators.max(5)]]
     });
   }
 
   ngOnInit() {
-
     this.dataService.getCourses().subscribe(courses => {
       this.myCourses = courses;
     });

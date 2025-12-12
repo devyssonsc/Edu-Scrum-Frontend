@@ -114,16 +114,17 @@ export class TeacherDashboardComponent implements OnInit {
   // --- EDIT / NAVIGATION LOGIC ---
   
   handleEdit(row: any) {
-    if (this.selectedOption === 'Courses') {
-      this.router.navigate(['/teacher-dashboard/course', row.id]);
-    
-    } else if (this.selectedOption === 'Projects') {
-      this.router.navigate(['/teacher-dashboard/project', row.id]);
-    
-    } else if (this.selectedOption === 'Awards') {
-      this.handleAwardAction(row);
-    }
+  if (this.selectedOption === 'Courses') {
+    this.router.navigate(['/teacher-dashboard/course', row.id]);
+  
+  } else if (this.selectedOption === 'Projects') {
+    this.router.navigate(['/teacher-dashboard/project', row.id]);
+  
+  } else if (this.selectedOption === 'Awards') {
+    // ALTERAÇÃO: Navegar para o detalhe do prémio
+    this.router.navigate(['/teacher-dashboard/award', row.id]);
   }
+}
 
   // --- DELETE LOGIC ---
 

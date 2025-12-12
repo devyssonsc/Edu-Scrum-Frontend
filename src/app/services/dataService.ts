@@ -9,7 +9,7 @@ import { delay } from 'rxjs/operators';
 export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type TeamRole = 'PRODUCT_OWNER' | 'SCRUM_MASTER' | 'DEVELOPER';
 export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED';
-export type AwardType = 'GLOBAL' | 'COURSE'; // New AwardType
+export type AwardType = 'GLOBAL' | 'COURSE';
 
 // ==========================================
 // 2. INTERFACES
@@ -87,7 +87,7 @@ export interface Team {
   name: string;
   projectId: number;
   members: TeamMember[];
-  sprints: Sprint[]; // simplified
+  sprints: Sprint[];
 }
 
 // New interfaces for Awards
@@ -99,7 +99,7 @@ export interface Award {
   type: AwardType;
   icon?: string;
   courseId?: number;
-  isOwner?: boolean; // Keep for compatibility if used elsewhere, though logic suggests type/courseId handles this
+  isOwner?: boolean;
 }
 
 export interface StudentAward {
@@ -140,109 +140,28 @@ export interface CreateTeamRequest {
 export class DataService {
   // --- MOCK DATA ---
   private degrees: Degree[] = [
-    {
-      id: 1,
-      name: 'Computer Engineering',
-      coursesCount: 30,
-      teachersCount: 15,
-      studentsCount: 217,
-    },
-    {
-      id: 2,
-      name: 'Information Systems',
-      coursesCount: 25,
-      teachersCount: 10,
-      studentsCount: 150,
-    },
+    { id: 1, name: 'Computer Engineering', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
+    { id: 2, name: 'Information Systems', coursesCount: 25, teachersCount: 10, studentsCount: 150 },
   ];
 
   private courses: Course[] = [
-    {
-      id: 1,
-      name: 'Software Quality',
-      degree: this.degrees[0],
-      degreeName: 'Computer Engineering',
-      studentsCount: 75,
-      projectsCount: 1,
-    },
-    {
-      id: 2,
-      name: 'Artificial Intelligence',
-      degree: this.degrees[0],
-      degreeName: 'Computer Engineering',
-      studentsCount: 60,
-      projectsCount: 2,
-    },
-    {
-      id: 3,
-      name: 'Project Management',
-      degree: this.degrees[1],
-      degreeName: 'Information Systems',
-      studentsCount: 45,
-      projectsCount: 1,
-    },
+    { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
+    { id: 2, name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 60, projectsCount: 2 },
+    { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 },
   ];
 
   private students: StudentLite[] = [
-    {
-      id: 1,
-      name: 'Tiago Silva',
-      studentNumber: '50440',
-      email: '50440@upt.pt',
-      degreeId: 1,
-    },
-    {
-      id: 2,
-      name: 'David Aroso',
-      studentNumber: '50441',
-      email: '50441@upt.pt',
-      degreeId: 1,
-    },
-    {
-      id: 3,
-      name: 'Ana Pereira',
-      studentNumber: '50442',
-      email: '50442@upt.pt',
-      degreeId: 1,
-    },
-    {
-      id: 4,
-      name: 'João Santos',
-      studentNumber: '50443',
-      email: '50443@upt.pt',
-      degreeId: 1,
-    },
-    {
-      id: 5,
-      name: 'Beatriz Costa',
-      studentNumber: '50444',
-      email: '50444@upt.pt',
-      degreeId: 2,
-    },
+    { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt', degreeId: 1 },
+    { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt', degreeId: 1 },
+    { id: 3, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt', degreeId: 1 },
+    { id: 4, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt', degreeId: 1 },
+    { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt', degreeId: 2 },
   ];
 
   private teachers: Teacher[] = [
-    {
-      id: 1,
-      name: 'Fátima Leal',
-      email: 'fatimal@upt.pt',
-      coursesCount: 3,
-      courseIds: [1, 3],
-    },
-    {
-      id: 2,
-      name: 'Bruno Cunha',
-      email: 'bruninho@upt.pt',
-      coursesCount: 4,
-      courseIds: [1, 2],
-    },
-    {
-      id: 3,
-      name: 'Joaquim Silva',
-      email: 'joaquim@upt.pt',
-      coursesCount: 2,
-      courseIds: [2],
-    },
+    { id: 1, name: 'Fátima Leal', email: 'fatimal@upt.pt', coursesCount: 3, courseIds: [1, 3] },
+    { id: 2, name: 'Bruno Cunha', email: 'bruninho@upt.pt', coursesCount: 4, courseIds: [1, 2] },
+    { id: 3, name: 'Joaquim Silva', email: 'joaquim@upt.pt', coursesCount: 2, courseIds: [2] },
   ];
 
   private projects: Project[] = [
@@ -259,134 +178,87 @@ export class DataService {
     },
   ];
 
-  private teams: Team[] = []; // --- MOCK AWARDS ---
-
-  private awards: Award[] = [
-    {
-      id: 1,
-      name: 'Fast Hands',
-      description: 'Completed task in record time',
-      points: 10,
-      type: 'GLOBAL',
-      icon: 'bi-lightning-charge-fill',
-      isOwner: false,
-    },
-    {
-      id: 2,
-      name: 'Multitasker',
-      description: 'Completed 5 tasks in a sprint',
-      points: 20,
-      type: 'GLOBAL',
-      icon: 'bi-layers-fill',
-      isOwner: false,
-    },
-    {
-      id: 3,
-      name: 'Bug Hunter',
-      description: 'Found a critical bug',
-      points: 15,
-      type: 'GLOBAL',
-      icon: 'bi-bug-fill',
-      isOwner: false,
-    }, // Award Específico de Cadeira (Software Quality)
+  // --- NEW: MOCK TEAMS ---
+  private teams: Team[] = [
     {
       id: 101,
-      name: 'Best Pitch',
-      description: 'Best project presentation',
-      points: 50,
-      type: 'COURSE',
-      courseId: 1,
-      icon: 'bi-mic-fill',
-      isOwner: true,
+      name: 'Alpha Team',
+      projectId: 1,
+      members: [
+        { student: this.students[0], role: 'PRODUCT_OWNER' }, // Tiago
+        { student: this.students[1], role: 'SCRUM_MASTER' }, // David
+        { student: this.students[2], role: 'DEVELOPER' }     // Ana
+      ],
+      sprints: []
     },
-  ]; // Tabelas de Ligação
+    {
+      id: 102,
+      name: 'Beta Squad',
+      projectId: 1,
+      members: [
+        { student: this.students[3], role: 'PRODUCT_OWNER' }, // João
+        { student: this.students[4], role: 'DEVELOPER' }      // Beatriz
+      ],
+      sprints: []
+    }
+  ];
 
+  // --- MOCK AWARDS ---
+  private awards: Award[] = [
+    { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', icon: 'bi-lightning-charge-fill', isOwner: false },
+    { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', icon: 'bi-layers-fill', isOwner: false },
+    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, icon: 'bi-mic-fill', isOwner: true },
+  ];
+
+  // Tabelas de Ligação
   private studentAwards: StudentAward[] = [];
   private teamAwards: TeamAward[] = [];
 
-  constructor() {} // --- GETTERS ---
+  constructor() {}
 
-  getDegrees(): Observable<Degree[]> {
-    return of(this.degrees);
-  }
-  getDegreeById(id: number): Observable<Degree | undefined> {
-    return of(this.degrees.find((d) => d.id === id));
-  }
-  getCourses(): Observable<Course[]> {
-    return of(this.courses);
-  }
-  getCourseById(id: number): Observable<Course | undefined> {
-    return of(this.courses.find((c) => c.id === id));
-  }
-  getCoursesByDegreeId(degreeId: number): Observable<Course[]> {
-    return of(this.courses.filter((c) => c.degree?.id === degreeId));
-  }
+  // --- GETTERS ---
 
-  getStudents(): Observable<StudentLite[]> {
-    return of(this.students);
-  }
-  getStudentById(id: number): Observable<StudentLite | undefined> {
-    return of(this.students.find((s) => s.id === id));
-  }
-  getTeachers(): Observable<Teacher[]> {
-    return of(this.teachers);
-  }
-  getTeacherById(id: number): Observable<Teacher | undefined> {
-    return of(this.teachers.find((t) => t.id === id));
-  }
-  getTeachersByCourseId(courseId: number): Observable<Teacher[]> {
-    return of(this.teachers.filter((t) => t.courseIds.includes(courseId)));
-  }
+  getDegrees(): Observable<Degree[]> { return of(this.degrees); }
+  getDegreeById(id: number): Observable<Degree | undefined> { return of(this.degrees.find((d) => d.id === id)); }
+  getCourses(): Observable<Course[]> { return of(this.courses); }
+  getCourseById(id: number): Observable<Course | undefined> { return of(this.courses.find((c) => c.id === id)); }
+  getCoursesByDegreeId(degreeId: number): Observable<Course[]> { return of(this.courses.filter((c) => c.degree?.id === degreeId)); }
 
-  getAllProjects(): Observable<Project[]> {
-    return of(this.projects);
-  }
-  getProjectById(id: number): Observable<Project | undefined> {
-    return of(this.projects.find((p) => p.id === id));
-  }
-  getProjectsByCourseId(courseId: number): Observable<Project[]> {
-    return of(this.projects.filter((p) => p.courseId === courseId));
-  }
+  getStudents(): Observable<StudentLite[]> { return of(this.students); }
+  getStudentById(id: number): Observable<StudentLite | undefined> { return of(this.students.find((s) => s.id === id)); }
+  getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
+  getTeacherById(id: number): Observable<Teacher | undefined> { return of(this.teachers.find((t) => t.id === id)); }
+  getTeachersByCourseId(courseId: number): Observable<Teacher[]> { return of(this.teachers.filter((t) => t.courseIds.includes(courseId))); }
 
-  getTeamsByProject(projectId: number): Observable<Team[]> {
-    return of(this.teams.filter((t) => t.projectId === projectId));
-  }
+  getAllProjects(): Observable<Project[]> { return of(this.projects); }
+  getProjectById(id: number): Observable<Project | undefined> { return of(this.projects.find((p) => p.id === id)); }
+  getProjectsByCourseId(courseId: number): Observable<Project[]> { return of(this.projects.filter((p) => p.courseId === courseId)); }
+
+  getTeamsByProject(projectId: number): Observable<Team[]> { return of(this.teams.filter((t) => t.projectId === projectId)); }
   getTeamsByCourseId(courseId: number): Observable<Team[]> {
-    // Helper para encontrar equipas de um curso (através dos projetos)
-    const projectIds = this.projects
-      .filter((p) => p.courseId === courseId)
-      .map((p) => p.id);
+    const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
 
-  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
-    return of(this.students);
-  } // Modified getAwards to return all mock awards
-
-  getAwards(): Observable<Award[]> {
-    return of(this.awards);
-  } // --- GAMIFICATION METHODS --- // Obter prémios disponíveis (Globais + Da Cadeira)
+  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> { return of(this.students); }
+  getAwards(): Observable<Award[]> { return of(this.awards); }
+  
+  // --- GAMIFICATION METHODS --- 
   getAwardsByCourse(courseId: number): Observable<Award[]> {
-    const courseAwards = this.awards.filter(
-      (a) => a.type === 'GLOBAL' || a.courseId === courseId
-    );
+    const courseAwards = this.awards.filter((a) => a.type === 'GLOBAL' || a.courseId === courseId);
     return of(courseAwards);
-  } // Obter prémios globais apenas
+  }
 
   getGlobalAwards(): Observable<Award[]> {
     return of(this.awards.filter((a) => a.type === 'GLOBAL'));
-  } // Criar Prémio Personalizado
+  }
 
-  createAward(awardData: {
-    name: string;
-    description: string;
-    points: number;
-    courseId: number;
-  }): Observable<boolean> {
-    const newId =
-      this.awards.length > 0
-        ? Math.max(...this.awards.map((a) => a.id)) + 1
-        : 1;
+  getAwardById(id: number): Observable<Award | undefined> {
+    return of(this.awards.find((a) => a.id === id));
+  }
+
+  createAward(awardData: { name: string; description: string; points: number; courseId: number; }): Observable<boolean> {
+    const newId = this.awards.length > 0 ? Math.max(...this.awards.map((a) => a.id)) + 1 : 1;
     const newAward: Award = {
       id: newId,
       name: awardData.name,
@@ -394,22 +266,15 @@ export class DataService {
       points: awardData.points,
       type: 'COURSE',
       courseId: awardData.courseId,
-      icon: undefined, // CHANGED: null to undefined
+      icon: undefined,
       isOwner: true,
     };
     this.awards.push(newAward);
     return of(true);
-  } // Atribuir a Aluno
+  }
 
-  assignAwardToStudent(
-    studentId: number,
-    awardId: number,
-    courseId: number
-  ): Observable<boolean> {
-    const newId =
-      this.studentAwards.length > 0
-        ? Math.max(...this.studentAwards.map((sa) => sa.id)) + 1
-        : 1;
+  assignAwardToStudent(studentId: number, awardId: number, courseId: number): Observable<boolean> {
+    const newId = this.studentAwards.length > 0 ? Math.max(...this.studentAwards.map((sa) => sa.id)) + 1 : 1;
     this.studentAwards.push({
       id: newId,
       studentId: studentId,
@@ -418,42 +283,33 @@ export class DataService {
       date: new Date().toISOString(),
     });
     return of(true);
-  } // Atribuir a Equipa (Cria registo na equipa E nos alunos individualmente)
+  }
 
-  assignAwardToTeam(
-    teamId: number,
-    awardId: number,
-    courseId: number
-  ): Observable<boolean> {
+  assignAwardToTeam(teamId: number, awardId: number, courseId: number): Observable<boolean> {
     const team = this.teams.find((t) => t.id === teamId);
-    if (!team) return of(false); // 1. Registo na Tabela TeamAward
+    if (!team) return of(false); 
 
-    const newTeamAwardId =
-      this.teamAwards.length > 0
-        ? Math.max(...this.teamAwards.map((ta) => ta.id)) + 1
-        : 1;
+    const newTeamAwardId = this.teamAwards.length > 0 ? Math.max(...this.teamAwards.map((ta) => ta.id)) + 1 : 1;
     this.teamAwards.push({
       id: newTeamAwardId,
       teamId: teamId,
       awardId: awardId,
       date: new Date().toISOString(),
-    }); // 2. Registo na Tabela StudentAward (para cada membro)
+    });
 
     team.members.forEach((member) => {
       this.assignAwardToStudent(member.student.id, awardId, courseId);
     });
 
     return of(true);
-  } // --- RANKINGS --- // Ranking Individual (Top Alunos)
+  }
 
+  // --- RANKINGS --- 
   getStudentRankings(): Observable<LeaderboardEntry[]> {
     const rankings: LeaderboardEntry[] = [];
 
     this.students.forEach((student) => {
-      // Soma pontos de todos os prémios atribuídos a este aluno
-      const studentAssignments = this.studentAwards.filter(
-        (sa) => sa.studentId === student.id
-      );
+      const studentAssignments = this.studentAwards.filter((sa) => sa.studentId === student.id);
       let totalPoints = 0;
       studentAssignments.forEach((sa) => {
         const award = this.awards.find((a) => a.id === sa.awardId);
@@ -462,40 +318,33 @@ export class DataService {
 
       if (totalPoints > 0) {
         rankings.push({
-          rank: 0, // Será calculado a seguir
+          rank: 0,
           name: student.name,
           points: totalPoints,
           entityType: 'STUDENT',
         });
       }
-    }); // Ordenar e atribuir rank
+    });
 
     rankings.sort((a, b) => b.points - a.points);
     rankings.forEach((entry, index) => (entry.rank = index + 1));
 
     return of(rankings);
-  } // Ranking de Equipas
+  }
 
   getTeamRankings(courseId: number): Observable<LeaderboardEntry[]> {
-    const rankings: LeaderboardEntry[] = []; // Obter equipas deste curso (via projetos)
-    const projectIds = this.projects
-      .filter((p) => p.courseId === courseId)
-      .map((p) => p.id);
-    const courseTeams = this.teams.filter((t) =>
-      projectIds.includes(t.projectId)
-    );
+    const rankings: LeaderboardEntry[] = []; 
+    const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
+    const courseTeams = this.teams.filter((t) => projectIds.includes(t.projectId));
 
     courseTeams.forEach((team) => {
-      // Soma pontos dos prémios atribuídos À EQUIPA
-      const teamAssignments = this.teamAwards.filter(
-        (ta) => ta.teamId === team.id
-      );
+      const teamAssignments = this.teamAwards.filter((ta) => ta.teamId === team.id);
       let totalPoints = 0;
 
       teamAssignments.forEach((ta) => {
         const award = this.awards.find((a) => a.id === ta.awardId);
         if (award) totalPoints += award.points;
-      }); // Se quisermos apenas pontos totais da equipa:
+      });
 
       if (totalPoints > 0) {
         rankings.push({
@@ -511,7 +360,9 @@ export class DataService {
     rankings.forEach((entry, index) => (entry.rank = index + 1));
 
     return of(rankings);
-  } // --- UPDATE METHODS ---
+  }
+
+  // --- UPDATE METHODS ---
 
   updateDegree(id: number, updatedData: { name: string }): Observable<boolean> {
     const degree = this.degrees.find((d) => d.id === id);
@@ -528,10 +379,7 @@ export class DataService {
     return of(false);
   }
 
-  updateCourse(
-    id: number,
-    updatedData: { name: string; degreeId: number }
-  ): Observable<boolean> {
+  updateCourse(id: number, updatedData: { name: string; degreeId: number }): Observable<boolean> {
     const course = this.courses.find((c) => c.id === id);
     const degree = this.degrees.find((d) => d.id === updatedData.degreeId);
 
@@ -544,20 +392,11 @@ export class DataService {
     return of(false);
   }
 
-  updateStudent(
-    id: number,
-    updatedData: { name: string; email: string; degreeId: number }
-  ): Observable<boolean> {
+  updateStudent(id: number, updatedData: { name: string; email: string; degreeId: number }): Observable<boolean> {
     const student = this.students.find((s) => s.id === id);
     if (student) {
-      const emailExists = this.students.some(
-        (s) => s.email === updatedData.email && s.id !== id
-      );
-      if (emailExists)
-        return throwError(() => ({
-          status: 409,
-          message: 'Email already exists.',
-        }));
+      const emailExists = this.students.some((s) => s.email === updatedData.email && s.id !== id);
+      if (emailExists) return throwError(() => ({ status: 409, message: 'Email already exists.', }));
 
       student.name = updatedData.name;
       student.email = updatedData.email;
@@ -567,27 +406,20 @@ export class DataService {
     return of(false);
   }
 
-  updateTeacher(
-    id: number,
-    updatedData: { name: string; email: string }
-  ): Observable<boolean> {
+  updateTeacher(id: number, updatedData: { name: string; email: string }): Observable<boolean> {
     const teacher = this.teachers.find((t) => t.id === id);
     if (teacher) {
-      const emailExists = this.teachers.some(
-        (t) => t.email === updatedData.email && t.id !== id
-      );
-      if (emailExists)
-        return throwError(() => ({
-          status: 409,
-          message: 'Email already exists.',
-        }));
+      const emailExists = this.teachers.some((t) => t.email === updatedData.email && t.id !== id);
+      if (emailExists) return throwError(() => ({ status: 409, message: 'Email already exists.', }));
 
       teacher.name = updatedData.name;
       teacher.email = updatedData.email;
       return of(true);
     }
     return of(false);
-  } // --- RELATIONSHIP METHODS ---
+  }
+
+  // --- RELATIONSHIP METHODS ---
 
   addTeacherToCourse(courseId: number, teacherId: number): Observable<boolean> {
     const teacher = this.teachers.find((t) => t.id === teacherId);
@@ -601,10 +433,7 @@ export class DataService {
     return of(false);
   }
 
-  removeTeacherFromCourse(
-    courseId: number,
-    teacherId: number
-  ): Observable<boolean> {
+  removeTeacherFromCourse(courseId: number, teacherId: number): Observable<boolean> {
     const teacher = this.teachers.find((t) => t.id === teacherId);
     if (teacher) {
       const index = teacher.courseIds.indexOf(courseId);
@@ -615,7 +444,9 @@ export class DataService {
       }
     }
     return of(false);
-  } // --- DELETE METHODS ---
+  }
+
+  // --- DELETE METHODS ---
 
   deleteDegree(id: number): Observable<boolean> {
     const index = this.degrees.findIndex((d) => d.id === id);
@@ -681,6 +512,7 @@ export class DataService {
     }
     return of(false);
   }
+
   deleteAward(name: string): Observable<boolean> {
     const index = this.awards.findIndex((a) => a.name === name);
     if (index !== -1 && this.awards[index].type === 'COURSE') {
@@ -688,15 +520,14 @@ export class DataService {
       return of(true);
     }
     return of(false);
-  } // --- CREATE METHODS ---
+  }
+
+  // --- CREATE METHODS ---
 
   createProject(projectData: any): Observable<boolean> {
     const courseId = Number(projectData.courseId);
     const relatedCourse = this.courses.find((c) => c.id === courseId);
-    const newId =
-      this.projects.length > 0
-        ? Math.max(...this.projects.map((p) => p.id)) + 1
-        : 101;
+    const newId = this.projects.length > 0 ? Math.max(...this.projects.map((p) => p.id)) + 1 : 101;
 
     const newProject: Project = {
       id: newId,
@@ -715,12 +546,10 @@ export class DataService {
 
   createTeam(request: CreateTeamRequest): Observable<boolean> {
     const hasConflict = request.members.some((m) => m.studentId === 50442);
-    if (hasConflict)
-      return throwError(() => ({ status: 409, message: 'Conflict' }));
+    if (hasConflict) return throwError(() => ({ status: 409, message: 'Conflict' }));
 
     const newMembers: TeamMember[] = request.members.map((m) => {
-      const student =
-        this.students.find((s) => s.id === m.studentId) || this.students[0];
+      const student = this.students.find((s) => s.id === m.studentId) || this.students[0];
       return { student, role: m.teamRole };
     });
 
@@ -733,5 +562,16 @@ export class DataService {
     };
     this.teams.push(newTeam);
     return of(true).pipe(delay(500));
+  }
+
+  updateAward(id: number, data: { name: string; description: string; points: number }): Observable<boolean> {
+    const award = this.awards.find((a) => a.id === id);
+    if (award && award.type === 'COURSE') {
+      award.name = data.name;
+      award.description = data.description;
+      award.points = data.points;
+      return of(true);
+    }
+    return of(false);
   }
 }

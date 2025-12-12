@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
 })
 export class StatsCardComponent {
   @Input() title!: string;
-  @Input() value!: number;
+  @Input() value!: string;
   @Input() description!: string;
   @Input() iconClass!: string;
 }

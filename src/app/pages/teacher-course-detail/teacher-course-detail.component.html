@@ -12,14 +12,14 @@
     <div class="stats-cards">
         <app-stats-card 
             title="Enrolled Students" 
-            [value]="course?.studentsCount || 0" 
+            [value]="(course?.studentsCount || 0).toString()" 
             description="this semester"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Teams" 
-            [value]="12" 
+            [value]="'12'" 
             description="formed (mock)"
             iconClass="bi bi-microsoft-teams">
         </app-stats-card>

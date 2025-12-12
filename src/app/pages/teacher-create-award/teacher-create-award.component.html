@@ -1,18 +1,12 @@
 <div class="form-page-container">
-
     <form class="card form-card" [formGroup]="awardForm" (ngSubmit)="onSubmit()">
         
         <h2 class="form-title">New Award</h2>
-        
         <p class="context-info">Create a badge to gamify your courses.</p>
 
         <div class="form-group">
             <label for="course">Course</label>
-            <select 
-                id="course"
-                formControlName="courseId" 
-                class="main-input" 
-                [class.invalid]="awardForm.get('courseId')?.invalid && awardForm.get('courseId')?.touched">
+            <select id="course" formControlName="courseId">
                 <option [ngValue]="null" disabled>Select a Course...</option>
                 @for (course of myCourses; track course.id) {
                     <option [value]="course.id">{{ course.name }}</option>
@@ -34,16 +28,16 @@
 
             <div class="form-group">
                 <label for="points">Points Value</label>
-                <input type="number" id="points" formControlName="points" placeholder="Ex: 10">
+                <input type="number" id="points" formControlName="points" placeholder="1-5">
                 @if (awardForm.get('points')?.invalid && awardForm.get('points')?.touched) {
-                    <small class="error-msg">Min 1 point.</small>
+                    <small class="error-msg">Min 1, Max 5 points.</small>
                 }
             </div>
         </div>
 
         <div class="form-group">
             <label for="desc">Description</label>
-            <input type="text" id="desc" formControlName="description" placeholder="Brief description of the achievement...">
+            <input type="text" id="desc" formControlName="description" placeholder="Brief description...">
             @if (awardForm.get('description')?.invalid && awardForm.get('description')?.touched) {
                 <small class="error-msg">Description is required.</small>
             }
@@ -55,7 +49,6 @@
             Create Award
         </button>
         
-        <a class="btn-cancel" routerLink="/teacher-dashboard">Cancel</a>
-
+        <a class="btn-cancel" routerLink="/teacher-dashboard" [queryParams]="{ tab: 'Courses' }">Cancel</a>
     </form>
 </div>

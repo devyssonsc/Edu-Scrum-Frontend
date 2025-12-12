@@ -1,0 +1,152 @@
+<div class="detail-container">
+    
+    <div class="header-row">
+        <button class="btn-back" routerLink="/teacher-dashboard" [queryParams]="{ tab: 'Awards' }">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+        <h1>Manage Award: <span class="highlight">{{ award?.name }}</span></h1>
+    </div>
+
+    <div class="stats-row">
+        <app-stats-card 
+            title="Value" 
+            [value]="(award?.points || 0).toString()" 
+            description="points earned"
+            iconClass="bi bi-star-fill">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Assignments" 
+            [value]="assignmentsCount.toString()" 
+            description="total recipients"
+            iconClass="bi bi-person-check-fill">
+        </app-stats-card>
+
+        <app-stats-card 
+            title="Type" 
+            [value]="award?.type || 'N/A'" 
+            description="award scope"
+            iconClass="bi bi-globe">
+        </app-stats-card>
+    </div>
+
+    <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="edit-section card">
+        
+        <div class="section-header">
+            <h3>Award Data</h3>
+            
+            <div class="actions" style="display: flex; gap: 1rem;">
+                @if (award?.type === 'COURSE') {
+                    <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || !editForm.dirty">
+                        Save Changes
+                    </button>
+                }
+                @if (award?.type !== 'GLOBAL') {
+                    <button type="button" class="btn btn-primary" (click)="toggleAssignForm()">
+                        Assign Award
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="form-group-main">
+            <label>Award Name</label>
+            <input type="text" formControlName="name" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+        </div>
+
+        <div class="form-group-main" style="margin-top: 1rem;">
+            <label>Description</label>
+            <input type="text" formControlName="description" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+        </div>
+
+        <div class="form-group-main" style="margin-top: 1rem;">
+            <label>Points Value</label>
+            <input type="number" formControlName="points" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+        </div>
+
+        <hr class="divider">
+
+        <h4 class="table-title">Recent Assignments</h4>
+        
+        <div class="table-container">
+            <table class="edit-table">
+                <thead>
+                    <tr>
+                        <th>Recipient</th>
+                        <th>Scope</th>
+                        @if (award?.type !== 'GLOBAL') {
+                            <th style="width: 50px;">Actions</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of assignmentHistory; track item.id) {
+                        <tr>
+                            <td>
+                                <input type="text" [value]="item.recipientName" class="table-input" readonly>
+                            </td>
+                            <td>
+                                <span class="table-input">{{ item.type }}</span>
+                            </td>
+                            @if (award?.type !== 'GLOBAL') {
+                                <td class="actions">
+                                    <i class="bi bi-trash delete-icon" (click)="deleteAssignment(item.id)"></i>
+                                </td>
+                            }
+                        </tr>
+                    }
+                    @if (assignmentHistory.length === 0) {
+                        <tr>
+                            <td [attr.colspan]="award?.type !== 'GLOBAL' ? 3 : 2" style="text-align: center; color: #999;">
+                                No assignments yet.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </form>
+
+    @if (showAssignForm) {
+        <div class="card edit-section" style="margin-top: 0;" #assignFormSection>
+            
+            <div class="section-header">
+                <h3>New Assignment</h3>
+                <button class="btn-cancel" (click)="toggleAssignForm()" style="background:none; border:none; cursor:pointer;">Cancel</button>
+            </div>
+            
+            <form [formGroup]="assignForm" (ngSubmit)="onSubmitAssignment()">
+                
+                <div class="form-group-main">
+                    <label>Recipient Type</label>
+                    <select formControlName="recipientType" (change)="onTypeChange()" class="main-input">
+                        <option value="STUDENT">Individual Student</option>
+                        <option value="TEAM">Project Team</option>
+                    </select>
+                </div>
+
+                <div class="form-group-main" style="margin-top: 1rem;">
+                    <label>Select Recipient</label>
+                    <select formControlName="recipientId" class="main-input">
+                        <option [ngValue]="null" disabled>Choose...</option>
+                        
+                        @if (assignForm.get('recipientType')?.value === 'STUDENT') {
+                            @for (s of availableStudents; track s.id) {
+                                <option [value]="s.id">{{ s.name }}</option>
+                            }
+                        } @else {
+                            @for (t of availableTeams; track t.id) {
+                                <option [value]="t.id">{{ t.name }}</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;" [disabled]="assignForm.invalid">
+                    Confirm Assignment
+                </button>
+            </form>
+        </div>
+    }
+</div>

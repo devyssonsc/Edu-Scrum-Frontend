@@ -1,12 +1,12 @@
 <div class="div-container">
     <div class="stats-cards">
-        <app-stats-card title="Degrees" [value]="countDegrees" description="registered degrees"
+        <app-stats-card title="Degrees" [value]="countDegrees.toString()" description="registered degrees"
             iconClass="bi bi-mortarboard-fill"></app-stats-card>
-        <app-stats-card title="Courses" [value]="countCourses" description="available courses"
+        <app-stats-card title="Courses" [value]="countCourses.toString()" description="available courses"
             iconClass="bi bi-book"></app-stats-card>
-        <app-stats-card title="Students" [value]="countStudents" description="enrolled students"
+        <app-stats-card title="Students" [value]="countStudents.toString()" description="enrolled students"
             iconClass="bi bi-people-fill"></app-stats-card>
-        <app-stats-card title="Teachers" [value]="countTeachers" description="active teachers"
+        <app-stats-card title="Teachers" [value]="countTeachers.toString()" description="active teachers"
             iconClass="bi bi-person-badge-fill"></app-stats-card>
     </div>
     
