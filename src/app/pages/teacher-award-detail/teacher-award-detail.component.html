@@ -23,8 +23,8 @@
         </app-stats-card>
 
         <app-stats-card 
-            title="Scope"  
-            [value]="(award?.type || 'N/A').toString()"
+            title="Scope" 
+            [value]="award?.type || 'N/A'"
             description="award type"
             iconClass="bi bi-globe">
         </app-stats-card>
@@ -34,7 +34,8 @@
         
         <div class="section-header">
             <h3>Award Data</h3>
-            <div class="actions">
+            
+            <div class="actions" style="display: flex; gap: 1rem;">
                 @if (award?.type === 'COURSE') {
                     <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || !editForm.dirty">
                         Save Changes
@@ -85,9 +86,8 @@
                                 <input type="text" [value]="item.recipientName" class="table-input" readonly>
                             </td>
                             <td>
-                                <span class="table-input" style="color: #777;">{{ item.type }}</span>
+                                <span class="table-input">{{ item.type }}</span>
                             </td>
-                            
                             @if (award?.type !== 'GLOBAL') {
                                 <td class="actions">
                                     <i class="bi bi-trash delete-icon" (click)="deleteAssignment(item.id)"></i>

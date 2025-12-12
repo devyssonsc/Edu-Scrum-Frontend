@@ -1,7 +1,5 @@
 @import "../../../styles/variables.scss";
 
-// --- O TEU CÓDIGO EXATO (MANTIDO) ---
-
 .detail-container {
     padding: 2rem;
     background-color: $light-gray;
@@ -23,17 +21,14 @@
         cursor: pointer;
         color: $dark-gray;
         transition: transform 0.2s;
-        background: none; border: none; // Reset extra para garantir
-        font-size: 1rem;
         
         &:hover { transform: translateX(-5px); }
     }
 
     h1 {
-        font-family: $font-secondary; // Usei secondary pois primary as vezes não existe no variables
+        font-family: $font-primary;
         font-size: 2rem;
         color: $dark-gray;
-        margin: 0;
         
         .highlight { color: #000; }
     }
@@ -49,10 +44,6 @@
     display: flex;
     flex-direction: column;
     padding: 2rem;
-    // Adicionado para garantir fundo branco como no teu exemplo 'card'
-    background: white; 
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     
     .section-header {
         display: flex;
@@ -65,12 +56,6 @@
             font-weight: 700;
             color: $dark-gray;
             font-size: 1.5rem;
-            margin: 0;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 1rem;
         }
     }
 }
@@ -90,11 +75,8 @@
         width: 100%;
         font-size: 1.1rem;
         padding: 0.5rem;
-        border: none;
         border-bottom: 2px solid $medium-gray;
         font-family: $font-secondary;
-        background: transparent;
-        outline: none;
         
         &:focus { border-color: $dark-gray; }
     }
@@ -102,7 +84,7 @@
 
 .divider {
     border: none;
-    border-top: 1px solid #eee; // Ajustado para ser visível
+    border-top: 1px solid $light-gray;
     margin: 2rem 0;
 }
 
@@ -110,7 +92,6 @@
     font-family: $font-secondary;
     color: $dark-gray;
     margin-bottom: 1rem;
-    font-size: 1.1rem;
 }
 
 .edit-table {
@@ -123,12 +104,12 @@
         font-family: $font-secondary;
         font-size: 0.9rem;
         color: #777;
-        border-bottom: 2px solid #eee;
+        border-bottom: 2px solid $light-gray;
     }
 
     td {
         padding: 0.5rem;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid $light-gray;
         vertical-align: middle;
     }
 
@@ -146,6 +127,12 @@
             background-color: $light-gray;
             border-color: $medium-gray;
         }
+
+        &.code-input {
+            font-weight: 700;
+            text-transform: uppercase;
+            color: $dark-gray;
+        }
     }
 
     .actions {
@@ -159,21 +146,5 @@
         transition: color 0.2s;
         
         &:hover { color: #e74c3c; }
-    }
-}
-
-
-.btn-primary {
-    background-color: #545454;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    
-    &:disabled {
-        background-color: #bdc3c7;
-        cursor: not-allowed;
     }
 }

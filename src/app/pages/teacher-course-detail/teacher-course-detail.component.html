@@ -12,7 +12,7 @@
     <div class="stats-cards">
         <app-stats-card 
             title="Enrolled Students" 
-            [value]="String(course?.studentsCount || 0)" 
+            [value]="(course?.studentsCount || 0).toString()" 
             description="this semester"
             iconClass="bi bi-people-fill">
         </app-stats-card>
