@@ -23,7 +23,7 @@
         </app-stats-card>
 
         <app-stats-card 
-            title="Scope" 
+            title="Type" 
             [value]="award?.type || 'N/A'"
             description="award type"
             iconClass="bi bi-globe">
@@ -73,7 +73,7 @@
                 <thead>
                     <tr>
                         <th>Recipient</th>
-                        <th>Type</th>
+                        <th>Scope</th>
                         @if (award?.type !== 'GLOBAL') {
                             <th style="width: 50px;">Actions</th>
                         }
