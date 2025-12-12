@@ -141,7 +141,7 @@ export class StudentDashboardComponent {
   };
 
 
-  data: any[] = this.allData.projects;
+  data: any[] = this.allData.awards;
 
   sections: string[] = ['Awards', 'Progression', 'Scores', 'Specific functions'];
 
@@ -149,7 +149,7 @@ export class StudentDashboardComponent {
 
   constructor(private router: Router) { }
 
-  selectedOption: string = this.sections[1];
+  selectedOption: string = this.sections[0];
 
   get columns(): string[] {
     if (!this.allData.degrees || this.allData.degrees.length === 0) return [];
