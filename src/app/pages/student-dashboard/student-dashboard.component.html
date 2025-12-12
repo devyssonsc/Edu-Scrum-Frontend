@@ -1,0 +1,112 @@
+<div class="div-container">
+    <div class="stats-cards">
+        <app-stats-card title="Total Score" [value]="'365'" description="points"
+            iconClass="bi bi-bar-chart-line-fill"></app-stats-card>
+        <app-stats-card title="Awards Received" [value]="'5'" [description]="'2 automatic, 3 manual'"
+            iconClass="bi bi-trophy-fill"></app-stats-card>
+        <app-stats-card title="Tasks Completed" [value]="'24'" [description]="'of 30 assigned'"
+            iconClass="bi bi-graph-up-arrow"></app-stats-card>
+        <app-stats-card title="Ranking" [value]="'#3'" [description]="'of 45 students'"
+            iconClass="bi bi-clipboard-data"></app-stats-card>
+    </div>
+
+    <app-section-selector [options]="sections" (selectedOption)="onSelectOption($event)">
+    </app-section-selector>
+
+    <div class="card show-all">
+        <div class="content">
+            <h3>{{ selectedOption }}</h3>
+
+            @if(selectedOption === 'Awards') {
+                @for(d of data; track d) {
+                    <div class="card award-card">
+                        <img [src]="d.badgeIcon" alt="Award Image" class="award-image" />
+                        <div class="award-details">
+                            <h4>{{ d.awardName }}</h4>
+                            <p>{{ d.awardDescription }}</p>
+                            <span>{{ d.projectName }} ● {{ d.assignedAt }}</span>
+                        </div>
+                        <span>+{{ d.points }} pts</span>
+                    </div>
+                }
+            }
+            @else if(selectedOption === 'Progression') {
+                @for(project of data; track project) {
+                    <div class="card project-card">
+                        <div class="project-header">
+                            <div class="project-info">
+                                <h3>{{ project.name }}</h3>
+                                <div class="project-description">{{ project.description }}</div>
+                            </div>
+                            <div class="project-progress">
+                                <span>General Progress</span>
+                                <h3>{{ getProjectProgress(project) }}%</h3>
+                            </div>
+                        </div>
+
+                        <div class="progress" role="progressbar" aria-label="Example with label" [attr.aria-valuenow]="getProjectProgress(project)"
+                            aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                            <div class="progress-bar" [style.width.%]="getProjectProgress(project)"></div>
+                        </div>
+
+                        <div class="accordion sprint-accordion" id="accordion-{{ project.id }}">
+                            @for (sprint of project.sprints; track sprint) {
+
+                            <div class="accordion-item">
+
+                                <h2 class="accordion-header" id="heading-{{ sprint.id }}">
+                                    <button
+                                        class="accordion-button collapsed d-flex flex-row justify-content-between align-items-center gap-3"
+                                        type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + sprint.id"
+                                        aria-expanded="false" [attr.aria-controls]="'collapse-' + sprint.id">
+
+                                        <div class="sprint-info d-flex flex-row align-items-center gap-2">
+                                            <i class="bi bi-layers"></i>
+                                            <span>Sprint {{ sprint.sprintNumber }} - {{ sprint.goal }}</span>
+                                        </div>
+
+                                        <span class="sprint-dates">{{ sprint.startDate }} ● {{ sprint.endDate }}</span>
+
+                                        <span class="badge {{ getSprintStatusClass(sprint) }}">
+                                            {{ getSprintStatus(sprint) }}
+                                        </span>
+
+                                    </button>
+                                </h2>
+
+                                <div id="collapse-{{ sprint.id }}" class="accordion-collapse collapse"
+                                    [attr.aria-labelledby]="'heading-' + sprint.id"
+                                    [attr.data-bs-parent]="'#accordion-' + project.id">
+
+                                    <div class="accordion-body">
+
+                                        <div class="task-list">
+                                            @for(task of sprint.tasks; track task) {
+                                            <div class="task-item d-flex flex-row justify-content-between align-items-center">
+
+                                                <i class="bi bi-card-checklist"></i>
+
+                                                <p class="task-title">{{ task.description }}</p>
+                                                <p class="task-member">{{ task.teamMemberName }}</p>
+
+                                                <span class="task-status">{{ task.status }}</span>
+                                            </div>
+                                            }
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            @else {
+                <p>Select a section to view details.</p>
+            }
+        </div>
+    </div>
+</div>
