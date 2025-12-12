@@ -378,8 +378,8 @@ export class DataService {
   } // Criar Prémio Personalizado
 
   getAwardById(id: number): Observable<Award | undefined> {
-  return of(this.awards.find(a => a.id === id));
-}
+    return of(this.awards.find((a) => a.id === id));
+  }
 
   createAward(awardData: {
     name: string;
@@ -737,5 +737,18 @@ export class DataService {
     };
     this.teams.push(newTeam);
     return of(true).pipe(delay(500));
+  }
+  updateAward(
+    id: number,
+    data: { name: string; description: string; points: number }
+  ): Observable<boolean> {
+    const award = this.awards.find((a) => a.id === id);
+    if (award && award.type === 'COURSE') {
+      award.name = data.name;
+      award.description = data.description;
+      award.points = data.points;
+      return of(true);
+    }
+    return of(false);
   }
 }
