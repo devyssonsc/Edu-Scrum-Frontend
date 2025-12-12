@@ -1,0 +1,139 @@
+@import "../../../styles/variables.scss";
+
+.div-container {
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .show-all {
+        width: 100%;
+
+        display: flex;
+        justify-content: flex-start;
+
+        padding: 20px 30px;
+
+        .content {
+            width: 100%;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 1rem;
+
+            padding-right: 10px;
+
+            .award-card {
+                width: 100%;
+                max-height: 300px;
+
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+                gap: 1rem;
+                padding: 1em;
+
+                margin-bottom: 1rem;
+
+                h4,
+                p {
+                    margin-bottom: 0;
+                }
+
+                .award-details {
+                    width: 85%;
+                }
+
+                .award-image {
+                    width: 7%;
+                    object-fit: contain;
+                }
+            }
+
+            .project-card {
+                width: 100%;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: flex-start;
+                gap: 1rem;
+
+                .project-header {
+                    width: 100%;
+
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .project-progress {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        gap: 0.5rem;
+
+                        span {
+                            font-size: 0.9rem;
+                            font-weight: 500;
+                            color: $dark-gray;
+                        }
+                    }
+                }
+
+                .sprint-accordion {
+                    width: 100%;
+
+                    .accordion-item {
+                        border-radius: 8px;
+                        overflow: hidden;
+                        margin-bottom: 0.5rem;
+                        border: 1px solid $light-gray;
+                    }
+
+                    .accordion-button {
+                        background-color: $white;
+                        font-weight: 500;
+                        padding: 1rem;
+
+                        .sprint-dates {
+                            font-size: 0.9rem;
+                            color: $dark-gray;
+                            font-weight: 500;
+                        }
+
+                        .badge {
+                            font-size: 0.8rem;
+                            opacity: 0.8;
+                        }
+                    }
+
+                    .accordion-button:not(.collapsed) {
+                        background-color: $light-gray;
+                    }
+
+                    .task-list {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.5rem;
+
+                        .task-item {
+                            background-color: $light-gray;
+                            padding: 0.75rem 1rem;
+                            border-radius: 5px;
+
+                            p {
+                                margin-bottom: 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
