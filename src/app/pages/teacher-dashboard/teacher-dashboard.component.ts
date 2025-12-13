@@ -30,6 +30,7 @@ export class TeacherDashboardComponent implements OnInit {
 
   countCourses = 0;
   countProjects = 0;
+  countAwards = 0;
 
   constructor() {}
 
@@ -79,6 +80,8 @@ export class TeacherDashboardComponent implements OnInit {
         Course: a.courseName || 'All', 
         Points: a.points
       }));
+      
+      this.countAwards = res.length; 
       
       if (this.selectedOption === 'Awards') this.data = this.awards;
     });

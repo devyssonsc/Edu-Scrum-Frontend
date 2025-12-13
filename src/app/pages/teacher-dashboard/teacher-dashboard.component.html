@@ -6,10 +6,14 @@
     </div>
 
     <div class="stats-cards">
-        <app-stats-card title="Courses" [value]="countCourses.toString()" description="active courses"
+        <app-stats-card title="Courses" [value]="countCourses.toString()" description="courses to teach"
             iconClass="bi bi-book"></app-stats-card>
+        
         <app-stats-card title="Projects" [value]="countProjects.toString()" description="all projects"
             iconClass="bi bi-kanban"></app-stats-card>
+
+        <app-stats-card title="Awards" [value]="countAwards.toString()" description="total awards"
+            iconClass="bi bi-trophy"></app-stats-card>
     </div>
     
     <app-section-selector 
