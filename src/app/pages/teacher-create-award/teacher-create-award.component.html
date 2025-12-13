@@ -37,7 +37,7 @@
 
         <div class="form-group">
             <label for="desc">Description</label>
-            <input type="text" id="desc" formControlName="description" placeholder="Brief description...">
+            <textarea id="desc" formControlName="description" placeholder="Brief description..." rows="4"></textarea>
             @if (awardForm.get('description')?.invalid && awardForm.get('description')?.touched) {
                 <small class="error-msg">Description is required.</small>
             }
