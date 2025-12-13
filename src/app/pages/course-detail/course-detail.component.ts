@@ -105,18 +105,14 @@ export class CourseDetailComponent implements OnInit {
   addTeacher() {
     const teacherId = Number(this.selectedTeacherId.value);
     
-    if (teacherId && this.courseId) {
-        this.dataService.addTeacherToCourse(this.courseId, teacherId).subscribe(success => {
-            if (success) {
-                this.loadTeachers(this.courseId!); 
-                this.selectedTeacherId.reset();
-                this.selectedTeacherId.setValue(null);
-                this.courseForm.markAsDirty();
-            } else {
-                alert('Could not add teacher.');
-            }
-        });
+    if(confirm('Are you sure you want to add this teacher?')){
+      this.httpClient.post(`${enviroments.apiUrl}/courses/${this.courseId}/teachers/${teacherId}`, {}).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
+
+        this.loadTeachers(response.id);
+       })
     }
+
   }
 
   removeTeacher(index: number) {
