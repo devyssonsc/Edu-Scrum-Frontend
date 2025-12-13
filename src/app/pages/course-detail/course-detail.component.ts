@@ -29,7 +29,7 @@ export class CourseDetailComponent implements OnInit {
   currentTeachers: Teacher[] = [];       
   selectedTeacherId = new FormControl<number | null>(null);
 
-  mockCourseData = {
+  CourseData = {
     stats: {
       studentsCount: 0,
       teachersCount: 0
@@ -63,22 +63,24 @@ export class CourseDetailComponent implements OnInit {
 
   loadCourseData(id: number) {
     this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
+      this.dataService.getCourseStats(id).subscribe((response:any) => {
       if (data) {
         this.courseName = data.name;
-        this.mockCourseData.stats.studentsCount = data.studentsCount || 0;
+        this.CourseData.stats.studentsCount = response.studentsCount || 0;
+        this.CourseData.stats.teachersCount = response.teachersCount || 0;
         
         this.courseForm.patchValue({
           name: data.name,
-          degreeId: data.degree?.id
+          degreeId: data.degreeId
         });
       }
+    });
     });
   }
 
   loadTeachers(courseId: number) {
     this.dataService.getTeachersByCourseId(courseId).subscribe(teachers => {
         this.currentTeachers = teachers;
-        this.mockCourseData.stats.teachersCount = teachers.length;
         
         const teachersArray = this.courseForm.get('teachers') as FormArray;
         teachersArray.clear();
@@ -109,7 +111,11 @@ export class CourseDetailComponent implements OnInit {
       this.httpClient.post(`${enviroments.apiUrl}/courses/${this.courseId}/teachers/${teacherId}`, {}).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
 
-        this.loadTeachers(response.id);
+        //Refresh the page to update Labels
+         const currentUrl = this.router.url;
+          this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+            this.router.navigate([currentUrl]);
+          });
        })
     }
 
