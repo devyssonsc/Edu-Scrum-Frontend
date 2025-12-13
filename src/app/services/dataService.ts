@@ -266,8 +266,15 @@ export class DataService {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
-
-  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> { return of(this.students); }
+  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
+    const course = this.courses.find(c => c.id === courseId);
+    
+    if (course && course.degree) {
+        const degreeId = course.degree.id;
+        return of(this.students.filter(s => s.degreeId === degreeId));
+    }
+    return of([]); 
+  }
   getAwards(): Observable<Award[]> { return of(this.awards); }
   
   // --- GAMIFICATION METHODS --- 
