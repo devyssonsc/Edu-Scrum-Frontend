@@ -24,6 +24,9 @@ export class StudentDetailComponent implements OnInit {
   studentId: number | null = null;
   studentName: string = '';
   allDegrees: Degree[] = [];
+  
+  availableCoursesToAdd: Course[] = [];
+  selectedCourseId = new FormControl<number | null>(null); 
 
   constructor(private httpClient: HttpClient) {
     this.studentForm = this.fb.group({
@@ -89,9 +92,40 @@ export class StudentDetailComponent implements OnInit {
     return this.studentForm.get('courses') as FormArray;
   }
 
+  // --- AÇÕES ---
+
+  addCourse() {
+    const courseId = Number(this.selectedCourseId.value);
+
+    if (courseId && this.studentId) {
+
+        this.dataService.addStudentToCourse(courseId, this.studentId).subscribe(success => {
+            if (success) {
+                this.loadData(this.studentId!);
+                this.selectedCourseId.reset();
+                this.selectedCourseId.setValue(null);
+                this.studentForm.markAsDirty();
+            } else {
+                alert('Could not enroll student in this course.');
+            }
+        });
+    }
+  }
+
   removeCourse(index: number) {
-    this.courses.removeAt(index);
-    this.studentForm.markAsDirty();
+    const courseGroup = this.courses.at(index);
+    const courseId = courseGroup.value.id;
+
+    if (this.studentId && courseId) {
+        if(confirm('Unenroll student from this course?')) {
+            this.dataService.removeStudentFromCourse(courseId, this.studentId).subscribe(success => {
+                if (success) {
+                    this.loadData(this.studentId!);
+                    this.studentForm.markAsDirty();
+                }
+            });
+        }
+    }
   }
 
   onSubmit() {

@@ -6,6 +6,7 @@
         </button>
         <h1>Manage Student: <span class="highlight">{{ studentName }}</span></h1>
     </div>
+    <br>
 
     <form [formGroup]="studentForm" (ngSubmit)="onSubmit()" class="edit-section card">
         
@@ -45,6 +46,24 @@
 
         <h4 class="table-title">Course Enrollments</h4>
         
+        <div class="add-section">
+            <div class="inline-add">
+                <select [formControl]="selectedCourseId" class="inline-select">
+                    <option [ngValue]="null" disabled>Select a course to enroll...</option>
+                    @for (c of availableCoursesToAdd; track c.id) {
+                        <option [ngValue]="c.id">{{ c.name }}</option>
+                    }
+                    @if (availableCoursesToAdd.length === 0) {
+                        <option disabled>No more courses available in this degree.</option>
+                    }
+                </select>
+                <button type="button" class="btn-icon add-btn" (click)="addCourse()" 
+                        [disabled]="!selectedCourseId.value" title="Enroll Course">
+                    <i class="bi bi-plus-circle-fill"></i>
+                </button>
+            </div>
+        </div>
+
         <div class="table-container">
             <table class="edit-table">
                 <thead>
@@ -62,6 +81,11 @@
                             <td class="actions">
                                 <i class="bi bi-trash delete-icon" (click)="removeCourse(i)"></i>
                             </td>
+                        </tr>
+                    }
+                    @if (courses.length === 0) {
+                        <tr>
+                            <td colspan="3" class="empty-row">Student is not enrolled in any courses.</td>
                         </tr>
                     }
                 </tbody>
