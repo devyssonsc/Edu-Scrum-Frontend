@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { forkJoin, Observable, of, throwError } from 'rxjs';
+import { delay, map, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../enviroments/enviroments';
 
@@ -219,8 +219,9 @@ export class DataService {
 
   getDegrees(): Observable<Degree[]> { return of(this.degrees); }
   getDegreeById(id: number): Observable<Degree | undefined> { return of(this.degrees.find((d) => d.id === id)); }
-  getCourses(): Observable<Course[]> { return of(this.courses); }
-
+  getCourses(): Observable<Course[]> { 
+      return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/courses`);
+  }
   getCourseById(id: number): Observable<Course | undefined> { 
       return of(this.courses.find(c => c.id === id)); 
   }
@@ -248,6 +249,42 @@ export class DataService {
 
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> { return of(this.students); }
   getAwards(): Observable<Award[]> { return of(this.awards); }
+
+  getAwardsByTeacher(teacherId: any) {
+  // 1️⃣ Buscar cursos do teacher
+  return this.httpClient
+    .get<Course[]>(`${enviroments.apiUrl}/teachers/${teacherId}/courses`)
+    .pipe(
+      // 2️⃣ Para cada curso, buscar os awards
+      switchMap(courses => {
+        const requests = courses.map(course =>
+          this.httpClient.get<Award[]>(
+            `${enviroments.apiUrl}/courses/${course.id}/awards`
+          )
+        );
+
+        // 3️⃣ Executa todas as requisições em paralelo
+        return forkJoin(requests);
+      }),
+
+      // 4️⃣ Junta tudo e remove globais duplicados
+      map((awardsByCourse: Award[][]) => {
+        const allAwards = awardsByCourse.flat();
+
+        const uniqueAwardsMap = new Map<number, Award>();
+
+        allAwards.forEach(award => {
+          // usa o ID como chave → elimina duplicados automaticamente
+          if (!uniqueAwardsMap.has(award.id)) {
+            uniqueAwardsMap.set(award.id, award);
+          }
+        });
+        
+        this.awards = Array.from(uniqueAwardsMap.values());
+        return this.awards;
+      })
+    );
+}
   
   // --- GAMIFICATION METHODS --- 
   getAwardsByCourse(courseId: number): Observable<Award[]> {

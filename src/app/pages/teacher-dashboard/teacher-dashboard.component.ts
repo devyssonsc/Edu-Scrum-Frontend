@@ -19,6 +19,7 @@ export class TeacherDashboardComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   teacherName: string = 'Fátima Leal';
+  teacherId: any = localStorage.getItem("id");
 
   // Data Holders
   courses: any[] = [];
@@ -74,7 +75,7 @@ export class TeacherDashboardComponent implements OnInit {
     });
 
     // 3. Awards
-    this.dataService.getAwards().subscribe(res => {
+    this.dataService.getAwardsByTeacher(this.teacherId).subscribe(res => {
       this.rawAwards = res;
       this.awards = res.map(a => ({
         id: a.id,
