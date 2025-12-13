@@ -234,12 +234,18 @@ export class DataService {
   private awards: Award[] = [
     { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', icon: 'bi-lightning-charge-fill', isOwner: false },
     { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', icon: 'bi-layers-fill', isOwner: false },
-    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, // Added courseName
+    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, 
   ];
 
-  // Tabelas de Ligação
-  private studentAwards: StudentAward[] = [];
-  private teamAwards: TeamAward[] = [];
+  // --- TABELAS DE LIGAÇÃO (MOCK) ---
+  // Inicializamos com dados para que o histórico não apareça vazio no teste
+  private studentAwards: StudentAward[] = [
+    { id: 1, studentId: 1, awardId: 3, courseId: 1, date: '2024-12-01' }
+  ];
+  
+  private teamAwards: TeamAward[] = [
+    { id: 2, teamId: 101, awardId: 3, date: '2024-12-02' }
+  ];
 
   constructor() {}
 
@@ -289,29 +295,55 @@ export class DataService {
     return of(this.awards.find((a) => a.id === id));
   }
 
-  getAllProjects(): Observable<Project[]> {
-    // Percorre todos os projetos e calcula o número real de equipas
-    const projectsWithDynamicCount = this.projects.map(p => {
-      // Conta quantas equipas têm o projectId igual ao id deste projeto
-      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
-      
-      // Retorna o projeto atualizado com a contagem certa
-      return { 
-        ...p, 
-        teamsCount: realTeamCount 
-      };
-    });
+  // --- NOVO MÉTODO: Retorna histórico de atribuições para um Award específico ---
+  getAssignmentsByAward(awardId: number): Observable<any[]> {
+    const result: any[] = [];
 
+    // 1. Atribuições a Alunos
+    this.studentAwards
+        .filter(sa => sa.awardId === awardId)
+        .forEach(sa => {
+            const student = this.students.find(s => s.id === sa.studentId);
+            result.push({
+                id: sa.id, // ID da atribuição (usado para eliminar)
+                recipientId: sa.studentId,
+                recipientName: student ? student.name : 'Unknown Student',
+                type: 'STUDENT',
+                date: sa.date
+            });
+        });
+
+    // 2. Atribuições a Equipas
+    this.teamAwards
+        .filter(ta => ta.awardId === awardId)
+        .forEach(ta => {
+            const team = this.teams.find(t => t.id === ta.teamId);
+            result.push({
+                id: ta.id, // ID da atribuição
+                recipientId: ta.teamId,
+                recipientName: team ? team.name : 'Unknown Team',
+                type: 'TEAM',
+                date: ta.date
+            });
+        });
+
+    return of(result);
+  }
+
+  getAllProjects(): Observable<Project[]> {
+    const projectsWithDynamicCount = this.projects.map(p => {
+      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
+      return { ...p, teamsCount: realTeamCount };
+    });
     return of(projectsWithDynamicCount);
   }
+  
   getProjectsByCourseId(courseId: number): Observable<Project[]> {
     const filteredProjects = this.projects.filter((p) => p.courseId === courseId);
-    
     const projectsWithDynamicCount = filteredProjects.map(p => {
       const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
       return { ...p, teamsCount: realTeamCount };
     });
-    
     return of(projectsWithDynamicCount);
   }
 
@@ -334,6 +366,8 @@ export class DataService {
     this.awards.push(newAward);
     return of(true);
   }
+
+  // --- CREATE / ASSIGN METHODS ---
 
   assignAwardToStudent(studentId: number, awardId: number, courseId: number): Observable<boolean> {
     const newId = this.studentAwards.length > 0 ? Math.max(...this.studentAwards.map((sa) => sa.id)) + 1 : 1;
@@ -359,10 +393,28 @@ export class DataService {
       date: new Date().toISOString(),
     });
 
-    team.members.forEach((member) => {
-      this.assignAwardToStudent(member.student.id, awardId, courseId);
-    });
+    return of(true);
+  }
 
+  // --- DELETE METHODS (REVOKE) ---
+  
+  revokeAssignment(assignmentId: number): Observable<boolean> {
+    // 1. Tenta remover dos prémios de estudantes
+    const sIndex = this.studentAwards.findIndex(sa => sa.id === assignmentId);
+    if (sIndex !== -1) {
+      this.studentAwards.splice(sIndex, 1);
+      return of(true);
+    }
+
+    // 2. Tenta remover dos prémios de equipa
+    const tIndex = this.teamAwards.findIndex(ta => ta.id === assignmentId);
+    if (tIndex !== -1) {
+      this.teamAwards.splice(tIndex, 1);
+      return of(true);
+    }
+
+    // Se não encontrou (pode ter sido um ID errado ou já apagado)
+    console.warn(`Assignment ID ${assignmentId} not found.`);
     return of(true);
   }
 
@@ -583,6 +635,7 @@ export class DataService {
     }
     return of(false);
   }
+  
 
   // --- CREATE METHODS ---
 
@@ -607,12 +660,9 @@ export class DataService {
   }
 
   createTeam(request: CreateTeamRequest): Observable<boolean> {
-    
-    // 1. Validar duplicados (aluno já em equipa) - MOCK EXEMPLO
-    const hasConflict = request.members.some((m) => m.studentId === 50442); // Simulação de conflito
+    const hasConflict = request.members.some((m) => m.studentId === 50442); 
     if (hasConflict) return throwError(() => ({ status: 409, message: 'Conflict' }));
 
-    // 2. Validar Regras de Negócio (1 PO, 1 SM, 1+ Dev)
     const smCount = request.members.filter(m => m.teamRole === 'SCRUM_MASTER').length;
     const poCount = request.members.filter(m => m.teamRole === 'PRODUCT_OWNER').length;
     const devCount = request.members.filter(m => m.teamRole === 'DEVELOPER').length;
@@ -647,14 +697,13 @@ export class DataService {
       award.description = data.description;
       award.points = data.points;
       
-      // Se vier um ID de curso (mesmo em string), converte e atualiza
       if (data.courseId) {
           const newCourseId = Number(data.courseId);
           const newCourse = this.courses.find(c => c.id === newCourseId);
           
           if (newCourse) {
               award.courseId = newCourseId;
-              award.courseName = newCourse.name; // IMPORTANTE: Atualiza o nome da cadeira
+              award.courseName = newCourse.name; 
           }
       }
       return of(true);
