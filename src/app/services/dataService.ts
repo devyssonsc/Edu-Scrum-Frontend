@@ -10,6 +10,7 @@ export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type TeamRole = 'PRODUCT_OWNER' | 'SCRUM_MASTER' | 'DEVELOPER';
 export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED';
 export type AwardType = 'GLOBAL' | 'COURSE';
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 
 // ==========================================
 // 2. INTERFACES
@@ -74,6 +75,15 @@ export interface Sprint {
   startDate: string;
   endDate: string;
   status: SprintStatus;
+  tasks: Task[];
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  status: TaskStatus;
+  assigneeId?: number; 
+  assigneeName?: string;
 }
 
 export interface TeamMember {
@@ -190,18 +200,34 @@ export class DataService {
         { student: this.students[1], role: 'SCRUM_MASTER' }, 
         { student: this.students[2], role: 'DEVELOPER' }     
       ],
-      sprints: []
+      sprints: [
+        {
+            id: 1,
+            name: 'Sprint 1',
+            goal: 'Setup Project Architecture',
+            startDate: '2024-10-01',
+            endDate: '2024-10-15',
+            status: 'COMPLETED',
+            tasks: [
+                { id: 1, title: 'Database Schema', status: 'DONE', assigneeId: 1, assigneeName: 'Tiago Silva' },
+                { id: 2, title: 'Auth API', status: 'DONE', assigneeId: 2, assigneeName: 'David Aroso' }
+            ]
+        },
+        {
+            id: 2,
+            name: 'Sprint 2',
+            goal: 'Frontend Basics',
+            startDate: '2024-10-16',
+            endDate: '2024-10-30',
+            status: 'ACTIVE',
+            tasks: [
+                { id: 3, title: 'Login Page', status: 'DONE', assigneeId: 3, assigneeName: 'Ana Pereira' },
+                { id: 4, title: 'Dashboard Layout', status: 'IN_PROGRESS', assigneeId: 2, assigneeName: 'David Aroso' },
+                { id: 5, title: 'User Profile', status: 'TODO', assigneeId: 1, assigneeName: 'Tiago Silva' }
+            ]
+        }
+      ]
     },
-    {
-      id: 102,
-      name: 'Beta Squad',
-      projectId: 1,
-      members: [
-        { student: this.students[3], role: 'PRODUCT_OWNER' }, 
-        { student: this.students[4], role: 'DEVELOPER' }      
-      ],
-      sprints: []
-    }
   ];
 
   // --- MOCK AWARDS ---

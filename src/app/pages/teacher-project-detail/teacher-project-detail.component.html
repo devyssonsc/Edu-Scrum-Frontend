@@ -12,18 +12,11 @@
 
     <div class="card description-card">
         <div class="desc-content">
-            <h4><i class="bi bi-info-circle-fill"></i> Description & Goals</h4>
-            <p>{{ project?.description || 'No description provided by the teacher.' }}</p>
-            
+            <h4>Description & Goals</h4>
+            <p>{{ project?.description || 'No description provided.' }}</p>
             <div class="meta-data">
-                <div class="meta-item">
-                    <i class="bi bi-calendar-event"></i>
-                    <span>Start: <strong>{{ project?.startDate }}</strong></span>
-                </div>
-                <div class="meta-item">
-                    <i class="bi bi-flag-fill"></i>
-                    <span>End: <strong>{{ project?.endDate }}</strong></span>
-                </div>
+                <div class="meta-item"><i class="bi bi-calendar-event"></i> <span>Start: <strong>{{ project?.startDate }}</strong></span></div>
+                <div class="meta-item"><i class="bi bi-flag-fill"></i> <span>End: <strong>{{ project?.endDate }}</strong></span></div>
             </div>
         </div>
     </div>
@@ -82,6 +75,9 @@
                         <i class="bi bi-x delete-btn" (click)="removeMemberFromForm(i)"></i>
                     </div>
                 }
+                @if (members.invalid && members.touched) {
+                    <small class="error-msg center">At least one member is required.</small>
+                }
             </div>
 
             <hr class="divider">
@@ -105,7 +101,12 @@
             <div class="card team-card">
                 <div class="team-header">
                     <h5>{{ team.name }}</h5>
-                    <span class="badge-count">{{ team.members.length }} members</span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span class="badge-count">{{ team.members.length }} members</span>
+                        <button class="btn-icon-small" (click)="openSprintModal(team)" title="View Sprints & Tasks">
+                            <i class="bi bi-kanban"></i> View Board
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="members-list">
@@ -120,25 +121,11 @@
                     }
                 </div>
 
-                <hr class="divider-small">
-                
                 <div class="sprints-section">
-                    <h6>Active Sprints</h6>
-                    @if (team.sprints.length > 0) {
-                        <div class="sprint-list">
-                            @for (sprint of team.sprints; track sprint.id) {
-                                <div class="sprint-item" [class.completed]="sprint.status === 'COMPLETED'">
-                                    <div class="sp-top">
-                                        <span class="sp-name">{{ sprint.name }}</span>
-                                        <span class="sp-status">{{ sprint.status }}</span>
-                                    </div>
-                                    <small class="sp-goal">{{ sprint.goal }}</small>
-                                </div>
-                            }
-                        </div>
-                    } @else {
-                        <p class="no-data">No sprints started yet.</p>
-                    }
+                    <div class="progress-mini">
+                        <div class="progress-bar" [style.width.%]="getTeamProgress(team)"></div>
+                    </div>
+                    <small style="color: #666;">Progress: {{ getTeamProgress(team) }}%</small>
                 </div>
             </div>
         }
@@ -151,3 +138,74 @@
         }
     </div>
 </div>
+
+@if (showSprintModal && selectedTeam) {
+    <div class="modal-overlay" (click)="closeSprintModal()">
+        <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h2>{{ selectedTeam.name }} - Sprint Board</h2>
+                    <p style="margin: 0; color: #666;">View detailed task progress for this team.</p>
+                </div>
+                <button class="btn-close-modal" (click)="closeSprintModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="modal-body sprint-view">
+                <div class="accordion sprint-accordion" id="accordion-modal">
+                    @for (sprint of selectedTeam.sprints; track sprint.id) {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading-{{ sprint.id }}">
+                                <button class="accordion-button collapsed d-flex justify-content-between align-items-center gap-3"
+                                        type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + sprint.id">
+                                    
+                                    <div class="sprint-info d-flex align-items-center gap-2">
+                                        <i class="bi bi-layers-fill text-primary"></i>
+                                        <strong>{{ sprint.name }}</strong>
+                                        <span class="text-muted">- {{ sprint.goal }}</span>
+                                    </div>
+
+                                    <div class="sprint-meta d-flex align-items-center gap-3">
+                                        <span class="sprint-dates">{{ sprint.startDate }} ● {{ sprint.endDate }}</span>
+                                        <span class="badge" [ngClass]="getSprintStatusClass(sprint)">
+                                            {{ getSprintStatus(sprint) }}
+                                        </span>
+                                    </div>
+                                </button>
+                            </h2>
+
+                            <div id="collapse-{{ sprint.id }}" class="accordion-collapse collapse" [attr.data-bs-parent]="'#accordion-modal'">
+                                <div class="accordion-body">
+                                    <div class="task-list">
+                                        @if (sprint.tasks && sprint.tasks.length > 0) {
+                                            @for(task of sprint.tasks; track task.id) {
+                                                <div class="task-item">
+                                                    <div class="task-left">
+                                                        <i class="bi" [ngClass]="task.status === 'DONE' ? 'bi-check-circle-fill text-success' : 'bi-circle'"></i>
+                                                        <span class="task-title" [class.done]="task.status === 'DONE'">{{ task.title }}</span>
+                                                    </div>
+                                                    <div class="task-right">
+                                                        <span class="assignee-badge" *ngIf="task.assigneeName">
+                                                            <i class="bi bi-person-fill"></i> {{ task.assigneeName }}
+                                                        </span>
+                                                        <span class="status-pill" [ngClass]="task.status">{{ task.status }}</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        } @else {
+                                            <p class="text-muted text-center py-2">No tasks in this sprint yet.</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (!selectedTeam.sprints || selectedTeam.sprints.length === 0) {
+                        <div class="empty-state">
+                            <p>No sprints defined for this team.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
