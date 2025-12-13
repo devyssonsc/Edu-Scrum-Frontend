@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
-import { DataService, Course, Project } from '../../services/dataService';
+import { DataService, Course, Project, StudentLite } from '../../services/dataService'; 
 
 @Component({
   selector: 'app-teacher-course-detail',
@@ -22,6 +22,8 @@ export class TeacherCourseDetailComponent implements OnInit {
   course: Course | undefined;
   
   projectsView: any[] = [];
+  
+  realStudentCount: number = 0;
 
   constructor() {}
 
@@ -35,10 +37,12 @@ export class TeacherCourseDetailComponent implements OnInit {
   }
 
   loadCourseData(id: number) {
+    // 1. Carrega dados básicos do curso
     this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
       this.course = data;
     });
 
+    // 2. Carrega Projetos (para o card de Projetos)
     this.dataService.getProjectsByCourseId(id).subscribe((data: Project[]) => {
       this.projectsView = data.map((p: Project) => ({
         id: p.id, 
@@ -47,6 +51,11 @@ export class TeacherCourseDetailComponent implements OnInit {
         endDate: p.endDate,
         teams: p.teamsCount
       }));
+    });
+
+    // 3. Carrega Alunos (para o card de Estudantes Inscritos)
+    this.dataService.getStudentsByCourseId(id).subscribe((students: StudentLite[]) => {
+        this.realStudentCount = students.length;
     });
   }
 

@@ -12,6 +12,7 @@ export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type TeamRole = 'PRODUCT_OWNER' | 'SCRUM_MASTER' | 'DEVELOPER';
 export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED';
 export type AwardType = 'GLOBAL' | 'COURSE';
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 
 // ==========================================
 // 2. INTERFACES
@@ -76,6 +77,15 @@ export interface Sprint {
   startDate: string;
   endDate: string;
   status: SprintStatus;
+  tasks: Task[];
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  status: TaskStatus;
+  assigneeId?: number; 
+  assigneeName?: string;
 }
 
 export interface TeamMember {
@@ -92,7 +102,7 @@ export interface Team {
   sprints: Sprint[];
 }
 
-// New interfaces for Awards
+
 export interface Award {
   id: number;
   name: string;
@@ -101,6 +111,7 @@ export interface Award {
   type: AwardType;
   icon?: string;
   courseId?: number;
+  courseName?: string; 
   isOwner?: boolean;
 }
 
@@ -177,43 +188,67 @@ export class DataService {
     },
   ];
 
-  // --- NEW: MOCK TEAMS ---
+  // --- MOCK TEAMS ---
   private teams: Team[] = [
     {
       id: 101,
       name: 'Alpha Team',
       projectId: 1,
       members: [
-        { student: this.students[0], role: 'PRODUCT_OWNER' }, // Tiago
-        { student: this.students[1], role: 'SCRUM_MASTER' }, // David
-        { student: this.students[2], role: 'DEVELOPER' }     // Ana
+        { student: this.students[0], role: 'PRODUCT_OWNER' }, 
+        { student: this.students[1], role: 'SCRUM_MASTER' }, 
+        { student: this.students[2], role: 'DEVELOPER' }     
       ],
-      sprints: []
+      sprints: [
+        {
+            id: 1,
+            name: 'Sprint 1',
+            goal: 'Setup Project Architecture',
+            startDate: '2024-10-01',
+            endDate: '2024-10-15',
+            status: 'COMPLETED',
+            tasks: [
+                { id: 1, title: 'Database Schema', status: 'DONE', assigneeId: 1, assigneeName: 'Tiago Silva' },
+                { id: 2, title: 'Auth API', status: 'DONE', assigneeId: 2, assigneeName: 'David Aroso' }
+            ]
+        },
+        {
+            id: 2,
+            name: 'Sprint 2',
+            goal: 'Frontend Basics',
+            startDate: '2024-10-16',
+            endDate: '2024-10-30',
+            status: 'ACTIVE',
+            tasks: [
+                { id: 3, title: 'Login Page', status: 'DONE', assigneeId: 3, assigneeName: 'Ana Pereira' },
+                { id: 4, title: 'Dashboard Layout', status: 'IN_PROGRESS', assigneeId: 2, assigneeName: 'David Aroso' },
+                { id: 5, title: 'User Profile', status: 'TODO', assigneeId: 1, assigneeName: 'Tiago Silva' }
+            ]
+        }
+      ]
     },
-    {
-      id: 102,
-      name: 'Beta Squad',
-      projectId: 1,
-      members: [
-        { student: this.students[3], role: 'PRODUCT_OWNER' }, // João
-        { student: this.students[4], role: 'DEVELOPER' }      // Beatriz
-      ],
-      sprints: []
-    }
   ];
 
   // --- MOCK AWARDS ---
   private awards: Award[] = [
     { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', icon: 'bi-lightning-charge-fill', isOwner: false },
     { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', icon: 'bi-layers-fill', isOwner: false },
-    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, icon: 'bi-mic-fill', isOwner: true },
+    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, 
   ];
 
 
   constructor(private httpClient: HttpClient) { }
-  // Tabelas de Ligação
-  private studentAwards: StudentAward[] = [];
-  private teamAwards: TeamAward[] = [];
+
+
+  // --- TABELAS DE LIGAÇÃO (MOCK) ---
+  private studentAwards: StudentAward[] = [
+    { id: 1, studentId: 1, awardId: 3, courseId: 1, date: '2024-12-01' }
+  ];
+  
+  private teamAwards: TeamAward[] = [
+    { id: 2, teamId: 101, awardId: 3, date: '2024-12-02' }
+  ];
+
 
 
   // --- GETTERS ---
@@ -252,6 +287,7 @@ export class DataService {
   }
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
+
   getStudentById(id: number): Observable<StudentLite | undefined> {
     return this.httpClient.get<StudentLite>(`${enviroments.apiUrl}/users/${id}`);
     }
@@ -270,17 +306,24 @@ export class DataService {
   }
 
 
-  getAllProjects(): Observable<Project[]> { return of(this.projects); }
+
   getProjectById(id: number): Observable<Project | undefined> { return of(this.projects.find((p) => p.id === id)); }
-  getProjectsByCourseId(courseId: number): Observable<Project[]> { return of(this.projects.filter((p) => p.courseId === courseId)); }
+
 
   getTeamsByProject(projectId: number): Observable<Team[]> { return of(this.teams.filter((t) => t.projectId === projectId)); }
   getTeamsByCourseId(courseId: number): Observable<Team[]> {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
-
-  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> { return of(this.students); }
+  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
+    const course = this.courses.find(c => c.id === courseId);
+    
+    if (course && course.degree) {
+        const degreeId = course.degree.id;
+        return of(this.students.filter(s => s.degreeId === degreeId));
+    }
+    return of([]); 
+  }
   getAwards(): Observable<Award[]> { return of(this.awards); }
 
   //AI generated method
@@ -334,8 +377,60 @@ export class DataService {
     return of(this.awards.find((a) => a.id === id));
   }
 
+  getAssignmentsByAward(awardId: number): Observable<any[]> {
+    const result: any[] = [];
+    this.studentAwards
+        .filter(sa => sa.awardId === awardId)
+        .forEach(sa => {
+            const student = this.students.find(s => s.id === sa.studentId);
+            result.push({
+                id: sa.id, 
+                recipientId: sa.studentId,
+                recipientName: student ? student.name : 'Unknown Student',
+                type: 'STUDENT',
+                date: sa.date
+            });
+        });
+
+    // 2. Atribuições a Equipas
+    this.teamAwards
+        .filter(ta => ta.awardId === awardId)
+        .forEach(ta => {
+            const team = this.teams.find(t => t.id === ta.teamId);
+            result.push({
+                id: ta.id, 
+                recipientId: ta.teamId,
+                recipientName: team ? team.name : 'Unknown Team',
+                type: 'TEAM',
+                date: ta.date
+            });
+        });
+
+    return of(result);
+  }
+
+  getAllProjects(): Observable<Project[]> {
+    const projectsWithDynamicCount = this.projects.map(p => {
+      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
+      return { ...p, teamsCount: realTeamCount };
+    });
+    return of(projectsWithDynamicCount);
+  }
+  
+  getProjectsByCourseId(courseId: number): Observable<Project[]> {
+    const filteredProjects = this.projects.filter((p) => p.courseId === courseId);
+    const projectsWithDynamicCount = filteredProjects.map(p => {
+      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
+      return { ...p, teamsCount: realTeamCount };
+    });
+    return of(projectsWithDynamicCount);
+  }
+
   createAward(awardData: { name: string; description: string; points: number; courseId: number; }): Observable<boolean> {
     const newId = this.awards.length > 0 ? Math.max(...this.awards.map((a) => a.id)) + 1 : 1;
+    const course = this.courses.find(c => c.id === awardData.courseId);
+    const courseName = course ? course.name : 'Unknown';
+
     const newAward: Award = {
       id: newId,
       name: awardData.name,
@@ -343,12 +438,15 @@ export class DataService {
       points: awardData.points,
       type: 'COURSE',
       courseId: awardData.courseId,
+      courseName: courseName, 
       icon: undefined,
       isOwner: true,
     };
     this.awards.push(newAward);
     return of(true);
   }
+
+  // --- CREATE / ASSIGN METHODS ---
 
   assignAwardToStudent(studentId: number, awardId: number, courseId: number): Observable<boolean> {
     const newId = this.studentAwards.length > 0 ? Math.max(...this.studentAwards.map((sa) => sa.id)) + 1 : 1;
@@ -374,10 +472,24 @@ export class DataService {
       date: new Date().toISOString(),
     });
 
-    team.members.forEach((member) => {
-      this.assignAwardToStudent(member.student.id, awardId, courseId);
-    });
+    return of(true);
+  }
 
+  // --- DELETE METHODS (REVOKE) ---
+  
+  revokeAssignment(assignmentId: number): Observable<boolean> {
+    const sIndex = this.studentAwards.findIndex(sa => sa.id === assignmentId);
+    if (sIndex !== -1) {
+      this.studentAwards.splice(sIndex, 1);
+      return of(true);
+    }
+    const tIndex = this.teamAwards.findIndex(ta => ta.id === assignmentId);
+    if (tIndex !== -1) {
+      this.teamAwards.splice(tIndex, 1);
+      return of(true);
+    }
+
+    console.warn(`Assignment ID ${assignmentId} not found.`);
     return of(true);
   }
 
@@ -521,6 +633,79 @@ export class DataService {
     return of(false);
   }
 
+  updateAward(id: number, data: { name: string; description: string; points: number; courseId?: number | string | null }): Observable<boolean> {
+    const award = this.awards.find((a) => a.id === id);
+    if (award && award.type === 'COURSE') {
+      award.name = data.name;
+      award.description = data.description;
+      award.points = data.points;
+      
+      if (data.courseId) {
+          const newCourseId = Number(data.courseId);
+          const newCourse = this.courses.find(c => c.id === newCourseId);
+          
+          if (newCourse) {
+              award.courseId = newCourseId;
+              award.courseName = newCourse.name; 
+          }
+      }
+      return of(true);
+    }
+    return of(false);
+  }
+
+  // --- MÉTODOS PARA GESTÃO DE PROJETOS E EQUIPAS ---
+
+  updateProject(id: number, data: { name: string; description: string; startDate: string; endDate: string }): Observable<boolean> {
+    const project = this.projects.find((p) => p.id === id);
+    if (project) {
+      project.name = data.name;
+      project.description = data.description;
+      project.startDate = data.startDate; // Novo
+      project.endDate = data.endDate;     // Novo
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteTeam(teamId: number): Observable<boolean> {
+    const index = this.teams.findIndex((t) => t.id === teamId);
+    if (index !== -1) {
+      this.teams.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+  removeTeamMember(teamId: number, studentId: number): Observable<boolean> {
+    const team = this.teams.find((t) => t.id === teamId);
+    if (team) {
+      const memberIndex = team.members.findIndex((m) => m.student.id === studentId);
+      if (memberIndex !== -1) {
+        team.members.splice(memberIndex, 1);
+        return of(true);
+      }
+    }
+    return of(false);
+  }
+  addTeamMember(teamId: number, studentId: number): Observable<boolean> {
+    const team = this.teams.find((t) => t.id === teamId);
+    const student = this.students.find((s) => s.id === studentId);
+
+    if (team && student) {
+      const exists = team.members.some((m) => m.student.id === studentId);
+      if (exists) {
+          return throwError(() => ({ status: 409, message: 'Student already in team' }));
+      }
+
+      team.members.push({
+        student: student,
+        role: 'DEVELOPER'
+      });
+      return of(true);
+    }
+    return of(false);
+  }
+
   // --- RELATIONSHIP METHODS ---
 
   addTeacherToCourse(courseId: number, teacherId: number): Observable<boolean> {
@@ -623,6 +808,7 @@ export class DataService {
     }
     return of(false);
   }
+  
 
   // --- CREATE METHODS ---
 
@@ -647,8 +833,19 @@ export class DataService {
   }
 
   createTeam(request: CreateTeamRequest): Observable<boolean> {
-    const hasConflict = request.members.some((m) => m.studentId === 50442);
+    const hasConflict = request.members.some((m) => m.studentId === 50442); 
     if (hasConflict) return throwError(() => ({ status: 409, message: 'Conflict' }));
+
+    const smCount = request.members.filter(m => m.teamRole === 'SCRUM_MASTER').length;
+    const poCount = request.members.filter(m => m.teamRole === 'PRODUCT_OWNER').length;
+    const devCount = request.members.filter(m => m.teamRole === 'DEVELOPER').length;
+
+    if (smCount !== 1 || poCount !== 1 || devCount < 1) {
+        return throwError(() => ({ 
+            status: 400, 
+            message: 'Invalid Team Composition. Required: 1 SM, 1 PO, 1+ Devs.' 
+        }));
+    }
 
     const newMembers: TeamMember[] = request.members.map((m) => {
       const student = this.students.find((s) => s.id === m.studentId) || this.students[0];
@@ -664,16 +861,5 @@ export class DataService {
     };
     this.teams.push(newTeam);
     return of(true).pipe(delay(500));
-  }
-
-  updateAward(id: number, data: { name: string; description: string; points: number }): Observable<boolean> {
-    const award = this.awards.find((a) => a.id === id);
-    if (award && award.type === 'COURSE') {
-      award.name = data.name;
-      award.description = data.description;
-      award.points = data.points;
-      return of(true);
-    }
-    return of(false);
   }
 }

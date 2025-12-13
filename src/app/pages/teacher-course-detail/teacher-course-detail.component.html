@@ -9,21 +9,23 @@
         </h1>
         <p class="degree-name">{{ course?.degree?.name }}</p>
     </div>
+
     <div class="stats-cards">
         <app-stats-card 
-            title="Enrolled Students" 
-            [value]="(course?.studentsCount || 0).toString()" 
-            description="this semester"
+            title="Students" 
+            [value]="realStudentCount.toString()" 
+            description="in this course"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
-            title="Teams" 
-            [value]="'12'" 
-            description="formed (mock)"
-            iconClass="bi bi-microsoft-teams">
+            title="Projects" 
+            [value]="projectsView.length.toString()" 
+            description="created in this course"
+            iconClass="bi bi-kanban">
         </app-stats-card>
     </div>
+
     <div class="card show-all">
         <div class="content">
             
