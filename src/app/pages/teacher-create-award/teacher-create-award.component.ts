@@ -50,7 +50,7 @@ export class TeacherCreateAwardComponent implements OnInit {
 
       this.httpClient.post(`${enviroments.apiUrl}/courses/${courseId}/awards`, payload).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
-        alert('The Student was successfully registered.');
+        alert('The Award was successfully registered.');
         this.router.navigate(['/teacher-dashboard'], { queryParams: { tab: 'Awards' }})
       });
 
