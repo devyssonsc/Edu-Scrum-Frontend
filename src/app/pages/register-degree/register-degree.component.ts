@@ -74,8 +74,6 @@ export class RegisterDegreeComponent implements OnInit {
     this.isSubmitted = true; 
     this.degreeForm.markAllAsTouched();
 
-    
-    
     if (this.degreeForm.valid) {
       
       const newCourses = this.degreeForm.value.courses

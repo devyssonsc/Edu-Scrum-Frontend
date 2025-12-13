@@ -196,7 +196,7 @@ export class AdminDashboardComponent implements OnInit {
 }
   loadAllData() {
     // 1. Degrees
-    this.dataService.getDegrees().subscribe(res => {
+    this.dataService.getDegreesAdmin().subscribe(res => {
       this.degrees = res.map(d => ({
         id: d.id, 
         Name: d.name,
@@ -208,7 +208,7 @@ export class AdminDashboardComponent implements OnInit {
     });
 
     // 2. Courses
-    this.dataService.getCourses().subscribe(res => {
+    this.dataService.getCoursesAdmin().subscribe(res => {
       this.courses = res.map(c => ({
         id: c.id,
         Name: c.name,
@@ -228,16 +228,25 @@ export class AdminDashboardComponent implements OnInit {
       if (this.selectedOption === 'Students') this.data = this.students;
     });
 
-    // 4. Teachers
-    this.dataService.getTeachers().subscribe(res => {
-      this.teachers = res.map(t => ({
+    // 4. Teachers (AI Generated method)
+    this.dataService.getTeachers().subscribe((res: any[]) => {
+    // Cria um array de Observables para cada professor
+    const statsObservables = res.map(t =>
+    this.dataService.getTeacherStats(t.id)
+    );
+
+    // Executa todas as requisições em paralelo
+    forkJoin(statsObservables).subscribe((statsArray: any[]) => {
+      this.teachers = res.map((t, index) => ({
         id: t.id,
         Name: t.name,
         Email: t.email,
-        Courses: t.coursesCount
+        Courses: statsArray[index].coursesCount  // pega o coursesCount correspondente
       }));
+
       if (this.selectedOption === 'Teachers') this.data = this.teachers;
     });
+  });
   }
 
   onSelectOption(event: any) {
