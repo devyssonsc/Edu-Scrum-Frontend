@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { forkJoin, Observable, of, throwError } from 'rxjs';
+import { delay, map, switchMap } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../enviroments/enviroments';
 
 // ==========================================
 // 1. ENUMS & TYPES
@@ -26,7 +28,6 @@ export interface User {
 export interface StudentLite {
   id: number;
   name: string;
-  studentNumber: string;
   email: string;
   degreeId?: number;
   courseIds: number[]; 
@@ -52,6 +53,7 @@ export interface Course {
   id: number;
   name: string;
   degree?: Degree;
+  degreeId?: number,
   degreeName?: string;
   studentsCount?: number;
   projectsCount?: number;
@@ -139,6 +141,7 @@ export interface LeaderboardEntry {
 export interface CreateTeamRequest {
   name: string;
   projectId: number;
+  groupNumber: number;
   members: { studentId: number; teamRole: TeamRole }[];
 }
 
@@ -152,22 +155,13 @@ export interface CreateTeamRequest {
 export class DataService {
   // --- MOCK DATA ---
   private degrees: Degree[] = [
-    { id: 1, name: 'Computer Engineering', coursesCount: 30, teachersCount: 15, studentsCount: 217 },
-    { id: 2, name: 'Information Systems', coursesCount: 25, teachersCount: 10, studentsCount: 150 },
   ];
 
   private courses: Course[] = [
-    { id: 1, name: 'Software Quality', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 75, projectsCount: 1 },
-    { id: 2, name: 'Artificial Intelligence', degree: this.degrees[0], degreeName: 'Computer Engineering', studentsCount: 60, projectsCount: 2 },
-    { id: 3, name: 'Project Management', degree: this.degrees[1], degreeName: 'Information Systems', studentsCount: 45, projectsCount: 1 },
   ];
 
   private students: StudentLite[] = [
-    { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt', degreeId: 1, courseIds: [1] },
-    { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt', degreeId: 1, courseIds: [1] },
-    { id: 3, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt', degreeId: 1, courseIds: [1] },
-    { id: 4, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt', degreeId: 1, courseIds: [] },
-    { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt', degreeId: 2, courseIds: [] },
+
   ];
 
   private teachers: Teacher[] = [
@@ -238,6 +232,10 @@ export class DataService {
     { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, 
   ];
 
+
+  constructor(private httpClient: HttpClient) { }
+
+
   // --- TABELAS DE LIGAÇÃO (MOCK) ---
   private studentAwards: StudentAward[] = [
     { id: 1, studentId: 1, awardId: 3, courseId: 1, date: '2024-12-01' }
@@ -247,27 +245,70 @@ export class DataService {
     { id: 2, teamId: 101, awardId: 3, date: '2024-12-02' }
   ];
 
-  constructor() {}
+
 
   // --- GETTERS ---
 
-  getDegrees(): Observable<Degree[]> { return of(this.degrees); }
-  getDegreeById(id: number): Observable<Degree | undefined> { return of(this.degrees.find((d) => d.id === id)); }
-  getCourses(): Observable<Course[]> { return of(this.courses); }
-  getCourseById(id: number): Observable<Course | undefined> { return of(this.courses.find((c) => c.id === id)); }
-  getCoursesByDegreeId(degreeId: number): Observable<Course[]> { return of(this.courses.filter((c) => c.degree?.id === degreeId)); }
+  getDegrees(): Observable<Degree[]> { 
+    return this.httpClient.get<Degree[]>(`${enviroments.apiUrl}/degrees`);
+   }
+
+  getDegreesAdmin(): Observable<Degree[]> {
+    return of(this.degrees);
+  }
+  getDegreeById(id: number): Observable<Degree | undefined> { 
+    return this.httpClient.get<Degree>(`${enviroments.apiUrl}/degrees/${id}`);
+  }
+  getDegreeStats(id: number): any{
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/degrees/${id}`);
+  }
+  getCourses(): Observable<Course[]> { 
+      return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/courses`);
+  }
+  getCoursesAdmin(): Observable<Course[]>{
+    return of(this.courses);
+  }
+  getCoursesByStudent(id: any): Observable<Course[]> {
+     return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/students/${id}/courses`);
+  }
+  getCoursesByTeacher(id: any): Observable<Course[]> {
+    return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/teachers/${id}/courses`);
+  }
+
+  getCourseById(id: number): Observable<Course | undefined> { 
+    return this.httpClient.get<Course>(`${enviroments.apiUrl}/courses/${id}`);
+  }
+  getCoursesByDegreeId(degreeId: number) {
+  return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/degrees/${degreeId}/courses`);
+  }
+  getCourseStats(id: number){
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/courses/${id}`);
+  }
+
 
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
-  getStudentById(id: number): Observable<StudentLite | undefined> { return of(this.students.find((s) => s.id === id)); }
-  
-  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
-    return of(this.students.filter(s => s.courseIds && s.courseIds.includes(courseId)));
+
+
+  getStudentById(id: number): Observable<StudentLite | undefined> {
+    return this.httpClient.get<StudentLite>(`${enviroments.apiUrl}/users/${id}`);
+    }
+  getTeachers(): Observable<Teacher[]> { 
+    return this.httpClient.get<Teacher[]>(`${enviroments.apiUrl}/users/teachers`);
   }
 
-  getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
-  getTeacherById(id: number): Observable<Teacher | undefined> { return of(this.teachers.find((t) => t.id === id)); }
-  getTeachersByCourseId(courseId: number): Observable<Teacher[]> { return of(this.teachers.filter((t) => t.courseIds.includes(courseId))); }
+  getTeacherById(id: number): Observable<Teacher | undefined> { 
+    return this.httpClient.get<Teacher>(`${enviroments.apiUrl}/users/${id}`);
+  }
+  getTeachersByCourseId(courseId: number): Observable<Teacher[]> { 
+    return this.httpClient.get<Teacher[]>(`${enviroments.apiUrl}/users/courses/${courseId}/teachers`);
+  }
+  getTeacherStats(id: number): any{
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/teachers/${id}`);
+  }
+
+
+
   getProjectById(id: number): Observable<Project | undefined> { return of(this.projects.find((p) => p.id === id)); }
 
 
@@ -276,8 +317,56 @@ export class DataService {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
-  
+
+  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
+  /*   const course = this.courses.find(c => c.id === courseId);
+    
+    if (course && course.degree) {
+        const degreeId = course.degree.id;
+        return of(this.students.filter(s => s.degreeId === degreeId));
+    }
+    return of([]);  */
+    return this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/courses/${courseId}/students`);
+  }
+
   getAwards(): Observable<Award[]> { return of(this.awards); }
+
+  //AI generated method
+  getAwardsByTeacher(teacherId: any) {
+  // 1️⃣ Buscar cursos do teacher
+  return this.httpClient
+    .get<Course[]>(`${enviroments.apiUrl}/teachers/${teacherId}/courses`)
+    .pipe(
+      // 2️⃣ Para cada curso, buscar os awards
+      switchMap(courses => {
+        const requests = courses.map(course =>
+          this.httpClient.get<Award[]>(
+            `${enviroments.apiUrl}/courses/${course.id}/awards`
+          )
+        );
+
+        // 3️⃣ Executa todas as requisições em paralelo
+        return forkJoin(requests);
+      }),
+
+      // 4️⃣ Junta tudo e remove globais duplicados
+      map((awardsByCourse: Award[][]) => {
+        const allAwards = awardsByCourse.flat();
+
+        const uniqueAwardsMap = new Map<number, Award>();
+
+        allAwards.forEach(award => {
+          // usa o ID como chave → elimina duplicados automaticamente
+          if (!uniqueAwardsMap.has(award.id)) {
+            uniqueAwardsMap.set(award.id, award);
+          }
+        });
+        
+        
+        return Array.from(uniqueAwardsMap.values());
+      })
+    );
+}
   
   // --- GAMIFICATION METHODS --- 
   getAwardsByCourse(courseId: number): Observable<Award[]> {
@@ -462,6 +551,31 @@ export class DataService {
     rankings.forEach((entry, index) => (entry.rank = index + 1));
 
     return of(rankings);
+  }
+
+  // --- SETTERS ---
+
+  setDegrees(degrees: Degree[]){
+    this.degrees = degrees;
+  }
+
+  setCourses(courses: Course[]){
+    this.courses = courses;
+  }
+
+  setStudents(students: StudentLite[]){
+    this.students = students;
+  }
+
+  setTeachers(teachers: Teacher[]){
+     this.teachers = teachers.map(t => ({
+    ...t,
+    courseIds: t.courseIds ?? []
+  }));
+  }
+
+  setAwards(awards: Award[]){
+    this.awards = awards;
   }
 
   // --- UPDATE METHODS ---

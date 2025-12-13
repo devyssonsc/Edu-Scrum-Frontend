@@ -45,6 +45,7 @@ export class LoginComponent {
       this.httpClient.post(`${enviroments.apiUrl}/auth/login`, this.loginForm.value).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
         localStorage.setItem('token', response.token);
+        localStorage.setItem('id', response.id);
         this.redirectUser(response.role);
        })
        

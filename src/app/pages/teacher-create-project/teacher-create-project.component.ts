@@ -1,8 +1,11 @@
+
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataService, Course } from '../../services/dataService';
+import { HttpClient } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-teacher-create-project',
@@ -22,7 +25,7 @@ export class TeacherCreateProjectComponent implements OnInit {
   courseId: number | null = null; 
   courseName: string = '';
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.projectForm = this.fb.group({
       name: ['', Validators.required],
       startDate: ['', Validators.required],
@@ -68,15 +71,20 @@ export class TeacherCreateProjectComponent implements OnInit {
         endDate: this.projectForm.value.endDate,
         description: this.projectForm.value.description
       };
+      
+      console.log('Formulário Válido:', this.projectForm.value);
+      this.httpClient.post(`${enviroments.apiUrl}/courses/${newProject.courseId}/projects`, newProject).subscribe((response: any) => {
+      console.log("Resposta do Servidor:" + response)
 
-      this.dataService.createProject(newProject).subscribe((success: boolean) => {
-        if (success) {
-          alert('Project created successfully!');
+       this.dataService.createProject(newProject).subscribe((success: boolean) => {
+         if (success) {
+           alert('Project created successfully!');
 
-          this.router.navigate(['/teacher-dashboard/course', this.courseId]);
-        }
-      });
+           this.router.navigate(['/teacher-dashboard/course', this.courseId]);
+         }
 
+       });
+    });
     } else {
       this.projectForm.markAllAsTouched();
     }

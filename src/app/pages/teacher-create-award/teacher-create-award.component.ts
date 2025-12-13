@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataService, Course } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-teacher-create-award',
@@ -20,7 +22,7 @@ export class TeacherCreateAwardComponent implements OnInit {
   awardForm: FormGroup;
   myCourses: Course[] = [];
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.awardForm = this.fb.group({
       courseId: [null, Validators.required],
       name: ['', Validators.required],
@@ -38,22 +40,21 @@ export class TeacherCreateAwardComponent implements OnInit {
   onSubmit() {
     if (this.awardForm.valid) {
       const formValue = this.awardForm.value;
-      
+      const courseId = Number(formValue.courseId)
+
       const payload = {
         name: formValue.name,
         description: formValue.description,
         points: Number(formValue.points),
-        courseId: Number(formValue.courseId)
       };
 
-      this.dataService.createAward(payload).subscribe(success => {
-        if (success) {
-          alert('Award created successfully!');
-          this.router.navigate(['/teacher-dashboard'], { queryParams: { tab: 'Awards' } });
-        } else {
-          alert('Error creating award.');
-        }
+      this.httpClient.post(`${enviroments.apiUrl}/courses/${courseId}/awards`, payload).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
+        alert('The Student was successfully registered.');
+        this.router.navigate(['/teacher-dashboard'], { queryParams: { tab: 'Awards' }})
       });
+
+      
     } else {
       this.awardForm.markAllAsTouched();
     }

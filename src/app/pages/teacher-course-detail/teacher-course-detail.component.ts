@@ -54,8 +54,8 @@ export class TeacherCourseDetailComponent implements OnInit {
     });
 
     // 3. Carrega Alunos (para o card de Estudantes Inscritos)
-    this.dataService.getStudentsByCourseId(id).subscribe((students: StudentLite[]) => {
-        this.realStudentCount = students.length;
+    this.dataService.getCourseStats(id).subscribe((res: any) => {
+        this.realStudentCount = res.studentsCount;
     });
   }
 

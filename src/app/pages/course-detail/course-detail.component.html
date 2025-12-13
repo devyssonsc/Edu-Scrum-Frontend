@@ -10,14 +10,14 @@
     <div class="stats-row">
         <app-stats-card 
             title="Students" 
-            [value]="mockCourseData.stats.studentsCount.toString()" 
+            [value]="CourseData.stats.studentsCount.toString()" 
             description="enrolled"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Teaching Team" 
-            [value]="mockCourseData.stats.teachersCount.toString()" 
+            [value]="CourseData.stats.teachersCount.toString()" 
             description="teachers"
             iconClass="bi bi-person-badge-fill">
         </app-stats-card>
@@ -65,6 +65,8 @@
                         [disabled]="!selectedTeacherId.value" title="Add Teacher">
                     <i class="bi bi-plus-circle-fill"></i>
                 </button>
+
+                
             </div>
         </div>
         
@@ -99,6 +101,7 @@
                 </tbody>
             </table>
         </div>
+
 
     </form>
 </div>

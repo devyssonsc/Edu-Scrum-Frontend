@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Course, Degree, Teacher } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-course-detail',
@@ -27,14 +29,14 @@ export class CourseDetailComponent implements OnInit {
   currentTeachers: Teacher[] = [];       
   selectedTeacherId = new FormControl<number | null>(null);
 
-  mockCourseData = {
+  CourseData = {
     stats: {
       studentsCount: 0,
       teachersCount: 0
     }
   };
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
       degreeId: [null, Validators.required],
@@ -61,22 +63,24 @@ export class CourseDetailComponent implements OnInit {
 
   loadCourseData(id: number) {
     this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
+      this.dataService.getCourseStats(id).subscribe((response:any) => {
       if (data) {
         this.courseName = data.name;
-        this.mockCourseData.stats.studentsCount = data.studentsCount || 0;
+        this.CourseData.stats.studentsCount = response.studentsCount || 0;
+        this.CourseData.stats.teachersCount = response.teachersCount || 0;
         
         this.courseForm.patchValue({
           name: data.name,
-          degreeId: data.degree?.id
+          degreeId: data.degreeId
         });
       }
+    });
     });
   }
 
   loadTeachers(courseId: number) {
     this.dataService.getTeachersByCourseId(courseId).subscribe(teachers => {
         this.currentTeachers = teachers;
-        this.mockCourseData.stats.teachersCount = teachers.length;
         
         const teachersArray = this.courseForm.get('teachers') as FormArray;
         teachersArray.clear();
@@ -103,18 +107,18 @@ export class CourseDetailComponent implements OnInit {
   addTeacher() {
     const teacherId = Number(this.selectedTeacherId.value);
     
-    if (teacherId && this.courseId) {
-        this.dataService.addTeacherToCourse(this.courseId, teacherId).subscribe(success => {
-            if (success) {
-                this.loadTeachers(this.courseId!); 
-                this.selectedTeacherId.reset();
-                this.selectedTeacherId.setValue(null);
-                this.courseForm.markAsDirty();
-            } else {
-                alert('Could not add teacher.');
-            }
-        });
+    if(confirm('Are you sure you want to add this teacher?')){
+      this.httpClient.post(`${enviroments.apiUrl}/courses/${this.courseId}/teachers/${teacherId}`, {}).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
+
+        //Refresh the page to update Labels
+         const currentUrl = this.router.url;
+          this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+            this.router.navigate([currentUrl]);
+          });
+       })
     }
+
   }
 
   removeTeacher(index: number) {
@@ -138,17 +142,13 @@ export class CourseDetailComponent implements OnInit {
     if (this.courseForm.valid && this.courseId) {
       const payload = {
         name: this.courseForm.value.name,
-        degreeId: Number(this.courseForm.value.degreeId)
       };
 
-      this.dataService.updateCourse(this.courseId, payload).subscribe(success => {
-        if (success) {
-          alert('Course updated successfully!');
-          this.router.navigate(['/admin-dashboard']);
-        } else {
-          alert('Error updating course.');
-        }
-      });
+      this.httpClient.put(`${enviroments.apiUrl}/courses/${this.courseId}`, payload).subscribe((response: any) => {
+              console.log('Resposta do servidor:', response);
+
+              //this.router.navigate(['/admin-dashboard']);
+            });
     }
   }
 }

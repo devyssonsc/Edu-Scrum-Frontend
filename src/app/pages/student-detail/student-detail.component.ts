@@ -1,8 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { DataService, StudentLite, Degree, Course } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
+
 
 @Component({
   selector: 'app-student-detail',
@@ -26,7 +30,7 @@ export class StudentDetailComponent implements OnInit {
   availableCoursesToAdd: Course[] = [];
   selectedCourseId = new FormControl<number | null>(null); 
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.studentForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -53,22 +57,30 @@ export class StudentDetailComponent implements OnInit {
   }
 
   loadData(id: number) {
+    this.dataService.getDegrees().subscribe(degrees => {
+      this.allDegrees = degrees;
+    });
     this.dataService.getStudentById(id).subscribe((student: StudentLite | undefined) => {
       if (student) {
         this.studentName = student.name;
 
+        console.log(student)
         this.studentForm.patchValue({
           name: student.name,
           email: student.email,
           degreeId: student.degreeId 
         });
         
+
         if (student.degreeId) {
             this.loadStudentCourses(student.degreeId, student.courseIds || []);
         }
+
+        this.loadCourses();
       }
     });
   }
+
 
   loadStudentCourses(degreeId: number, enrolledCourseIds: number[]) {
     this.dataService.getCoursesByDegreeId(degreeId).subscribe(degreeCourses => {
@@ -87,7 +99,21 @@ export class StudentDetailComponent implements OnInit {
                 grade: ['---']
             }));
         });
+      });}
+
+      
+    loadCourses() {
+      const coursesArray = this.studentForm.get('courses') as FormArray;
+      coursesArray.clear();
+
+      this.dataService.getCoursesByStudent(this.studentId).subscribe(enrollments => {
+      enrollments.forEach(c => {
+      const group = this.fb.group({
+        name: [c.name]
+      });
+      coursesArray.push(group);
     });
+  });
   }
 
   get courses() {
@@ -139,22 +165,11 @@ export class StudentDetailComponent implements OnInit {
         degreeId: Number(this.studentForm.value.degreeId)
       };
 
-      this.dataService.updateStudent(this.studentId, payload).subscribe({
-        next: (success) => {
-            if(success) {
-                alert('Student updated successfully!');
-                this.router.navigate(['/admin-dashboard']);
-            }
-        },
-        error: (err) => {
-            if (err.status === 409) {
-                alert('Error: This email is already assigned to another student.');
-                this.studentForm.get('email')?.setErrors({ 'duplicate': true });
-            } else {
-                alert('An error occurred while updating the student.');
-            }
-        }
+      this.httpClient.put(`${enviroments.apiUrl}/users/students/${this.studentId}`, payload).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
       });
+
+      
     }
   }
 }
