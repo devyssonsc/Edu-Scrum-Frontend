@@ -30,6 +30,7 @@ export interface StudentLite {
   name: string;
   email: string;
   degreeId?: number;
+  courseIds: number[]; 
 }
 
 export interface Degree {
@@ -160,11 +161,6 @@ export class DataService {
   ];
 
   private students: StudentLite[] = [
-    { id: 1, name: 'Tiago Silva', email: '50440@upt.pt', degreeId: 1 },
-    { id: 2, name: 'David Aroso', email: '50441@upt.pt', degreeId: 1 },
-    { id: 3, name: 'Ana Pereira', email: '50442@upt.pt', degreeId: 1 },
-    { id: 4, name: 'João Santos', email: '50443@upt.pt', degreeId: 1 },
-    { id: 5, name: 'Beatriz Costa', email: '50444@upt.pt', degreeId: 2 }
 
   ];
 
@@ -289,7 +285,10 @@ export class DataService {
     return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/courses/${id}`);
   }
 
+
+
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
+
 
   getStudentById(id: number): Observable<StudentLite | undefined> {
     return this.httpClient.get<StudentLite>(`${enviroments.apiUrl}/users/${id}`);
@@ -318,6 +317,7 @@ export class DataService {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
+
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
   /*   const course = this.courses.find(c => c.id === courseId);
     
@@ -328,6 +328,7 @@ export class DataService {
     return of([]);  */
     return this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/courses/${courseId}/students`);
   }
+
   getAwards(): Observable<Award[]> { return of(this.awards); }
 
   //AI generated method
@@ -396,7 +397,6 @@ export class DataService {
             });
         });
 
-    // 2. Atribuições a Equipas
     this.teamAwards
         .filter(ta => ta.awardId === awardId)
         .forEach(ta => {
@@ -492,8 +492,6 @@ export class DataService {
       this.teamAwards.splice(tIndex, 1);
       return of(true);
     }
-
-    console.warn(`Assignment ID ${assignmentId} not found.`);
     return of(true);
   }
 
@@ -665,8 +663,8 @@ export class DataService {
     if (project) {
       project.name = data.name;
       project.description = data.description;
-      project.startDate = data.startDate; // Novo
-      project.endDate = data.endDate;     // Novo
+      project.startDate = data.startDate;
+      project.endDate = data.endDate;
       return of(true);
     }
     return of(false);
@@ -731,6 +729,41 @@ export class DataService {
       if (index > -1) {
         teacher.courseIds.splice(index, 1);
         teacher.coursesCount = teacher.courseIds.length;
+        return of(true);
+      }
+    }
+    return of(false);
+  }
+
+  // NOVOS MÉTODOS PARA ALUNOS
+  addStudentToCourse(courseId: number, studentId: number): Observable<boolean> {
+    const student = this.students.find(s => s.id === studentId);
+    if (student) {
+      if (!student.courseIds) student.courseIds = [];
+      if (!student.courseIds.includes(courseId)) {
+        student.courseIds.push(courseId);
+        
+        // Atualizar contador no curso (opcional mas recomendado)
+        const course = this.courses.find(c => c.id === courseId);
+        if(course) course.studentsCount = (course.studentsCount || 0) + 1;
+
+        return of(true);
+      }
+    }
+    return of(false);
+  }
+
+  removeStudentFromCourse(courseId: number, studentId: number): Observable<boolean> {
+    const student = this.students.find(s => s.id === studentId);
+    if (student && student.courseIds) {
+      const index = student.courseIds.indexOf(courseId);
+      if (index > -1) {
+        student.courseIds.splice(index, 1);
+        
+        // Atualizar contador no curso
+        const course = this.courses.find(c => c.id === courseId);
+        if(course && (course.studentsCount || 0) > 0) course.studentsCount!--;
+
         return of(true);
       }
     }
@@ -867,3 +900,6 @@ export class DataService {
     return of(true).pipe(delay(500));
   }
 }
+
+
+

@@ -1,10 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { DataService, StudentLite, Degree, Course } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+
 
 @Component({
   selector: 'app-student-detail',
@@ -24,6 +26,9 @@ export class StudentDetailComponent implements OnInit {
   studentId: number | null = null;
   studentName: string = '';
   allDegrees: Degree[] = [];
+  
+  availableCoursesToAdd: Course[] = [];
+  selectedCourseId = new FormControl<number | null>(null); 
 
   constructor(private httpClient: HttpClient) {
     this.studentForm = this.fb.group({
@@ -66,32 +71,89 @@ export class StudentDetailComponent implements OnInit {
           degreeId: student.degreeId 
         });
         
+
+        if (student.degreeId) {
+            this.loadStudentCourses(student.degreeId, student.courseIds || []);
+        }
+
         this.loadCourses();
       }
     });
   }
 
-  loadCourses() {
-    const coursesArray = this.studentForm.get('courses') as FormArray;
-    coursesArray.clear();
 
-    this.dataService.getCoursesByStudent(this.studentId).subscribe(enrollments => {
-    enrollments.forEach(c => {
-    const group = this.fb.group({
-      name: [c.name]
+  loadStudentCourses(degreeId: number, enrolledCourseIds: number[]) {
+    this.dataService.getCoursesByDegreeId(degreeId).subscribe(degreeCourses => {
+        
+        this.availableCoursesToAdd = degreeCourses.filter(c => !enrolledCourseIds.includes(c.id));
+
+        const coursesArray = this.studentForm.get('courses') as FormArray;
+        coursesArray.clear();
+
+        const enrolledCourses = degreeCourses.filter(c => enrolledCourseIds.includes(c.id));
+
+        enrolledCourses.forEach(c => {
+            coursesArray.push(this.fb.group({
+                id: [c.id], 
+                name: [c.name],
+                grade: ['---']
+            }));
+        });
+      });}
+
+      
+    loadCourses() {
+      const coursesArray = this.studentForm.get('courses') as FormArray;
+      coursesArray.clear();
+
+      this.dataService.getCoursesByStudent(this.studentId).subscribe(enrollments => {
+      enrollments.forEach(c => {
+      const group = this.fb.group({
+        name: [c.name]
+      });
+      coursesArray.push(group);
     });
-    coursesArray.push(group);
   });
-});
   }
 
   get courses() {
     return this.studentForm.get('courses') as FormArray;
   }
 
+  // --- AÇÕES ---
+
+  addCourse() {
+    const courseId = Number(this.selectedCourseId.value);
+
+    if (courseId && this.studentId) {
+
+        this.dataService.addStudentToCourse(courseId, this.studentId).subscribe(success => {
+            if (success) {
+                this.loadData(this.studentId!);
+                this.selectedCourseId.reset();
+                this.selectedCourseId.setValue(null);
+                this.studentForm.markAsDirty();
+            } else {
+                alert('Could not enroll student in this course.');
+            }
+        });
+    }
+  }
+
   removeCourse(index: number) {
-    this.courses.removeAt(index);
-    this.studentForm.markAsDirty();
+    const courseGroup = this.courses.at(index);
+    const courseId = courseGroup.value.id;
+
+    if (this.studentId && courseId) {
+        if(confirm('Unenroll student from this course?')) {
+            this.dataService.removeStudentFromCourse(courseId, this.studentId).subscribe(success => {
+                if (success) {
+                    this.loadData(this.studentId!);
+                    this.studentForm.markAsDirty();
+                }
+            });
+        }
+    }
   }
 
   onSubmit() {
