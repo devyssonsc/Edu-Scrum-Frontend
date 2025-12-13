@@ -21,6 +21,7 @@ export class DegreeDetailComponent implements OnInit {
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
 
+  coursesArray: any
   degreeForm: FormGroup;
   degreeId: number | null = null;
   degreeName: string = '';
@@ -56,32 +57,32 @@ export class DegreeDetailComponent implements OnInit {
 
   loadDataById(id: number) {
     this.dataService.getDegreeById(id).subscribe(degree => {
+      this.dataService.getDegreeStats(id).subscribe((response:any) => {
         if (degree) {
-            this.stats.studentsCount = degree.studentsCount || 0;
-            this.stats.teachersCount = degree.teachersCount || 0;
-            this.stats.coursesCount = degree.coursesCount || 0;
+            this.stats.coursesCount = response.coursesCount
+            this.stats.studentsCount = response.studentsCount
+            this.stats.teachersCount = response.teachersCount
 
             this.degreeName = degree.name;
-
             this.degreeForm.patchValue({ name: degree.name });
             this.loadCourses(id);
         }
     });
+    });
   }
 
   loadCourses(degreeId: number) {
-    const cadeirasArray = this.degreeForm.get('cadeiras') as FormArray;
-    cadeirasArray.clear();
-    
-    
+    this.coursesArray = this.degreeForm.get('cadeiras') as FormArray;
+    this.coursesArray.clear();
 
     this.dataService.getCoursesByDegreeId(degreeId).subscribe(courses => {
         console.log(courses);
         courses.forEach(c => {
             const group = this.fb.group({
+                id: [c.id],
                 name: [c.name, Validators.required]
             });
-            cadeirasArray.push(group);
+            this.coursesArray.push(group);
         });
     });
   }
@@ -90,6 +91,13 @@ export class DegreeDetailComponent implements OnInit {
     return this.degreeForm.get('cadeiras') as FormArray;
   }
 
+  moveToCoursePage(index: number){
+
+    const courseGroup = this.coursesArray.at(index) as FormGroup;
+    const courseId = courseGroup.get('id')?.value;
+
+    this.router.navigate(['/admin-dashboard/course', courseId]); 
+  }
   removeCadeira(index: number) {
     this.cadeiras.removeAt(index);
     this.degreeForm.markAsDirty(); 
