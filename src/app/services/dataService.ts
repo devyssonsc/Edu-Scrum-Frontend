@@ -295,7 +295,9 @@ export class DataService {
   }
 
 
+
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
+
 
   getStudentById(id: number): Observable<StudentLite | undefined> {
     return this.httpClient.get<StudentLite>(`${enviroments.apiUrl}/users/${id}`);

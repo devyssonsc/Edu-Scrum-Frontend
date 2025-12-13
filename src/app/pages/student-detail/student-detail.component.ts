@@ -6,6 +6,7 @@ import { DataService, StudentLite, Degree, Course } from '../../services/dataSer
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
+
 @Component({
   selector: 'app-student-detail',
   standalone: true,
@@ -69,23 +70,49 @@ export class StudentDetailComponent implements OnInit {
           degreeId: student.degreeId 
         });
         
+
+        if (student.degreeId) {
+            this.loadStudentCourses(student.degreeId, student.courseIds || []);
+        }
+
         this.loadCourses();
       }
     });
   }
 
-  loadCourses() {
-    const coursesArray = this.studentForm.get('courses') as FormArray;
-    coursesArray.clear();
 
-    this.dataService.getCoursesByStudent(this.studentId).subscribe(enrollments => {
-    enrollments.forEach(c => {
-    const group = this.fb.group({
-      name: [c.name]
+  loadStudentCourses(degreeId: number, enrolledCourseIds: number[]) {
+    this.dataService.getCoursesByDegreeId(degreeId).subscribe(degreeCourses => {
+        
+        this.availableCoursesToAdd = degreeCourses.filter(c => !enrolledCourseIds.includes(c.id));
+
+        const coursesArray = this.studentForm.get('courses') as FormArray;
+        coursesArray.clear();
+
+        const enrolledCourses = degreeCourses.filter(c => enrolledCourseIds.includes(c.id));
+
+        enrolledCourses.forEach(c => {
+            coursesArray.push(this.fb.group({
+                id: [c.id], 
+                name: [c.name],
+                grade: ['---']
+            }));
+        });
+      });}
+
+      
+    loadCourses() {
+      const coursesArray = this.studentForm.get('courses') as FormArray;
+      coursesArray.clear();
+
+      this.dataService.getCoursesByStudent(this.studentId).subscribe(enrollments => {
+      enrollments.forEach(c => {
+      const group = this.fb.group({
+        name: [c.name]
+      });
+      coursesArray.push(group);
     });
-    coursesArray.push(group);
   });
-});
   }
 
   get courses() {
