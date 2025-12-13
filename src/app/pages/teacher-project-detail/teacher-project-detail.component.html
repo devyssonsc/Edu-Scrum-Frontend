@@ -171,9 +171,6 @@
                                 <span>{{ m.student.name }}</span>
                             </div>
                             
-                            @if (m.role === 'DEVELOPER') {
-                                <i class="bi bi-x-circle remove-icon" (click)="removeMember(team, m.student.id)" title="Remove Developer"></i>
-                            }
                         </div>
                     }
                 </div>
@@ -247,7 +244,7 @@
                                     
                                     <div class="sprint-info d-flex align-items-center gap-2">
                                         <i class="bi bi-layers-fill text-primary"></i>
-                                        <strong>{{ sprint.name }}</strong>
+                                        <strong>{{ sprint.finalGoal }}</strong>
                                         <span class="text-muted">- {{ sprint.goal }}</span>
                                     </div>
 
@@ -268,7 +265,7 @@
                                                 <div class="task-item">
                                                     <div class="task-left">
                                                         <i class="bi" [ngClass]="task.status === 'DONE' ? 'bi-check-circle-fill text-success' : 'bi-circle'"></i>
-                                                        <span class="task-title" [class.done]="task.status === 'DONE'">{{ task.title }}</span>
+                                                        <span class="task-title" [class.done]="task.status === 'DONE'">{{ task.description }}</span>
                                                     </div>
                                                     <div class="task-right">
                                                         <span class="assignee-badge" *ngIf="task.assigneeName">

@@ -93,6 +93,7 @@ export class TeacherProjectDetailComponent implements OnInit {
   loadData(projectId: number) {
     this.dataService.getProjectById(projectId).subscribe(p => {
       this.project = p;
+      console.log('PROJECT:', p);
       
       if (this.project) {
         this.editProjectForm.patchValue({
@@ -101,6 +102,7 @@ export class TeacherProjectDetailComponent implements OnInit {
           startDate: this.project.startDate,
           endDate: this.project.endDate
         });
+        
         if (p?.courseId) this.loadStudents(p.courseId);
       }
     });

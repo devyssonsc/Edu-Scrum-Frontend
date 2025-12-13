@@ -124,21 +124,22 @@ export class StudentDetailComponent implements OnInit {
 
   addCourse() {
     const courseId = Number(this.selectedCourseId.value);
+    if(confirm('Are you sure you want to add this course?')){
+      if (courseId && this.studentId) {
 
-    if (courseId && this.studentId) {
+        this.httpClient.post(`${enviroments.apiUrl}/courses/${courseId}/students/${this.studentId}`, {}).subscribe(r => {
+          console.log('Resposta do servidor:', r);
+            //Refresh the page to update Courses
+            const currentUrl = this.router.url;
+            this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+            this.router.navigate([currentUrl]);
+          });
+          });
+        }
 
-        this.dataService.addStudentToCourse(courseId, this.studentId).subscribe(success => {
-            if (success) {
-                this.loadData(this.studentId!);
-                this.selectedCourseId.reset();
-                this.selectedCourseId.setValue(null);
-                this.studentForm.markAsDirty();
-            } else {
-                alert('Could not enroll student in this course.');
-            }
-        });
+
+      }
     }
-  }
 
   removeCourse(index: number) {
     const courseGroup = this.courses.at(index);
