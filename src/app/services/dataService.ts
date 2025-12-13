@@ -256,10 +256,8 @@ export class DataService {
   getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
   getTeacherById(id: number): Observable<Teacher | undefined> { return of(this.teachers.find((t) => t.id === id)); }
   getTeachersByCourseId(courseId: number): Observable<Teacher[]> { return of(this.teachers.filter((t) => t.courseIds.includes(courseId))); }
-
-  getAllProjects(): Observable<Project[]> { return of(this.projects); }
   getProjectById(id: number): Observable<Project | undefined> { return of(this.projects.find((p) => p.id === id)); }
-  getProjectsByCourseId(courseId: number): Observable<Project[]> { return of(this.projects.filter((p) => p.courseId === courseId)); }
+
 
   getTeamsByProject(projectId: number): Observable<Team[]> { return of(this.teams.filter((t) => t.projectId === projectId)); }
   getTeamsByCourseId(courseId: number): Observable<Team[]> {
@@ -289,6 +287,32 @@ export class DataService {
 
   getAwardById(id: number): Observable<Award | undefined> {
     return of(this.awards.find((a) => a.id === id));
+  }
+
+  getAllProjects(): Observable<Project[]> {
+    // Percorre todos os projetos e calcula o número real de equipas
+    const projectsWithDynamicCount = this.projects.map(p => {
+      // Conta quantas equipas têm o projectId igual ao id deste projeto
+      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
+      
+      // Retorna o projeto atualizado com a contagem certa
+      return { 
+        ...p, 
+        teamsCount: realTeamCount 
+      };
+    });
+
+    return of(projectsWithDynamicCount);
+  }
+  getProjectsByCourseId(courseId: number): Observable<Project[]> {
+    const filteredProjects = this.projects.filter((p) => p.courseId === courseId);
+    
+    const projectsWithDynamicCount = filteredProjects.map(p => {
+      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
+      return { ...p, teamsCount: realTeamCount };
+    });
+    
+    return of(projectsWithDynamicCount);
   }
 
   createAward(awardData: { name: string; description: string; points: number; courseId: number; }): Observable<boolean> {
