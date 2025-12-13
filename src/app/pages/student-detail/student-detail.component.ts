@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DataService, StudentLite, Degree } from '../../services/dataService';
+import { DataService, StudentLite, Degree, Course } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 
@@ -52,6 +52,9 @@ export class StudentDetailComponent implements OnInit {
   }
 
   loadData(id: number) {
+    this.dataService.getDegrees().subscribe(degrees => {
+      this.allDegrees = degrees;
+    });
     this.dataService.getStudentById(id).subscribe((student: StudentLite | undefined) => {
       if (student) {
         this.studentName = student.name;
@@ -63,28 +66,23 @@ export class StudentDetailComponent implements OnInit {
           degreeId: student.degreeId 
         });
         
-        this.loadMockCourses();
+        this.loadCourses();
       }
     });
   }
 
-  loadMockCourses() {
+  loadCourses() {
     const coursesArray = this.studentForm.get('courses') as FormArray;
     coursesArray.clear();
 
-    const mockEnrollments = [
-      { name: 'Software Quality', grade: '---' }, 
-      { name: 'Artificial Intelligence', grade: '16' },
-      { name: 'Web Programming', grade: '14' }
-    ];
-
-    mockEnrollments.forEach(c => {
-      const group = this.fb.group({
-        name: [c.name],
-        grade: [c.grade] 
-      });
-      coursesArray.push(group);
+    this.dataService.getCoursesByStudent(this.studentId).subscribe(enrollments => {
+    enrollments.forEach(c => {
+    const group = this.fb.group({
+      name: [c.name]
     });
+    coursesArray.push(group);
+  });
+});
   }
 
   get courses() {
@@ -109,22 +107,7 @@ export class StudentDetailComponent implements OnInit {
         console.log('Resposta do servidor:', response);
       });
 
-      /* this.dataService.updateStudent(this.studentId, payload).subscribe({
-        next: (success) => {
-            if(success) {
-                alert('Student updated successfully!');
-                this.router.navigate(['/admin-dashboard']);
-            }
-        },
-        error: (err) => {
-            if (err.status === 409) {
-                alert('Error: This email is already assigned to another student.');
-                this.studentForm.get('email')?.setErrors({ 'duplicate': true });
-            } else {
-                alert('An error occurred while updating the student.');
-            }
-        }
-      }); */
+      
     }
   }
 }
