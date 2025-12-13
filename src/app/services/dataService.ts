@@ -51,6 +51,7 @@ export interface Course {
   id: number;
   name: string;
   degree?: Degree;
+  degreeId?: number,
   degreeName?: string;
   studentsCount?: number;
   projectsCount?: number;
@@ -217,24 +218,56 @@ export class DataService {
 
   // --- GETTERS ---
 
-  getDegrees(): Observable<Degree[]> { return of(this.degrees); }
-  getDegreeById(id: number): Observable<Degree | undefined> { return of(this.degrees.find((d) => d.id === id)); }
+  getDegrees(): Observable<Degree[]> { 
+    return this.httpClient.get<Degree[]>(`${enviroments.apiUrl}/degrees`);
+   }
+
+  getDegreesAdmin(): Observable<Degree[]> {
+    return of(this.degrees);
+  }
+  getDegreeById(id: number): Observable<Degree | undefined> { 
+    return this.httpClient.get<Degree>(`${enviroments.apiUrl}/degrees/${id}`);
+  }
+  getDegreeStats(id: number): any{
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/degrees/${id}`);
+  }
   getCourses(): Observable<Course[]> { 
       return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/courses`);
   }
+  getCoursesAdmin(): Observable<Course[]>{
+    return of(this.courses);
+  }
+  getCoursesByStudent(id: any): Observable<Course[]> {
+     return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/students/${id}/courses`);
+  }
+
   getCourseById(id: number): Observable<Course | undefined> { 
-      return of(this.courses.find(c => c.id === id)); 
+    return this.httpClient.get<Course>(`${enviroments.apiUrl}/courses/${id}`);
   }
   getCoursesByDegreeId(degreeId: number) {
   return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/degrees/${degreeId}/courses`);
   }
+  getCourseStats(id: number){
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/courses/${id}`);
+  }
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
-  getStudentById(id: number): Observable<StudentLite | undefined> { return of(this.students.find((s) => s.id === id)); }
-  getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
+  getStudentById(id: number): Observable<StudentLite | undefined> {
+    return this.httpClient.get<StudentLite>(`${enviroments.apiUrl}/users/${id}`);
+    }
+  getTeachers(): Observable<Teacher[]> { 
+    return this.httpClient.get<Teacher[]>(`${enviroments.apiUrl}/users/teachers`);
+  }
 
-  getTeacherById(id: number): Observable<Teacher | undefined> { return of(this.teachers.find((t) => t.id === id)); }
-  getTeachersByCourseId(courseId: number): Observable<Teacher[]> { return of(this.teachers.filter((t) => t.courseIds.includes(courseId))); }
+  getTeacherById(id: number): Observable<Teacher | undefined> { 
+    return this.httpClient.get<Teacher>(`${enviroments.apiUrl}/users/${id}`);
+  }
+  getTeachersByCourseId(courseId: number): Observable<Teacher[]> { 
+    return this.httpClient.get<Teacher[]>(`${enviroments.apiUrl}/users/courses/${courseId}/teachers`);
+  }
+  getTeacherStats(id: number): any{
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/teachers/${id}`);
+  }
 
 
   getAllProjects(): Observable<Project[]> { return of(this.projects); }
@@ -250,6 +283,7 @@ export class DataService {
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> { return of(this.students); }
   getAwards(): Observable<Award[]> { return of(this.awards); }
 
+  //AI generated method
   getAwardsByTeacher(teacherId: any) {
   // 1️⃣ Buscar cursos do teacher
   return this.httpClient
@@ -280,8 +314,8 @@ export class DataService {
           }
         });
         
-        this.awards = Array.from(uniqueAwardsMap.values());
-        return this.awards;
+        
+        return Array.from(uniqueAwardsMap.values());
       })
     );
 }
@@ -424,6 +458,10 @@ export class DataService {
     ...t,
     courseIds: t.courseIds ?? []
   }));
+  }
+
+  setAwards(awards: Award[]){
+    this.awards = awards;
   }
 
   // --- UPDATE METHODS ---

@@ -50,6 +50,7 @@ export class TeacherDashboardComponent implements OnInit {
   loadAllData() {
     // 1. Courses
     this.dataService.getCourses().subscribe(res => {
+      this.dataService.setCourses(res)
       this.courses = res.map(c => ({
         id: c.id,
         Name: c.name,
@@ -76,6 +77,7 @@ export class TeacherDashboardComponent implements OnInit {
 
     // 3. Awards
     this.dataService.getAwardsByTeacher(this.teacherId).subscribe(res => {
+      this.dataService.setAwards(res);
       this.rawAwards = res;
       this.awards = res.map(a => ({
         id: a.id,

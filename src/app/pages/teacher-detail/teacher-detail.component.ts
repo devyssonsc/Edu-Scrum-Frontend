@@ -54,7 +54,6 @@ export class TeacherDetailComponent implements OnInit {
     this.dataService.getTeacherById(id).subscribe((teacher: Teacher | undefined) => {
       if (teacher) {
         this.teacherName = teacher.name
-        this.stats.coursesCount = teacher.coursesCount;
         this.teacherForm.patchValue({
           name: teacher.name,
           email: teacher.email
@@ -73,6 +72,7 @@ export class TeacherDetailComponent implements OnInit {
     this.httpClient.get(`${enviroments.apiUrl}/teachers/${this.teacherId}/courses`).subscribe((response: any) => {
       console.log('Resposta do servidor:', response);
         const teacherCourses = response
+        this.stats.coursesCount = teacherCourses.length
         
         teacherCourses.forEach((c : any) => {
             const group = this.fb.group({
