@@ -38,7 +38,7 @@
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Description</label>
-            <input type="text" formControlName="description" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+            <textarea formControlName="description" class="main-input" [readonly]="award?.type === 'GLOBAL'" rows="4"></textarea>
         </div>
 
         <div class="form-group-main" style="margin-top: 1rem;">
