@@ -609,12 +609,23 @@ export class DataService {
     return of(true).pipe(delay(500));
   }
 
-  updateAward(id: number, data: { name: string; description: string; points: number }): Observable<boolean> {
+  updateAward(id: number, data: { name: string; description: string; points: number; courseId?: number | string | null }): Observable<boolean> {
     const award = this.awards.find((a) => a.id === id);
     if (award && award.type === 'COURSE') {
       award.name = data.name;
       award.description = data.description;
       award.points = data.points;
+      
+      // Se vier um ID de curso (mesmo em string), converte e atualiza
+      if (data.courseId) {
+          const newCourseId = Number(data.courseId);
+          const newCourse = this.courses.find(c => c.id === newCourseId);
+          
+          if (newCourse) {
+              award.courseId = newCourseId;
+              award.courseName = newCourse.name; // IMPORTANTE: Atualiza o nome da cadeira
+          }
+      }
       return of(true);
     }
     return of(false);
