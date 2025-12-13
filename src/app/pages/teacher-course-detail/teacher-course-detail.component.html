@@ -12,16 +12,16 @@
 
     <div class="stats-cards">
         <app-stats-card 
-            title="Enrolled Students" 
+            title="Students" 
             [value]="realStudentCount.toString()" 
-            description="this semester"
+            description="in this course"
             iconClass="bi bi-people-fill">
         </app-stats-card>
 
         <app-stats-card 
             title="Projects" 
             [value]="projectsView.length.toString()" 
-            description="created so far"
+            description="created in this course"
             iconClass="bi bi-kanban">
         </app-stats-card>
     </div>

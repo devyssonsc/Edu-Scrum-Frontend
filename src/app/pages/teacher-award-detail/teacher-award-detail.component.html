@@ -10,7 +10,7 @@
     <div class="stats-row">
         <app-stats-card title="Value" [value]="(award?.points || 0).toString()" description="points earned" iconClass="bi bi-star-fill"></app-stats-card>
         <app-stats-card title="Assignments" [value]="assignmentsCount.toString()" description="total recipients" iconClass="bi bi-person-check-fill"></app-stats-card>
-        <app-stats-card title="Type" [value]="award?.type || 'N/A'" description="award scope" iconClass="bi bi-globe"></app-stats-card>
+        <app-stats-card title="Type" [value]="award?.type || 'N/A'" description="award type" iconClass="bi bi-globe"></app-stats-card>
     </div>
 
     <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="edit-section card">
