@@ -29,6 +29,7 @@ export interface StudentLite {
   studentNumber: string;
   email: string;
   degreeId?: number;
+  courseIds: number[]; 
 }
 
 export interface Degree {
@@ -162,11 +163,11 @@ export class DataService {
   ];
 
   private students: StudentLite[] = [
-    { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt', degreeId: 1 },
-    { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt', degreeId: 1 },
-    { id: 3, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt', degreeId: 1 },
-    { id: 4, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt', degreeId: 1 },
-    { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt', degreeId: 2 },
+    { id: 1, name: 'Tiago Silva', studentNumber: '50440', email: '50440@upt.pt', degreeId: 1, courseIds: [1] },
+    { id: 2, name: 'David Aroso', studentNumber: '50441', email: '50441@upt.pt', degreeId: 1, courseIds: [1] },
+    { id: 3, name: 'Ana Pereira', studentNumber: '50442', email: '50442@upt.pt', degreeId: 1, courseIds: [1] },
+    { id: 4, name: 'João Santos', studentNumber: '50443', email: '50443@upt.pt', degreeId: 1, courseIds: [] },
+    { id: 5, name: 'Beatriz Costa', studentNumber: '50444', email: '50444@upt.pt', degreeId: 2, courseIds: [] },
   ];
 
   private teachers: Teacher[] = [
@@ -256,8 +257,14 @@ export class DataService {
   getCourseById(id: number): Observable<Course | undefined> { return of(this.courses.find((c) => c.id === id)); }
   getCoursesByDegreeId(degreeId: number): Observable<Course[]> { return of(this.courses.filter((c) => c.degree?.id === degreeId)); }
 
+
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
   getStudentById(id: number): Observable<StudentLite | undefined> { return of(this.students.find((s) => s.id === id)); }
+  
+  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
+    return of(this.students.filter(s => s.courseIds && s.courseIds.includes(courseId)));
+  }
+
   getTeachers(): Observable<Teacher[]> { return of(this.teachers); }
   getTeacherById(id: number): Observable<Teacher | undefined> { return of(this.teachers.find((t) => t.id === id)); }
   getTeachersByCourseId(courseId: number): Observable<Teacher[]> { return of(this.teachers.filter((t) => t.courseIds.includes(courseId))); }
@@ -269,15 +276,7 @@ export class DataService {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
-  getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
-    const course = this.courses.find(c => c.id === courseId);
-    
-    if (course && course.degree) {
-        const degreeId = course.degree.id;
-        return of(this.students.filter(s => s.degreeId === degreeId));
-    }
-    return of([]); 
-  }
+  
   getAwards(): Observable<Award[]> { return of(this.awards); }
   
   // --- GAMIFICATION METHODS --- 
@@ -309,7 +308,6 @@ export class DataService {
             });
         });
 
-    // 2. Atribuições a Equipas
     this.teamAwards
         .filter(ta => ta.awardId === awardId)
         .forEach(ta => {
@@ -405,8 +403,6 @@ export class DataService {
       this.teamAwards.splice(tIndex, 1);
       return of(true);
     }
-
-    console.warn(`Assignment ID ${assignmentId} not found.`);
     return of(true);
   }
 
@@ -553,8 +549,8 @@ export class DataService {
     if (project) {
       project.name = data.name;
       project.description = data.description;
-      project.startDate = data.startDate; // Novo
-      project.endDate = data.endDate;     // Novo
+      project.startDate = data.startDate;
+      project.endDate = data.endDate;
       return of(true);
     }
     return of(false);
@@ -619,6 +615,41 @@ export class DataService {
       if (index > -1) {
         teacher.courseIds.splice(index, 1);
         teacher.coursesCount = teacher.courseIds.length;
+        return of(true);
+      }
+    }
+    return of(false);
+  }
+
+  // NOVOS MÉTODOS PARA ALUNOS
+  addStudentToCourse(courseId: number, studentId: number): Observable<boolean> {
+    const student = this.students.find(s => s.id === studentId);
+    if (student) {
+      if (!student.courseIds) student.courseIds = [];
+      if (!student.courseIds.includes(courseId)) {
+        student.courseIds.push(courseId);
+        
+        // Atualizar contador no curso (opcional mas recomendado)
+        const course = this.courses.find(c => c.id === courseId);
+        if(course) course.studentsCount = (course.studentsCount || 0) + 1;
+
+        return of(true);
+      }
+    }
+    return of(false);
+  }
+
+  removeStudentFromCourse(courseId: number, studentId: number): Observable<boolean> {
+    const student = this.students.find(s => s.id === studentId);
+    if (student && student.courseIds) {
+      const index = student.courseIds.indexOf(courseId);
+      if (index > -1) {
+        student.courseIds.splice(index, 1);
+        
+        // Atualizar contador no curso
+        const course = this.courses.find(c => c.id === courseId);
+        if(course && (course.studentsCount || 0) > 0) course.studentsCount!--;
+
         return of(true);
       }
     }
@@ -755,3 +786,6 @@ export class DataService {
     return of(true).pipe(delay(500));
   }
 }
+
+
+
