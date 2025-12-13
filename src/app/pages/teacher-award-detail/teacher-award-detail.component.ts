@@ -14,7 +14,6 @@ import { DataService, Award, Course, StudentLite, Team } from '../../services/da
 })
 export class TeacherAwardDetailComponent implements OnInit {
 
-  // Referência ao formulário de atribuição para Auto-Scroll
   @ViewChild('assignFormSection') assignFormSection: ElementRef | undefined;
 
   private route = inject(ActivatedRoute);
@@ -26,8 +25,6 @@ export class TeacherAwardDetailComponent implements OnInit {
 
   assignmentHistory: any[] = []; 
   assignmentsCount: number = 0;
-
-  // Forms
   editForm: FormGroup;
   assignForm: FormGroup;
   showAssignForm = false;
@@ -39,7 +36,9 @@ export class TeacherAwardDetailComponent implements OnInit {
     this.editForm = this.fb.group({
       name: ['', Validators.required],
       description: ['', Validators.required],
-      points: [1, [Validators.required, Validators.min(1), Validators.max(5)]]
+      // Validação de Min 1 e Max 5 já está aqui no TS também
+      points: [1, [Validators.required, Validators.min(1), Validators.max(5)]],
+      courseId: [null]
     });
 
     this.assignForm = this.fb.group({
@@ -67,7 +66,8 @@ export class TeacherAwardDetailComponent implements OnInit {
           this.editForm.patchValue({
             name: this.award.name,
             description: this.award.description,
-            points: this.award.points
+            points: this.award.points,
+            courseId: this.award.courseId 
           });
 
           if (this.award.courseId) {
@@ -93,12 +93,9 @@ export class TeacherAwardDetailComponent implements OnInit {
     this.assignmentsCount = this.assignmentHistory.length;
   }
 
-  // --- Lógica de Scroll Automático Implementada ---
   toggleAssignForm() {
     this.showAssignForm = !this.showAssignForm;
-
     if (this.showAssignForm) {
-      // Pequeno delay para garantir que o Angular renderiza o elemento @if antes de fazer scroll
       setTimeout(() => {
         this.assignFormSection?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);

@@ -60,8 +60,21 @@
         </div>
 
         <div class="form-group-main" style="margin-top: 1rem;">
+            <label>Associated Course</label>
+            @if (award?.type === 'GLOBAL') {
+                <input type="text" value="Global Award (All Courses)" class="main-input" readonly>
+            } @else {
+                <select formControlName="courseId" class="main-input">
+                    @for (course of myCourses; track course.id) {
+                        <option [value]="course.id">{{ course.name }}</option>
+                    }
+                </select>
+            }
+        </div>
+
+        <div class="form-group-main" style="margin-top: 1rem;">
             <label>Points Value</label>
-            <input type="number" formControlName="points" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+            <input type="number" formControlName="points" class="main-input" [readonly]="award?.type === 'GLOBAL'" min="1" max="5">
         </div>
 
         <hr class="divider">
@@ -110,14 +123,12 @@
 
     @if (showAssignForm) {
         <div class="card edit-section" style="margin-top: 0;" #assignFormSection>
-            
             <div class="section-header">
                 <h3>New Assignment</h3>
                 <button class="btn-cancel" (click)="toggleAssignForm()" style="background:none; border:none; cursor:pointer;">Cancel</button>
             </div>
             
             <form [formGroup]="assignForm" (ngSubmit)="onSubmitAssignment()">
-                
                 <div class="form-group-main">
                     <label>Recipient Type</label>
                     <select formControlName="recipientType" (change)="onTypeChange()" class="main-input">
@@ -130,7 +141,6 @@
                     <label>Select Recipient</label>
                     <select formControlName="recipientId" class="main-input">
                         <option [ngValue]="null" disabled>Choose...</option>
-                        
                         @if (assignForm.get('recipientType')?.value === 'STUDENT') {
                             @for (s of availableStudents; track s.id) {
                                 <option [value]="s.id">{{ s.name }}</option>

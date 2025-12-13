@@ -76,7 +76,7 @@ export class TeacherDashboardComponent implements OnInit {
         id: a.id,
         Name: a.name,
         Type: a.type,
-        Course: a.courseName || 'Global / All', 
+        Course: a.courseName || 'All', 
         Points: a.points
       }));
       
