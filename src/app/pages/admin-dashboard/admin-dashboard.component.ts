@@ -63,6 +63,16 @@ export class AdminDashboardComponent implements OnInit {
     .subscribe({
       next: (degrees) => {
 
+        //Bug Fix for empty lists
+        if (degrees.length === 0) {
+          this.dataService.setDegrees([]);
+          this.pendingRequests--;
+          if (this.pendingRequests === 0) {
+            this.loadAllData();
+          }
+          return;
+        }
+
         // Criar array de observables (uma requisição por degree)
         const statsRequests = degrees.map(d =>
           this.httpClient.get(`${enviroments.apiUrl}/stats/degrees/${d.id}`)
@@ -104,6 +114,16 @@ export class AdminDashboardComponent implements OnInit {
   this.httpClient.get<Course[]>(`${enviroments.apiUrl}/courses`)
     .subscribe({
       next: (courses) => {
+        
+        //Bug Fix for empty lists
+        if (courses.length === 0) {
+          this.dataService.setCourses([]);
+          this.pendingRequests--;
+          if (this.pendingRequests === 0) {
+            this.loadAllData();
+          }
+          return;
+        }
 
         // Criar array de observables (uma requisição por course)
         const statsRequests = courses.map(c =>
@@ -144,6 +164,16 @@ export class AdminDashboardComponent implements OnInit {
     this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/users/students`)
     .subscribe({
       next: (students) => {
+
+        if (students.length === 0) {
+          this.dataService.setStudents([]);
+          this.pendingRequests--;
+          if (this.pendingRequests === 0) {
+            this.loadAllData();
+          }
+          return;
+        }
+
         this.dataService.setStudents(students); 
         this.pendingRequests--;
         if (this.pendingRequests === 0) {
@@ -159,6 +189,16 @@ export class AdminDashboardComponent implements OnInit {
       this.httpClient.get<Teacher[]>(`${enviroments.apiUrl}/users/teachers`)
     .subscribe({
       next: (teachers) => {
+        
+        //Bug fix for Empty Lists
+        if (teachers.length === 0) {
+          this.dataService.setTeachers([]);
+          this.pendingRequests--;
+          if (this.pendingRequests === 0) {
+            this.loadAllData();
+          }
+          return;
+        }
 
         // Criar array de observables (uma requisição por course)
         const statsRequests = teachers.map(t =>
