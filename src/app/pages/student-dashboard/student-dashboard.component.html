@@ -13,99 +13,205 @@
     <app-section-selector [options]="sections" (selectedOption)="onSelectOption($event)">
     </app-section-selector>
 
-    <div class="card show-all">
+    <div class="show-all">
         <div class="content">
             <h3>{{ selectedOption }}</h3>
 
             @if(selectedOption === 'Awards') {
-                @for(d of data; track d) {
-                    <div class="card award-card">
-                        <img [src]="d.badgeIcon" alt="Award Image" class="award-image" />
-                        <div class="award-details">
-                            <h4>{{ d.awardName }}</h4>
-                            <p>{{ d.awardDescription }}</p>
-                            <span>{{ d.projectName }} ● {{ d.assignedAt }}</span>
-                        </div>
-                        <span>+{{ d.points }} pts</span>
-                    </div>
-                }
+            @for(d of data; track d) {
+            <div class="card award-card">
+                <img [src]="'Awards/' + d.badgeIcon + '.png'" alt="Award Image" class="award-image" />
+                <div class="award-details">
+                    <h4>{{ d.awardName }}</h4>
+                    <p>{{ d.awardDescription }}</p>
+                    <span>{{ d.projectName }} ● {{ d.assignedAt }}</span>
+                </div>
+                <span>+{{ d.points }} pts</span>
+            </div>
             }
-            @else if(selectedOption === 'Progression') {
-                @for(project of data; track project) {
-                    <div class="card project-card">
-                        <div class="project-header">
-                            <div class="project-info">
-                                <h3>{{ project.name }}</h3>
-                                <div class="project-description">{{ project.description }}</div>
-                            </div>
-                            <div class="project-progress">
-                                <span>General Progress</span>
-                                <h3>{{ getProjectProgress(project) }}%</h3>
-                            </div>
-                        </div>
+            }
+            @else if(selectedOption === 'Dashboard') {
+            @for(project of data; track project) {
+            <div class="card project-card">
+                <div class="project-header">
+                    <div class="project-info">
+                        <h3>{{ project.projectName }}</h3>
+                        <div class="project-description">{{ project.projectDescription }}</div>
+                    </div>
+                    <div class="project-progress">
+                        <span>General Progress</span>
+                        <h3>{{ getProjectProgress(project) }}%</h3>
+                    </div>
+                </div>
 
-                        <div class="progress" role="progressbar" aria-label="Example with label" [attr.aria-valuenow]="getProjectProgress(project)"
-                            aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
-                            <div class="progress-bar" [style.width.%]="getProjectProgress(project)"></div>
-                        </div>
+                <div class="progress" role="progressbar" aria-label="Example with label"
+                    [attr.aria-valuenow]="getProjectProgress(project)" aria-valuemin="0" aria-valuemax="100"
+                    style="width: 100%;">
+                    <div class="progress-bar" [style.width.%]="getProjectProgress(project)"></div>
+                </div>
 
-                        <div class="accordion sprint-accordion" id="accordion-{{ project.id }}">
-                            @for (sprint of project.sprints; track sprint) {
+                <div class="accordion sprint-accordion" id="accordion-{{ project.id }}">
+                    @for (sprint of project.sprints; track sprint) {
 
-                            <div class="accordion-item">
+                    <div class="accordion-item">
 
-                                <h2 class="accordion-header" id="heading-{{ sprint.id }}">
-                                    <button
-                                        class="accordion-button collapsed d-flex flex-row justify-content-between align-items-center gap-3"
-                                        type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + sprint.id"
-                                        aria-expanded="false" [attr.aria-controls]="'collapse-' + sprint.id">
+                        <h2 class="accordion-header" id="heading-{{ sprint.id }}">
+                            <button
+                                class="accordion-button collapsed d-flex flex-row justify-content-between align-items-center gap-3"
+                                type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + sprint.id"
+                                aria-expanded="false" [attr.aria-controls]="'collapse-' + sprint.id">
 
-                                        <div class="sprint-info d-flex flex-row align-items-center gap-2">
-                                            <i class="bi bi-layers"></i>
-                                            <span>Sprint {{ sprint.sprintNumber }} - {{ sprint.goal }}</span>
-                                        </div>
+                                <div class="sprint-info d-flex flex-row align-items-center gap-2">
+                                    <i class="bi bi-layers"></i>
+                                    <span>Sprint {{ sprint.sprintNumber }} - {{ sprint.goal }}</span>
+                                </div>
 
-                                        <span class="sprint-dates">{{ sprint.startDate }} ● {{ sprint.endDate }}</span>
+                                <span class="sprint-dates">{{ sprint.startDate }} ● {{ sprint.endDate }}</span>
 
-                                        <span class="badge {{ getSprintStatusClass(sprint) }}">
-                                            {{ getSprintStatus(sprint) }}
-                                        </span>
+                                <span class="badge {{ getSprintStatusClass(sprint) }}">
+                                    {{ getSprintStatus(sprint) }}
+                                </span>
 
-                                    </button>
-                                </h2>
+                            </button>
+                        </h2>
 
-                                <div id="collapse-{{ sprint.id }}" class="accordion-collapse collapse"
-                                    [attr.aria-labelledby]="'heading-' + sprint.id"
-                                    [attr.data-bs-parent]="'#accordion-' + project.id">
+                        <div id="collapse-{{ sprint.id }}" class="accordion-collapse collapse"
+                            [attr.aria-labelledby]="'heading-' + sprint.id"
+                            [attr.data-bs-parent]="'#accordion-' + project.id">
 
-                                    <div class="accordion-body">
+                            <div class="accordion-body">
 
-                                        <div class="task-list">
-                                            @for(task of sprint.tasks; track task) {
-                                            <div class="task-item d-flex flex-row justify-content-between align-items-center">
+                                <div class="task-list">
+                                    @for(task of sprint.tasks; track task) {
+                                    <div class="task-item d-flex flex-row justify-content-between align-items-center">
 
-                                                <i class="bi bi-card-checklist"></i>
+                                        <i class="bi bi-card-checklist"></i>
 
-                                                <p class="task-title">{{ task.description }}</p>
-                                                <p class="task-member">{{ task.teamMemberName }}</p>
+                                        <p class="task-title">{{ task.description }}</p>
+                                        <p class="task-member">{{ task.teamMemberName }}</p>
 
-                                                <span class="task-status">{{ task.status }}</span>
-                                            </div>
-                                            }
-                                        </div>
-
+                                        <span class="task-status">{{ task.status }}</span>
                                     </div>
+                                    }
                                 </div>
 
                             </div>
+                        </div>
 
+                    </div>
+
+                    }
+                </div>
+            </div>
+            }
+            }
+            @else if(selectedOption === 'Rankings') {
+            <div class="card individual-ranking-card">
+                <h4>Individual Ranking</h4>
+                <div class="score-infos">
+                    <div class="card leaderboard-card">
+                        <h5>Student Leaderboard</h5>
+                        <div class="student-list">
+                            @for(student of data[0].individualRankings; track student; let i = $index) {
+                                @if(i < 4) {
+                                    <div class="student-item">
+                                        <span class="student-rank"><i class="bi bi-trophy"></i> {{ student.studentName }} {{
+                                            isCurrentUser(student) ? '(You)' : '' }}</span>
+                                        <span class="student-score">{{ student.totalScore }} pts</span>
+                                    </div>
+                                }
                             }
                         </div>
                     </div>
-                }
+                    <div class="card score-distribution">
+                        <h5>Score Distribution</h5>
+                        <canvas baseChart [data]="userRankingData" [options]="userRankingOptions" chartType="bar">
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="card team-rankings-card">
+                <h4>Team Rankings</h4>
+                <div class="team-list">
+                    @for(teamRanking of data[0].teamRankingsByCourse; track teamRanking; let tr = $index) {
+                    <div class="card team-item">
+                        <h5>{{ teamRanking.courseName }}</h5>
+                        <div class="score-infos">
+                            <div class="leaderboard-card">
+
+                                <div class="accordion team-accordion" [id]="'accordion-' + teamRanking.courseId">
+                                    @for (team of teamRanking.rankings; track team; let t = $index) {
+                                    <div class="accordion-item">
+
+                                        <h2 class="accordion-header" [id]="'heading-' + team.teamId">
+                                            <button
+                                                class="accordion-button collapsed d-flex flex-row justify-content-between align-items-center gap-3"
+                                                type="button" data-bs-toggle="collapse"
+                                                [attr.data-bs-target]="'#collapse-' + team.teamId" aria-expanded="false"
+                                                [attr.aria-controls]="'collapse-' + team.teamId">
+
+                                                <div class="sprint-info d-flex flex-row align-items-center gap-2">
+                                                    <i class="bi bi-trophy"></i>
+                                                </div>
+
+                                                <span class="team-name">{{ team.teamName }}</span>
+
+                                                <span class="team-points">{{ team.totalScore }} pts</span>
+
+                                                <span>{{ isCurrentUserTeam(team) ? '(Your Team)' : '' }}</span>
+
+                                            </button>
+                                        </h2>
+
+                                        <div [id]="'collapse-' + team.teamId" class="accordion-collapse collapse"
+                                            [attr.aria-labelledby]="'heading-' + team.teamId"
+                                            [attr.data-bs-parent]="'#accordion-' + teamRanking.courseId">
+
+                                            <div class="accordion-body">
+
+                                                <div class="member-list">
+                                                    @for(member of team.members; track member) {
+                                                    <div
+                                                        class="member-item d-flex flex-row justify-content-between align-items-center">
+                                                        <i class="bi bi-1-circle"></i>
+                                                        <p class="member-name">{{ member.studentName }} {{
+                                                            isCurrentUser(member) ? '(You)' : '' }}</p>
+                                                        <p class="member-points">{{ member.score }} points</p>
+                                                    </div>
+                                                    }
+                                                    <div
+                                                        class="member-item d-flex flex-row justify-content-between align-items-center">
+                                                        <i class="bi bi-1-circle"></i>
+                                                        <p class="member-name">João Silva</p>
+                                                        <p class="member-points">150 points</p>
+                                                    </div>
+                                                    <div
+                                                        class="member-item d-flex flex-row justify-content-between align-items-center">
+                                                        <i class="bi bi-2-circle"></i>
+                                                        <p class="member-name">Emília Correa</p>
+                                                        <p class="member-points">130 points</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card score-distribution">
+                                <h5>Score Distribution</h5>
+                                <canvas baseChart [data]="teamRankingData" [options]="teamRankingOptions"
+                                    chartType="bar">
+                                </canvas>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
             }
             @else {
-                <p>Select a section to view details.</p>
+            <p>Select a section to view details.</p>
             }
         </div>
     </div>

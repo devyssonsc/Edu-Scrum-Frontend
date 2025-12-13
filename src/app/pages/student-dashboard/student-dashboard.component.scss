@@ -134,6 +134,77 @@
                     }
                 }
             }
+
+            .individual-ranking-card {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 1rem;
+
+                .student-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+
+                    .student-item {
+                        background-color: $light-gray;
+                        padding: 0.75rem 1rem;
+                        border-radius: 5px;
+
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                }
+            }
+
+            .team-rankings-card {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 1rem;
+
+                .team-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+
+                    .team-item {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.75rem;
+                    }
+                }
+            }
+
+            .score-infos {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 1rem;
+
+                .leaderboard-card {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    gap: 0.75rem;
+
+                    width: 50%;
+                }
+                
+                .score-distribution {
+                    width: 50%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: center;
+                    gap: 1rem;
+                }
+            }
+
         }
     }
 }
