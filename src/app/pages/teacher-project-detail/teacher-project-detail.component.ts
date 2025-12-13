@@ -6,7 +6,7 @@ import { StatsCardComponent } from '../../components/stats-card/stats-card.compo
 
 import { HttpClient } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
-import { DataService, Project, Team, StudentLite, CreateTeamRequest, Sprint } from '../../services/dataService';
+import { DataService, Project, Team, StudentLite, CreateTeamRequest, Sprint, Award } from '../../services/dataService';
 
 // --- VALIDADOR DE DATAS ---
 const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -41,17 +41,23 @@ export class TeacherProjectDetailComponent implements OnInit {
   teamForm: FormGroup;
   selectedStudentId = new FormControl<number | null>(null);
 
-  
   isEditingProject = false;
   editProjectForm: FormGroup;
-
 
   addingToTeamId: number | null = null;
   selectedStudentToAdd: number | null = null;
 
- 
   showSprintModal = false;
   selectedTeam: Team | null = null;
+
+  // --- AWARDS LOGIC ---
+  showAwardModal = false;
+  availableAwards: Award[] = [];
+  selectedAwardId: number | null = null;
+  
+  targetType: 'TEAM' | 'STUDENT' | null = null;
+  targetId: number | null = null;
+  targetName: string = '';
 
   constructor(private httpClient: HttpClient) {
    
@@ -61,7 +67,6 @@ export class TeacherProjectDetailComponent implements OnInit {
       members: this.fb.array([], [Validators.minLength(3)]) 
     }, { validators: this.teamRolesValidator });
 
-   
     this.editProjectForm = this.fb.group({
       name: ['', Validators.required],
       description: ['', Validators.required],
@@ -69,8 +74,6 @@ export class TeacherProjectDetailComponent implements OnInit {
       endDate: ['', Validators.required]
     }, { validators: dateRangeValidator }); 
   }
-
-  // Validador de composição de equipa
   teamRolesValidator(group: AbstractControl): ValidationErrors | null {
     const membersArray = group.get('members') as FormArray;
     if (!membersArray || membersArray.length === 0) return null;
@@ -101,7 +104,12 @@ export class TeacherProjectDetailComponent implements OnInit {
           startDate: this.project.startDate,
           endDate: this.project.endDate
         });
-        if (p?.courseId) this.loadStudents(p.courseId);
+        if (p?.courseId) {
+            this.loadStudents(p.courseId);
+            this.dataService.getAwardsByCourse(p.courseId).subscribe(awards => {
+                this.availableAwards = awards;
+            });
+        }
       }
     });
     this.dataService.getTeamsByProject(projectId).subscribe(t => { this.teams = t; });
@@ -203,7 +211,7 @@ export class TeacherProjectDetailComponent implements OnInit {
   }
 
   // ==========================================
-  // 3. CRIAÇÃO DE EQUIPA
+  // 3. CRIAÇÃO DE EQUIPA ()
   // ==========================================
 
   toggleCreateForm() {
@@ -253,12 +261,74 @@ export class TeacherProjectDetailComponent implements OnInit {
             console.log("TeamMember registado:", response);
           });
         });
+        
+        alert('Team Created!');
+        this.toggleCreateForm();
+        this.loadData(this.project!.id);
       });
 
     } else { this.teamForm.markAllAsTouched(); }
   }
 
-  // --- MODAL ---
+  // ==========================================
+  // 4. AWARDS LOGIC
+  // ==========================================
+
+  get filteredAwards(): Award[] {
+    if (!this.targetType) return [];
+
+    const scopeNeeded = this.targetType === 'STUDENT' ? 'INDIVIDUAL' : 'TEAM'
+    
+    return this.availableAwards.filter(a => a.scope === scopeNeeded);
+  }
+
+  openAwardModalForTeam(team: Team) {
+    this.targetType = 'TEAM';
+    this.targetId = team.id;
+    this.targetName = `Team: ${team.name}`;
+    this.selectedAwardId = null;
+    this.showAwardModal = true;
+  }
+
+  openAwardModalForStudent(student: StudentLite) {
+    this.targetType = 'STUDENT';
+    this.targetId = student.id;
+    this.targetName = `Student: ${student.name}`;
+    this.selectedAwardId = null;
+    this.showAwardModal = true;
+  }
+
+  closeAwardModal() {
+    this.showAwardModal = false;
+    this.targetType = null;
+    this.targetId = null;
+    this.selectedAwardId = null;
+  }
+
+  confirmAwardAssignment() {
+    if (!this.selectedAwardId || !this.targetId || !this.targetType || !this.project?.courseId) return;
+
+    const courseId = this.project.courseId;
+    const awardId = Number(this.selectedAwardId);
+
+    if (this.targetType === 'STUDENT') {
+        this.dataService.assignAwardToStudent(this.targetId, awardId, courseId).subscribe(success => {
+            if (success) {
+                alert(`Award assigned to ${this.targetName}!`);
+                this.closeAwardModal();
+            }
+        });
+    } else if (this.targetType === 'TEAM') {
+        this.dataService.assignAwardToTeam(this.targetId, awardId, courseId).subscribe(success => {
+            if (success) {
+                alert(`Award assigned to ${this.targetName}!`);
+                this.closeAwardModal();
+            }
+        });
+    }
+  }
+
+  // --- MODAL SPRINT ---
 
   openSprintModal(team: Team) {
     this.selectedTeam = team;
