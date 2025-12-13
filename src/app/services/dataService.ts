@@ -238,7 +238,6 @@ export class DataService {
   ];
 
   // --- TABELAS DE LIGAÇÃO (MOCK) ---
-  // Inicializamos com dados para que o histórico não apareça vazio no teste
   private studentAwards: StudentAward[] = [
     { id: 1, studentId: 1, awardId: 3, courseId: 1, date: '2024-12-01' }
   ];
@@ -295,17 +294,14 @@ export class DataService {
     return of(this.awards.find((a) => a.id === id));
   }
 
-  // --- NOVO MÉTODO: Retorna histórico de atribuições para um Award específico ---
   getAssignmentsByAward(awardId: number): Observable<any[]> {
     const result: any[] = [];
-
-    // 1. Atribuições a Alunos
     this.studentAwards
         .filter(sa => sa.awardId === awardId)
         .forEach(sa => {
             const student = this.students.find(s => s.id === sa.studentId);
             result.push({
-                id: sa.id, // ID da atribuição (usado para eliminar)
+                id: sa.id, 
                 recipientId: sa.studentId,
                 recipientName: student ? student.name : 'Unknown Student',
                 type: 'STUDENT',
@@ -319,7 +315,7 @@ export class DataService {
         .forEach(ta => {
             const team = this.teams.find(t => t.id === ta.teamId);
             result.push({
-                id: ta.id, // ID da atribuição
+                id: ta.id, 
                 recipientId: ta.teamId,
                 recipientName: team ? team.name : 'Unknown Team',
                 type: 'TEAM',
@@ -399,21 +395,17 @@ export class DataService {
   // --- DELETE METHODS (REVOKE) ---
   
   revokeAssignment(assignmentId: number): Observable<boolean> {
-    // 1. Tenta remover dos prémios de estudantes
     const sIndex = this.studentAwards.findIndex(sa => sa.id === assignmentId);
     if (sIndex !== -1) {
       this.studentAwards.splice(sIndex, 1);
       return of(true);
     }
-
-    // 2. Tenta remover dos prémios de equipa
     const tIndex = this.teamAwards.findIndex(ta => ta.id === assignmentId);
     if (tIndex !== -1) {
       this.teamAwards.splice(tIndex, 1);
       return of(true);
     }
 
-    // Se não encontrou (pode ter sido um ID errado ou já apagado)
     console.warn(`Assignment ID ${assignmentId} not found.`);
     return of(true);
   }
@@ -528,6 +520,79 @@ export class DataService {
 
       teacher.name = updatedData.name;
       teacher.email = updatedData.email;
+      return of(true);
+    }
+    return of(false);
+  }
+
+  updateAward(id: number, data: { name: string; description: string; points: number; courseId?: number | string | null }): Observable<boolean> {
+    const award = this.awards.find((a) => a.id === id);
+    if (award && award.type === 'COURSE') {
+      award.name = data.name;
+      award.description = data.description;
+      award.points = data.points;
+      
+      if (data.courseId) {
+          const newCourseId = Number(data.courseId);
+          const newCourse = this.courses.find(c => c.id === newCourseId);
+          
+          if (newCourse) {
+              award.courseId = newCourseId;
+              award.courseName = newCourse.name; 
+          }
+      }
+      return of(true);
+    }
+    return of(false);
+  }
+
+  // --- MÉTODOS PARA GESTÃO DE PROJETOS E EQUIPAS ---
+
+  updateProject(id: number, data: { name: string; description: string; startDate: string; endDate: string }): Observable<boolean> {
+    const project = this.projects.find((p) => p.id === id);
+    if (project) {
+      project.name = data.name;
+      project.description = data.description;
+      project.startDate = data.startDate; // Novo
+      project.endDate = data.endDate;     // Novo
+      return of(true);
+    }
+    return of(false);
+  }
+
+  deleteTeam(teamId: number): Observable<boolean> {
+    const index = this.teams.findIndex((t) => t.id === teamId);
+    if (index !== -1) {
+      this.teams.splice(index, 1);
+      return of(true);
+    }
+    return of(false);
+  }
+  removeTeamMember(teamId: number, studentId: number): Observable<boolean> {
+    const team = this.teams.find((t) => t.id === teamId);
+    if (team) {
+      const memberIndex = team.members.findIndex((m) => m.student.id === studentId);
+      if (memberIndex !== -1) {
+        team.members.splice(memberIndex, 1);
+        return of(true);
+      }
+    }
+    return of(false);
+  }
+  addTeamMember(teamId: number, studentId: number): Observable<boolean> {
+    const team = this.teams.find((t) => t.id === teamId);
+    const student = this.students.find((s) => s.id === studentId);
+
+    if (team && student) {
+      const exists = team.members.some((m) => m.student.id === studentId);
+      if (exists) {
+          return throwError(() => ({ status: 409, message: 'Student already in team' }));
+      }
+
+      team.members.push({
+        student: student,
+        role: 'DEVELOPER'
+      });
       return of(true);
     }
     return of(false);
@@ -688,26 +753,5 @@ export class DataService {
     };
     this.teams.push(newTeam);
     return of(true).pipe(delay(500));
-  }
-
-  updateAward(id: number, data: { name: string; description: string; points: number; courseId?: number | string | null }): Observable<boolean> {
-    const award = this.awards.find((a) => a.id === id);
-    if (award && award.type === 'COURSE') {
-      award.name = data.name;
-      award.description = data.description;
-      award.points = data.points;
-      
-      if (data.courseId) {
-          const newCourseId = Number(data.courseId);
-          const newCourse = this.courses.find(c => c.id === newCourseId);
-          
-          if (newCourse) {
-              award.courseId = newCourseId;
-              award.courseName = newCourse.name; 
-          }
-      }
-      return of(true);
-    }
-    return of(false);
   }
 }

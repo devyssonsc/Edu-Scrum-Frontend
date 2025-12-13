@@ -4,22 +4,66 @@
         <button class="btn-back" routerLink="/teacher-dashboard" [queryParams]="{ tab: 'Projects' }">
             <i class="bi bi-arrow-left"></i> Back
         </button>
-        <div class="title-group">
-            <h1>{{ project?.name }}</h1>
-            <span class="course-badge">{{ project?.courseName }}</span>
-        </div>
+        
+        @if (!isEditingProject) {
+            <div class="title-group">
+                <h1>{{ project?.name }}</h1>
+                <span class="course-badge">{{ project?.courseName }}</span>
+                <button class="btn-icon-edit" (click)="toggleEditProject()" title="Edit Project Details">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+            </div>
+        } @else {
+            <form [formGroup]="editProjectForm" (ngSubmit)="saveProject()" class="edit-header-form">
+                <input type="text" formControlName="name" class="header-input" placeholder="Project Name">
+                <div class="header-actions">
+                    <button type="submit" class="btn btn-primary btn-sm" [disabled]="editProjectForm.invalid">Save</button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleEditProject()">Cancel</button>
+                </div>
+            </form>
+        }
     </div>
 
-    <div class="card description-card">
-        <div class="desc-content">
-            <h4>Description & Goals</h4>
-            <p>{{ project?.description || 'No description provided.' }}</p>
-            <div class="meta-data">
-                <div class="meta-item"><i class="bi bi-calendar-event"></i> <span>Start: <strong>{{ project?.startDate }}</strong></span></div>
-                <div class="meta-item"><i class="bi bi-flag-fill"></i> <span>End: <strong>{{ project?.endDate }}</strong></span></div>
+    @if (!isEditingProject) {
+        <div class="card description-card">
+            <div class="desc-content">
+                <h4>Description & Goals</h4>
+                <p>{{ project?.description || 'No description provided.' }}</p>
+                <div class="meta-data">
+                    <div class="meta-item"><i class="bi bi-calendar-event"></i> <span>Start: <strong>{{ project?.startDate }}</strong></span></div>
+                    <div class="meta-item"><i class="bi bi-flag-fill"></i> <span>End: <strong>{{ project?.endDate }}</strong></span></div>
+                </div>
             </div>
         </div>
-    </div>
+    } @else {
+        <div class="card description-card editing">
+            <form [formGroup]="editProjectForm">
+                
+                <div class="dates-row" style="display: flex; gap: 1.5rem; margin-bottom: 0.5rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label style="font-weight: 500; font-size: 0.9rem; color: #666; display: block; margin-bottom: 0.3rem;">Start Date</label>
+                        <input type="date" formControlName="startDate" class="form-control" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label style="font-weight: 500; font-size: 0.9rem; color: #666; display: block; margin-bottom: 0.3rem;">End Date</label>
+                        <input type="date" formControlName="endDate" class="form-control" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;">
+                    </div>
+                </div>
+
+                @if (editProjectForm.errors?.['dateRangeInvalid']) {
+                    <div style="color: #e74c3c; font-size: 0.9rem; margin-bottom: 1rem; padding: 0.5rem; background: #fdeaea; border-radius: 4px; text-align: center;">
+                        <i class="bi bi-exclamation-circle-fill"></i> Start Date cannot be after End Date.
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label style="font-weight: 500; font-size: 0.9rem; color: #666; display: block; margin-bottom: 0.3rem;">Description</label>
+                    <textarea formControlName="description" rows="4" class="desc-input" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+                </div>
+
+            </form>
+        </div>
+    }
 
     <div class="section-actions">
         <h3>Teams Management ({{ teams.length }})</h3>
@@ -101,31 +145,66 @@
             <div class="card team-card">
                 <div class="team-header">
                     <h5>{{ team.name }}</h5>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <span class="badge-count">{{ team.members.length }} members</span>
-                        <button class="btn-icon-small" (click)="openSprintModal(team)" title="View Sprints & Tasks">
-                            <i class="bi bi-kanban"></i> View Board
+                    <div class="header-tools">
+                        <button class="btn-icon-danger" (click)="deleteTeam(team.id)" title="Delete Team">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="members-list">
+                <div class="members-list-managed">
                     @for (m of team.members; track m.student.id) {
-                        <div class="mini-member">
-                            <span class="role-dot" [title]="m.role"
-                                  [class.po]="m.role === 'PRODUCT_OWNER'"
-                                  [class.sm]="m.role === 'SCRUM_MASTER'">
-                            </span>
-                            <span>{{ m.student.name }}</span>
+                        <div class="member-row">
+                            <div class="member-left">
+                                <span class="role-dot" [title]="m.role"
+                                      [class.po]="m.role === 'PRODUCT_OWNER'"
+                                      [class.sm]="m.role === 'SCRUM_MASTER'">
+                                </span>
+                                <span>{{ m.student.name }}</span>
+                            </div>
+                            
+                            @if (m.role === 'DEVELOPER') {
+                                <i class="bi bi-x-circle remove-icon" (click)="removeMember(team, m.student.id)" title="Remove Developer"></i>
+                            }
                         </div>
                     }
                 </div>
 
-                <div class="sprints-section">
+                <div class="add-member-footer">
+                    @if (addingToTeamId !== team.id) {
+                        <button class="btn-link-add" (click)="startAddMember(team.id)">
+                            + Add Developer
+                        </button>
+                    } @else {
+                        <div class="inline-add-small">
+                            <select [(ngModel)]="selectedStudentToAdd" class="small-select">
+                                <option [ngValue]="null">Select Student...</option>
+                                @for (s of getAvailableForTeam(team); track s.id) {
+                                    <option [ngValue]="s.id">{{ s.name }}</option>
+                                }
+                            </select>
+                            <div class="small-actions">
+                                <button class="btn-check-icon" (click)="confirmAddMember(team.id)" [disabled]="!selectedStudentToAdd">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button class="btn-close-icon" (click)="cancelAddMember()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="sprints-section" style="margin-top: 1.5rem; border-top: 1px solid #f0f0f0; padding-top: 1rem;">
                     <div class="progress-mini">
                         <div class="progress-bar" [style.width.%]="getTeamProgress(team)"></div>
                     </div>
-                    <small style="color: #666;">Progress: {{ getTeamProgress(team) }}%</small>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 5px;">
+                        <small style="color: #666;">Progress: {{ getTeamProgress(team) }}%</small>
+                        <button class="btn-icon-small" (click)="openSprintModal(team)" title="View Board">
+                            <i class="bi bi-kanban"></i> Board
+                        </button>
+                    </div>
                 </div>
             </div>
         }
