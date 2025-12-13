@@ -19,21 +19,20 @@ export class TeacherDashboardComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   teacherName: string = 'Fátima Leal';
-
-  // Data Holders
+  
   courses: any[] = [];
   projects: any[] = [];
   awards: any[] = [];
   
+
   private rawAwards: Award[] = [];
 
-  // Table Data
   data: any[] = [];
   selectedOption: string = 'Courses';
 
-  // Stats
   countCourses = 0;
   countProjects = 0;
+  countAwards = 0;
 
   constructor() {}
 
@@ -47,7 +46,7 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   loadAllData() {
-    // 1. Courses
+    // 1. CARREGAR CURSOS
     this.dataService.getCourses().subscribe(res => {
       this.courses = res.map(c => ({
         id: c.id,
@@ -58,10 +57,13 @@ export class TeacherDashboardComponent implements OnInit {
       }));
       
       this.countCourses = res.length;
-      if (this.selectedOption === 'Courses') this.data = this.courses;
+      
+      if (this.selectedOption === 'Courses') {
+        this.data = this.courses;
+      }
     });
 
-    // 2. Projects
+    // 2. CARREGAR PROJETOS
     this.dataService.getAllProjects().subscribe(res => {
       this.projects = res.map(p => ({
         id: p.id,
@@ -69,20 +71,29 @@ export class TeacherDashboardComponent implements OnInit {
         Course: p.courseName,
         Teams: p.teamsCount
       }));
+      
       this.countProjects = res.length;
-      if (this.selectedOption === 'Projects') this.data = this.projects;
+      if (this.selectedOption === 'Projects') {
+        this.data = this.projects;
+      }
     });
 
-    // 3. Awards
+    // 3. CARREGAR AWARDS
     this.dataService.getAwards().subscribe(res => {
       this.rawAwards = res;
       this.awards = res.map(a => ({
         id: a.id,
         Name: a.name,
         Type: a.type,
+        Course: a.courseName || 'All', 
         Points: a.points
       }));
-      if (this.selectedOption === 'Awards') this.data = this.awards;
+      
+      this.countAwards = res.length;
+      
+      if (this.selectedOption === 'Awards') {
+        this.data = this.awards;
+      }
     });
   }
 
@@ -107,28 +118,32 @@ export class TeacherDashboardComponent implements OnInit {
     }
   }
 
+  // --- NAVEGAÇÃO ---
+
   navigateToCreateAward() {
     this.router.navigate(['/teacher-dashboard/create-award']);
   }
 
-  // --- EDIT / NAVIGATION LOGIC ---
-  
-  handleEdit(row: any) {
-  if (this.selectedOption === 'Courses') {
-    this.router.navigate(['/teacher-dashboard/course', row.id]);
-  
-  } else if (this.selectedOption === 'Projects') {
-    this.router.navigate(['/teacher-dashboard/project', row.id]);
-  
-  } else if (this.selectedOption === 'Awards') {
-    // ALTERAÇÃO: Navegar para o detalhe do prémio
-    this.router.navigate(['/teacher-dashboard/award', row.id]);
+  navigateToAssignAward() {
+    this.router.navigate(['/teacher-dashboard/assign-award']);
   }
-}
 
-  // --- DELETE LOGIC ---
+  handleEdit(row: any) {
+    if (this.selectedOption === 'Courses') {
+      this.router.navigate(['/teacher-dashboard/course', row.id]);
+    
+    } else if (this.selectedOption === 'Projects') {
+      this.router.navigate(['/teacher-dashboard/project', row.id]);
+    
+    } else if (this.selectedOption === 'Awards') {
+      this.router.navigate(['/teacher-dashboard/award', row.id]);
+    }
+  }
+
+  // --- ELIMINAÇÃO ---
 
   handleDelete(row: any) {
+
     if (this.selectedOption === 'Courses') {
       alert('Teachers cannot delete Courses.');
       return;
@@ -147,23 +162,15 @@ export class TeacherDashboardComponent implements OnInit {
 
   postDeleteAction(success: boolean) {
     if (success) {
-      this.loadAllData();
+      this.loadAllData(); 
     } else {
       alert('Error deleting item.');
     }
   }
 
-  handleAwardAction(row: any) {
-    const originalAward = this.rawAwards.find(a => a.id === row.id || a.name === row.Name);
-    if (originalAward && originalAward.isOwner) {
-       alert('Edit award logic here');
-    } else {
-       alert('You can only manage awards created by you.');
-    }
-  }
-
   handleAwardDelete(row: any) {
     const originalAward = this.rawAwards.find(a => a.id === row.id || a.name === row.Name);
+    
     if (originalAward && originalAward.isOwner) {
         this.dataService.deleteAward(originalAward.name).subscribe(success => this.postDeleteAction(success));
     } else {

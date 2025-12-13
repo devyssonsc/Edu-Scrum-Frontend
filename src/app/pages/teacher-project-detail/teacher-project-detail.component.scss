@@ -1,5 +1,10 @@
 @import "../../../styles/variables.scss";
 
+$primary-color: #4A90E2; 
+$success-color: #27ae60; 
+$danger-color: #e74c3c;  
+$warning-color: #f39c12;
+
 .div-container {
     padding: 2rem;
     background-color: $light-gray;
@@ -27,7 +32,6 @@
         
          h1 {
             font-family: $font-secondary; font-weight: 800; font-size: 2rem; color: $dark-gray; line-height: 1.2;
-            .subtitle { color: $dark-gray; opacity: 0.6; font-weight: 400; margin-right: 0.5rem; }
         }
         .course-badge {
             background-color: $medium-gray; color: $dark-gray;
@@ -73,8 +77,6 @@
     
     .form-header {font-family: "Chewy", cursive; font-size: 2rem; font-weight: 900; color: #545454; margin-bottom: 1rem;text-align: center; }
 
-
-    
     .form-group {
         margin-bottom: 1rem;
         label { font-family: $font-secondary; font-weight: 600; font-size: 0.9rem; color: $dark-gray; margin-bottom: 0.25rem; display: block; }
@@ -156,22 +158,17 @@
     .divider-small { border: none; border-top: 1px solid $light-gray; margin: 0.5rem 0 1rem 0; }
 
     .sprints-section {
-        h6 { font-family: $font-secondary; font-weight: 700; font-size: 0.85rem; margin-bottom: 0.5rem; color: $dark-gray; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .sprint-list {
-            display: flex; flex-direction: column; gap: 0.6rem;
-            .sprint-item {
-                background: #f9f9f9; padding: 0.6rem; border-radius: 6px; border-left: 3px solid #f39c12; 
-                &.completed { border-left-color: #27ae60; background: #f0fdf4; }
-                
-                .sp-top {
-                    display: flex; justify-content: space-between; font-family: $font-secondary; font-weight: 600; font-size: 0.85rem; margin-bottom: 2px;
-                    .sp-status { font-size: 0.65rem; padding: 1px 4px; background: rgba(0,0,0,0.05); border-radius: 4px; }
-                }
-                .sp-goal { display: block; font-family: $font-secondary; font-size: 0.75rem; color: #777; line-height: 1.2; }
+        .progress-mini {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.25rem;
+            .progress-bar {
+                height: 100%;
+                background: $success-color;
             }
         }
-        .no-data { font-style: italic; color: #aaa; font-size: 0.85rem; font-family: $font-secondary; }
     }
 }
 
@@ -182,3 +179,154 @@
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+.btn-icon-small {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #f0f0f0;
+        color: $primary-color;
+        border-color: $primary-color;
+    }
+    i { margin-right: 4px; }
+}
+
+// --- MODAL STYLES ---
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+
+        h2 { margin: 0; font-size: 1.5rem; color: $dark-gray; }
+        .btn-close-modal {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #999;
+            &:hover { color: #333; }
+        }
+    }
+}
+
+// --- SPRINT ACCORDION STYLES ---
+.sprint-accordion {
+    .accordion-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .accordion-button {
+        background: #fafafa;
+        padding: 1rem;
+        width: 100%;
+        text-align: left;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        
+        &:hover { background: #f0f0f0; }
+        
+        .sprint-info { font-size: 1rem; color: $dark-gray; }
+        .sprint-meta { font-size: 0.85rem; color: #777; }
+        
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            
+            &.text-bg-success { background-color: $success-color; }
+            &.text-bg-primary { background-color: $primary-color; }
+            &.text-bg-secondary { background-color: #95a5a6; }
+        }
+    }
+
+    .accordion-body {
+        padding: 1rem;
+        background: white;
+    }
+
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid transparent;
+
+            .task-left {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                .task-title { 
+                    font-weight: 500; color: #333; 
+                    &.done { text-decoration: line-through; color: #999; }
+                }
+            }
+
+            .task-right {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+
+                .assignee-badge {
+                    font-size: 0.8rem;
+                    color: #666;
+                    background: #eee;
+                    padding: 0.2rem 0.5rem;
+                    border-radius: 4px;
+                }
+
+                .status-pill {
+                    font-size: 0.7rem;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    padding: 0.2rem 0.4rem;
+                    border-radius: 4px;
+                    
+                    &.DONE { color: $success-color; background: rgba($success-color, 0.1); }
+                    &.IN_PROGRESS { color: $primary-color; background: rgba($primary-color, 0.1); }
+                    &.TODO { color: #7f8c8d; background: #ecf0f1; }
+                }
+            }
+        }
+    }
+}

@@ -8,33 +8,15 @@
     </div>
 
     <div class="stats-row">
-        <app-stats-card 
-            title="Value" 
-            [value]="(award?.points || 0).toString()" 
-            description="points earned"
-            iconClass="bi bi-star-fill">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Assignments" 
-            [value]="assignmentsCount.toString()" 
-            description="total recipients"
-            iconClass="bi bi-person-check-fill">
-        </app-stats-card>
-
-        <app-stats-card 
-            title="Type" 
-            [value]="award?.type || 'N/A'" 
-            description="award scope"
-            iconClass="bi bi-globe">
-        </app-stats-card>
+        <app-stats-card title="Value" [value]="(award?.points || 0).toString()" description="points earned" iconClass="bi bi-star-fill"></app-stats-card>
+        <app-stats-card title="Assignments" [value]="assignmentsCount.toString()" description="total recipients" iconClass="bi bi-person-check-fill"></app-stats-card>
+        <app-stats-card title="Type" [value]="award?.type || 'N/A'" description="award type" iconClass="bi bi-globe"></app-stats-card>
     </div>
 
     <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="edit-section card">
         
         <div class="section-header">
             <h3>Award Data</h3>
-            
             <div class="actions" style="display: flex; gap: 1rem;">
                 @if (award?.type === 'COURSE') {
                     <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || !editForm.dirty">
@@ -56,12 +38,29 @@
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Description</label>
-            <input type="text" formControlName="description" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+            <textarea formControlName="description" class="main-input" [readonly]="award?.type === 'GLOBAL'" rows="4"></textarea>
+        </div>
+
+        <div class="form-group-main" style="margin-top: 1rem;">
+            <label>Associated Course</label>
+            @if (award?.type === 'GLOBAL') {
+                <input type="text" value="Global Award (All Courses)" class="main-input" readonly>
+            } @else {
+                <select formControlName="courseId" class="main-input">
+                    @for (course of myCourses; track course.id) {
+                        <option [ngValue]="course.id">{{ course.name }}</option>
+                    }
+                </select>
+            }
         </div>
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Points Value</label>
-            <input type="number" formControlName="points" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+            <input [type]="award?.type === 'GLOBAL' ? 'text' : 'number'" 
+                   formControlName="points" 
+                   class="main-input" 
+                   [readonly]="award?.type === 'GLOBAL'" 
+                   min="1" max="5">
         </div>
 
         <hr class="divider">
@@ -74,50 +73,34 @@
                     <tr>
                         <th>Recipient</th>
                         <th>Scope</th>
-                        @if (award?.type !== 'GLOBAL') {
-                            <th style="width: 50px;">Actions</th>
-                        }
+                        @if (award?.type !== 'GLOBAL') { <th style="width: 50px;">Actions</th> }
                     </tr>
                 </thead>
                 <tbody>
                     @for (item of assignmentHistory; track item.id) {
                         <tr>
-                            <td>
-                                <input type="text" [value]="item.recipientName" class="table-input" readonly>
-                            </td>
-                            <td>
-                                <span class="table-input">{{ item.type }}</span>
-                            </td>
+                            <td><input type="text" [value]="item.recipientName" class="table-input" readonly></td>
+                            <td><span class="table-input">{{ item.type }}</span></td>
                             @if (award?.type !== 'GLOBAL') {
-                                <td class="actions">
-                                    <i class="bi bi-trash delete-icon" (click)="deleteAssignment(item.id)"></i>
-                                </td>
+                                <td class="actions"><i class="bi bi-trash delete-icon" (click)="deleteAssignment(item.id)"></i></td>
                             }
                         </tr>
                     }
                     @if (assignmentHistory.length === 0) {
-                        <tr>
-                            <td [attr.colspan]="award?.type !== 'GLOBAL' ? 3 : 2" style="text-align: center; color: #999;">
-                                No assignments yet.
-                            </td>
-                        </tr>
+                        <tr><td [attr.colspan]="award?.type !== 'GLOBAL' ? 3 : 2" style="text-align: center; color: #999;">No assignments yet.</td></tr>
                     }
                 </tbody>
             </table>
         </div>
-
     </form>
 
     @if (showAssignForm) {
         <div class="card edit-section" style="margin-top: 0;" #assignFormSection>
-            
             <div class="section-header">
                 <h3>New Assignment</h3>
                 <button class="btn-cancel" (click)="toggleAssignForm()" style="background:none; border:none; cursor:pointer;">Cancel</button>
             </div>
-            
             <form [formGroup]="assignForm" (ngSubmit)="onSubmitAssignment()">
-                
                 <div class="form-group-main">
                     <label>Recipient Type</label>
                     <select formControlName="recipientType" (change)="onTypeChange()" class="main-input">
@@ -125,27 +108,18 @@
                         <option value="TEAM">Project Team</option>
                     </select>
                 </div>
-
                 <div class="form-group-main" style="margin-top: 1rem;">
                     <label>Select Recipient</label>
                     <select formControlName="recipientId" class="main-input">
                         <option [ngValue]="null" disabled>Choose...</option>
-                        
                         @if (assignForm.get('recipientType')?.value === 'STUDENT') {
-                            @for (s of availableStudents; track s.id) {
-                                <option [value]="s.id">{{ s.name }}</option>
-                            }
+                            @for (s of availableStudents; track s.id) { <option [value]="s.id">{{ s.name }}</option> }
                         } @else {
-                            @for (t of availableTeams; track t.id) {
-                                <option [value]="t.id">{{ t.name }}</option>
-                            }
+                            @for (t of availableTeams; track t.id) { <option [value]="t.id">{{ t.name }}</option> }
                         }
                     </select>
                 </div>
-
-                <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;" [disabled]="assignForm.invalid">
-                    Confirm Assignment
-                </button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;" [disabled]="assignForm.invalid">Confirm Assignment</button>
             </form>
         </div>
     }

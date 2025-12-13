@@ -1,14 +1,25 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, FormsModule, Validators, FormControl, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
-import { DataService, Project, Team, StudentLite, CreateTeamRequest } from '../../services/dataService';
+import { DataService, Project, Team, StudentLite, CreateTeamRequest, Sprint } from '../../services/dataService';
+
+// --- VALIDADOR DE DATAS ---
+const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const start = control.get('startDate')?.value;
+  const end = control.get('endDate')?.value;
+
+  if (start && end && new Date(start) > new Date(end)) {
+    return { dateRangeInvalid: true };
+  }
+  return null;
+};
 
 @Component({
   selector: 'app-teacher-project-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, StatsCardComponent, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, StatsCardComponent, ReactiveFormsModule, FormsModule],
   templateUrl: './teacher-project-detail.component.html',
   styleUrl: './teacher-project-detail.component.scss'
 })
@@ -22,115 +33,264 @@ export class TeacherProjectDetailComponent implements OnInit {
   teams: Team[] = [];
   availableStudents: StudentLite[] = [];
 
+  // --- FORMULÁRIOS ---
   showCreateTeamForm = false;
   teamForm: FormGroup;
   selectedStudentId = new FormControl<number | null>(null);
 
+  
+  isEditingProject = false;
+  editProjectForm: FormGroup;
+
+
+  addingToTeamId: number | null = null;
+  selectedStudentToAdd: number | null = null;
+
+ 
+  showSprintModal = false;
+  selectedTeam: Team | null = null;
+
   constructor() {
+   
     this.teamForm = this.fb.group({
       name: ['', Validators.required],
-      members: this.fb.array([], Validators.minLength(1))
-    });
+      members: this.fb.array([], [Validators.minLength(3)]) 
+    }, { validators: this.teamRolesValidator });
+
+   
+    this.editProjectForm = this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required]
+    }, { validators: dateRangeValidator }); 
+  }
+
+  // Validador de composição de equipa
+  teamRolesValidator(group: AbstractControl): ValidationErrors | null {
+    const membersArray = group.get('members') as FormArray;
+    if (!membersArray || membersArray.length === 0) return null;
+    const roles = membersArray.controls.map(ctrl => ctrl.value.role);
+    const smCount = roles.filter(r => r === 'SCRUM_MASTER').length;
+    const poCount = roles.filter(r => r === 'PRODUCT_OWNER').length;
+    const devCount = roles.filter(r => r === 'DEVELOPER').length;
+    const errors: any = {};
+    if (smCount !== 1) errors.invalidSM = true;
+    if (poCount !== 1) errors.invalidPO = true;
+    if (devCount < 1) errors.invalidDev = true;
+    return Object.keys(errors).length > 0 ? errors : null;
   }
 
   ngOnInit() {
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
-    
-    if (projectId) {
-      this.loadData(projectId);
-    }
+    if (projectId) { this.loadData(projectId); }
   }
 
   loadData(projectId: number) {
     this.dataService.getProjectById(projectId).subscribe(p => {
       this.project = p;
-
-      if (p && p.courseId) {
-        this.loadStudents(p.courseId);
+      
+      if (this.project) {
+        this.editProjectForm.patchValue({
+          name: this.project.name,
+          description: this.project.description,
+          startDate: this.project.startDate,
+          endDate: this.project.endDate
+        });
+        if (p?.courseId) this.loadStudents(p.courseId);
       }
     });
-
-    this.dataService.getTeamsByProject(projectId).subscribe(t => {
-      this.teams = t;
-    });
+    this.dataService.getTeamsByProject(projectId).subscribe(t => { this.teams = t; });
   }
 
   loadStudents(courseId: number) {
-    this.dataService.getStudentsByCourseId(courseId).subscribe((students: StudentLite[]) => {
-      this.availableStudents = students;
-    });
+    this.dataService.getStudentsByCourseId(courseId).subscribe(s => this.availableStudents = s);
   }
 
-  get members() {
-    return this.teamForm.get('members') as FormArray;
+  get members() { return this.teamForm.get('members') as FormArray; }
+
+  // ==========================================
+  // 1. EDIÇÃO DE PROJETO
+  // ==========================================
+  toggleEditProject() {
+    this.isEditingProject = !this.isEditingProject;
+    
+    if (this.isEditingProject && this.project) {
+        this.editProjectForm.patchValue({
+            name: this.project.name,
+            description: this.project.description,
+            startDate: this.project.startDate,
+            endDate: this.project.endDate
+        });
+    }
   }
+
+  saveProject() {
+    if (this.editProjectForm.valid && this.project) {
+        this.dataService.updateProject(this.project.id, this.editProjectForm.value).subscribe(success => {
+            if (success) {
+                this.isEditingProject = false;
+                this.loadData(this.project!.id);
+            } else {
+                alert('Error updating project.');
+            }
+        });
+    }
+  }
+
+  // ==========================================
+  // 2. GESTÃO DE EQUIPAS
+  // ==========================================
+
+  deleteTeam(teamId: number) {
+    if (confirm('Are you sure you want to delete this team entirely? This cannot be undone.')) {
+        this.dataService.deleteTeam(teamId).subscribe(success => {
+            if (success) {
+                this.loadData(this.project!.id);
+            }
+        });
+    }
+  }
+
+  removeMember(team: Team, studentId: number) {
+    const member = team.members.find(m => m.student.id === studentId);
+    if (member && member.role !== 'DEVELOPER') {
+        alert('You can only remove Developers. Scrum Master and Product Owner are mandatory.');
+        return;
+    }
+
+    if (confirm('Are you sure you want to remove this member from the team?')) {
+        this.dataService.removeTeamMember(team.id, studentId).subscribe(success => {
+            if (success) {
+                this.loadData(this.project!.id);
+            }
+        });
+    }
+  }
+
+  startAddMember(teamId: number) {
+    this.addingToTeamId = teamId;
+    this.selectedStudentToAdd = null;
+  }
+
+  confirmAddMember(teamId: number) {
+    if (this.selectedStudentToAdd) {
+        this.dataService.addTeamMember(teamId, this.selectedStudentToAdd).subscribe({
+            next: (success) => {
+                if (success) {
+                    this.addingToTeamId = null;
+                    this.selectedStudentToAdd = null;
+                    this.loadData(this.project!.id);
+                }
+            },
+            error: (err) => alert(err.message || 'Error adding member')
+        });
+    }
+  }
+
+  cancelAddMember() {
+    this.addingToTeamId = null;
+    this.selectedStudentToAdd = null;
+  }
+
+  getAvailableForTeam(team: Team): StudentLite[] {
+    const memberIds = team.members.map(m => m.student.id);
+    return this.availableStudents.filter(s => !memberIds.includes(s.id));
+  }
+
+  // ==========================================
+  // 3. CRIAÇÃO DE EQUIPA
+  // ==========================================
 
   toggleCreateForm() {
     this.showCreateTeamForm = !this.showCreateTeamForm;
-    if (!this.showCreateTeamForm) {
-      this.teamForm.reset();
-      this.members.clear();
-    }
+    if (!this.showCreateTeamForm) { this.teamForm.reset(); this.members.clear(); }
   }
 
   addMemberToForm() {
     const studentId = Number(this.selectedStudentId.value);
     if (!studentId) return;
-
     const student = this.availableStudents.find(s => s.id === studentId);
     if (!student) return;
-
     const isAlreadyInForm = this.members.controls.some(ctrl => ctrl.value.student.id === student.id);
-    
     if (!isAlreadyInForm) {
-      const memberGroup = this.fb.group({
-        student: [student], 
-        role: ['DEVELOPER', Validators.required] 
-      });
-      
+      const memberGroup = this.fb.group({ student: [student], role: ['DEVELOPER', Validators.required] });
       this.members.push(memberGroup);
       this.selectedStudentId.reset();
-    } else {
-      alert('Student already added to the list.');
-    }
+    } else { alert('Student already added.'); }
   }
 
-  removeMemberFromForm(index: number) {
-    this.members.removeAt(index);
-  }
+  removeMemberFromForm(index: number) { this.members.removeAt(index); }
 
   onSubmitTeam() {
     if (this.teamForm.valid && this.project) {
       const formValue = this.teamForm.value;
-      
       const payload: CreateTeamRequest = {
-        name: formValue.name,
-        projectId: this.project.id,
-        members: formValue.members.map((m: any) => ({
-          studentId: m.student.id,
-          teamRole: m.role
-        }))
+        name: formValue.name, projectId: this.project.id,
+        members: formValue.members.map((m: any) => ({ studentId: m.student.id, teamRole: m.role }))
       };
-
       this.dataService.createTeam(payload).subscribe({
         next: (success) => {
           if (success) {
-            alert(`Team "${payload.name}" created successfully!`);
+            alert(`Team created successfully!`);
             this.toggleCreateForm();
             this.loadData(this.project!.id); 
           }
         },
         error: (err) => {
-          if (err.status === 409) {
-            alert('Conflict: One or more students are already in a team for this project.');
-          } else {
-            console.error(err);
-            alert('An error occurred while creating the team.');
-          }
+            if(err.status === 400) alert(err.message);
+            else if (err.status === 409) alert('Student conflict.');
+            else alert('Error creating team.');
         }
       });
-    } else {
-      this.teamForm.markAllAsTouched();
-    }
+    } else { this.teamForm.markAllAsTouched(); }
+  }
+
+  // --- MODAL ---
+
+  openSprintModal(team: Team) {
+    this.selectedTeam = team;
+    this.showSprintModal = true;
+  }
+
+  closeSprintModal() {
+    this.showSprintModal = false;
+    this.selectedTeam = null;
+  }
+
+  getTeamProgress(team: Team): number {
+    if (!team.sprints || team.sprints.length === 0) return 0;
+    
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    team.sprints.forEach(sprint => {
+        if (sprint.tasks) {
+            totalTasks += sprint.tasks.length;
+            completedTasks += sprint.tasks.filter(t => t.status === 'DONE').length;
+        }
+    });
+
+    return totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+  }
+
+  getSprintStatus(sprint: Sprint): string {
+    const currentDate = new Date();
+    const startDate = new Date(sprint.startDate);
+    const endDate = new Date(sprint.endDate);
+    
+    if (sprint.status) return sprint.status; 
+
+    if (currentDate < startDate) return 'PLANNED';
+    if (currentDate >= startDate && currentDate <= endDate) return 'ACTIVE';
+    return 'COMPLETED';
+  }
+
+  getSprintStatusClass(sprint: Sprint): string {
+    const status = sprint.status || this.getSprintStatus(sprint);
+    if (status === 'PLANNED') return 'text-bg-secondary';
+    if (status === 'ACTIVE') return 'text-bg-primary';
+    if (status === 'COMPLETED') return 'text-bg-success';
+    return 'text-bg-secondary';
   }
 }
