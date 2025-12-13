@@ -550,8 +550,22 @@ export class DataService {
   }
 
   createTeam(request: CreateTeamRequest): Observable<boolean> {
-    const hasConflict = request.members.some((m) => m.studentId === 50442);
+    
+    // 1. Validar duplicados (aluno já em equipa) - MOCK EXEMPLO
+    const hasConflict = request.members.some((m) => m.studentId === 50442); // Simulação de conflito
     if (hasConflict) return throwError(() => ({ status: 409, message: 'Conflict' }));
+
+    // 2. Validar Regras de Negócio (1 PO, 1 SM, 1+ Dev)
+    const smCount = request.members.filter(m => m.teamRole === 'SCRUM_MASTER').length;
+    const poCount = request.members.filter(m => m.teamRole === 'PRODUCT_OWNER').length;
+    const devCount = request.members.filter(m => m.teamRole === 'DEVELOPER').length;
+
+    if (smCount !== 1 || poCount !== 1 || devCount < 1) {
+        return throwError(() => ({ 
+            status: 400, 
+            message: 'Invalid Team Composition. Required: 1 SM, 1 PO, 1+ Devs.' 
+        }));
+    }
 
     const newMembers: TeamMember[] = request.members.map((m) => {
       const student = this.students.find((s) => s.id === m.studentId) || this.students[0];

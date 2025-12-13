@@ -82,12 +82,16 @@
                         <i class="bi bi-x delete-btn" (click)="removeMemberFromForm(i)"></i>
                     </div>
                 }
-                @if (members.invalid && members.touched) {
-                    <small class="error-msg center">At least one member is required.</small>
-                }
             </div>
 
             <hr class="divider">
+
+            @if (teamForm.errors?.['invalidSM'] || teamForm.errors?.['invalidPO'] || teamForm.errors?.['invalidDev']) {
+                <div class="error-banner" style="color: #e74c3c; margin-bottom: 1rem; font-size: 0.9rem; text-align: center; background: #fdeaea; padding: 0.5rem; border-radius: 4px;">
+                    <i class="bi bi-exclamation-triangle-fill"></i> 
+                    <strong>Invalid Composition:</strong> Team must have exactly 1 Scrum Master, 1 Product Owner, and at least 1 Developer.
+                </div>
+            }
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" [disabled]="teamForm.invalid">Confirm & Create</button>

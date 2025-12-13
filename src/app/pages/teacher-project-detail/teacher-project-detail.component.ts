@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl, AbstractControl, ValidationErrors } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Project, Team, StudentLite, CreateTeamRequest } from '../../services/dataService';
 
@@ -29,13 +29,32 @@ export class TeacherProjectDetailComponent implements OnInit {
   constructor() {
     this.teamForm = this.fb.group({
       name: ['', Validators.required],
-      members: this.fb.array([], Validators.minLength(1))
-    });
+      // Validação mínima de 3 membros
+      members: this.fb.array([], [Validators.minLength(3)]) 
+    }, { validators: this.teamRolesValidator }); // Validador de Roles
+  }
+
+  // --- VALIDADOR PERSONALIZADO DE ROLES ---
+  teamRolesValidator(group: AbstractControl): ValidationErrors | null {
+    const membersArray = group.get('members') as FormArray;
+    if (!membersArray || membersArray.length === 0) return null;
+
+    const roles = membersArray.controls.map(ctrl => ctrl.value.role);
+    
+    const smCount = roles.filter(r => r === 'SCRUM_MASTER').length;
+    const poCount = roles.filter(r => r === 'PRODUCT_OWNER').length;
+    const devCount = roles.filter(r => r === 'DEVELOPER').length;
+
+    const errors: any = {};
+    if (smCount !== 1) errors.invalidSM = true;
+    if (poCount !== 1) errors.invalidPO = true;
+    if (devCount < 1) errors.invalidDev = true;
+
+    return Object.keys(errors).length > 0 ? errors : null;
   }
 
   ngOnInit() {
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
-    
     if (projectId) {
       this.loadData(projectId);
     }
@@ -44,7 +63,6 @@ export class TeacherProjectDetailComponent implements OnInit {
   loadData(projectId: number) {
     this.dataService.getProjectById(projectId).subscribe(p => {
       this.project = p;
-
       if (p && p.courseId) {
         this.loadStudents(p.courseId);
       }
@@ -123,6 +141,8 @@ export class TeacherProjectDetailComponent implements OnInit {
         error: (err) => {
           if (err.status === 409) {
             alert('Conflict: One or more students are already in a team for this project.');
+          } else if (err.status === 400) {
+             alert(err.message || 'Validation Error: Team must have 1 SM, 1 PO and at least 1 Dev.');
           } else {
             console.error(err);
             alert('An error occurred while creating the team.');
@@ -130,6 +150,12 @@ export class TeacherProjectDetailComponent implements OnInit {
         }
       });
     } else {
+      // Mostrar erros de validação específicos
+      if (this.teamForm.errors?.['invalidSM']) alert('Team must have exactly 1 Scrum Master.');
+      else if (this.teamForm.errors?.['invalidPO']) alert('Team must have exactly 1 Product Owner.');
+      else if (this.teamForm.errors?.['invalidDev']) alert('Team must have at least 1 Developer.');
+      else if (this.members.length < 3) alert('Team must have at least 3 members.');
+      
       this.teamForm.markAllAsTouched();
     }
   }
