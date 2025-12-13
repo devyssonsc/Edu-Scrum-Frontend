@@ -235,12 +235,18 @@ export class StudentDashboardComponent implements OnInit {
     }]
   };
 
+  data: any | any[] = [];
 
-  data: any[] = [];
+  awards: any[] = [];
+  projects: any[] = [];
+
+  rankings: {
+    studentInfo: any;
+    individualRankings: any[];
+    teamRankingsByCourse: any[];
+  } | null = null;
 
   sections: string[] = ['Awards', 'Dashboard', 'Rankings', 'Specific functions'];
-
-  openSprints: Record<string, boolean> = {};
 
   selectedOption: string = this.sections[2];
 
@@ -260,48 +266,52 @@ export class StudentDashboardComponent implements OnInit {
           }
         }
       }
-      console.log(response);
-      this.data = response;
+
+      if (this.selectedOption === 'Rankings') {
+        this.rankings = response;
+        const userLabels = response.individualRankings.map((item: any) => item.studentName) || [];
+        const userScores = response.individualRankings.map((item: any) => item.totalScore);
+        this.userRankingData = {
+          labels: userLabels,
+          datasets: [
+            {
+              label: 'Score',
+              data: userScores
+            }
+          ]
+        };
+
+        const teamLabels = response.teamRankingsByCourse[0].rankings.map((item: any) => item.teamName);
+        const teamScores = response.teamRankingsByCourse[0].rankings.map((item: any) => item.totalScore);
+        this.teamRankingData = {
+          labels: teamLabels,
+          datasets: [
+            {
+              label: 'Total Score',
+              data: teamScores
+            }
+          ]
+        };
+      } else {
+        this.data = response;
+      }
+      console.log(this.rankings);
     });
   }
 
 
-  get columns(): string[] {
-    if (!this.allData.degrees || this.allData.degrees.length === 0) return [];
-    return Object.keys(this.allData.degrees[0]);
-  }
+  // get columns(): string[] {
+  //   if (!this.allData.degrees || this.allData.degrees.length === 0) return [];
+  //   return Object.keys(this.allData.degrees[0]);
+  // }
 
   onSelectOption(event: any) {
     console.log(event);
     this.selectedOption = event;
-    if(this.selectedOption == 'Rankings'){
-      this.data = this.allData.rankings;
-      const userLabels = this.data[0].individualRankings.map((item: any) => item.studentName);
-      const userScores = this.data[0].individualRankings.map((item: any) => item.totalScore);
-      this.userRankingData = {
-        labels: userLabels,
-        datasets: [
-          {
-            label: 'Score',
-            data: userScores
-          }
-        ]
-      };
+    if (this.selectedOption == 'Rankings') {
 
-      const teamLabels = this.data[0].teamRankingsByCourse[0].rankings.map((item: any) => item.teamName);
-      const teamScores = this.data[0].teamRankingsByCourse[0].rankings.map((item: any) => item.totalScore);
-      this.teamRankingData = {
-        labels: teamLabels,
-        datasets: [
-          {
-            label: 'Total Score',
-            data: teamScores
-          }
-        ]
-      };
-    } else {
-      this.fetchData();
     }
+    this.fetchData();
   }
 
   getSprintStatus(sprint: any): string {
@@ -357,14 +367,14 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   isCurrentUser(student: any): boolean {
-    if(this.data[0].studentInfo.id === student.studentId) {
+    if (localStorage.getItem('id') == student.studentId) {
       return true;
     }
     return false;
   }
 
   isCurrentUserTeam(team: any): boolean {
-    if(team.members.some((member: any) => this.data[0].studentInfo.id === member.studentId)) {
+    if (team.members.some((member: any) => localStorage.getItem('id') == member.studentId)) {
       return true;
     }
     return false;

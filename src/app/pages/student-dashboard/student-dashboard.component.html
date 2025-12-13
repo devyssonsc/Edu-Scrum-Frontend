@@ -105,14 +105,15 @@
             </div>
             }
             }
-            @else if(selectedOption === 'Rankings') {
+            @else if(selectedOption === 'Rankings' && rankings) {
             <div class="card individual-ranking-card">
                 <h4>Individual Ranking</h4>
                 <div class="score-infos">
                     <div class="card leaderboard-card">
                         <h5>Student Leaderboard</h5>
                         <div class="student-list">
-                            @for(student of data[0].individualRankings; track student; let i = $index) {
+
+                            @for(student of rankings.individualRankings; track student; let i = $index) {
                             @if(i < 4) { <div
                                 [class]="'student-item' + (isCurrentUser(student) ? ' current-user' : '')">
                                 <span class="student-rank">
@@ -123,6 +124,7 @@
                         </div>
                         }
                         }
+
                     </div>
                 </div>
                 <div class="card score-distribution">
@@ -135,7 +137,7 @@
         <div class="card team-rankings-card">
             <h4>Team Rankings</h4>
             <div class="team-list">
-                @for(teamRanking of data[0].teamRankingsByCourse; track teamRanking; let tr = $index) {
+                @for(teamRanking of rankings.teamRankingsByCourse; track teamRanking; let tr = $index) {
                 <div class="card team-item">
                     <h5>{{ teamRanking.courseName }}</h5>
                     <div class="score-infos">
@@ -177,9 +179,11 @@
                                                     [class]="(isCurrentUser(member) ? 'current-user ' : '') + 'member-item d-flex flex-row justify-content-between align-items-center'">
 
                                                     <p class="member-name">
-                                                        <i [class]="'bi bi-' + (i === 0 ? 'trophy' : (i+1) + '-circle')"></i>
+                                                        <i
+                                                            [class]="'bi bi-' + (i === 0 ? 'trophy' : (i+1) + '-circle')"></i>
                                                         {{ member.studentName }}
-                                                        {{ isCurrentUser(member) ? '(You)' : '' }}</p>
+                                                        {{ isCurrentUser(member) ? '(You)' : '' }}
+                                                    </p>
                                                     <p class="member-points">{{ member.score }} points</p>
                                                 </div>
                                                 }
