@@ -1,0 +1,9 @@
+.btn-logout:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+}
+
+.btn-logout:active {
+  transform: translateY(0);
+}

@@ -13,6 +13,7 @@ export type TeamRole = 'PRODUCT_OWNER' | 'SCRUM_MASTER' | 'DEVELOPER';
 export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED';
 export type AwardType = 'GLOBAL' | 'COURSE';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
+export type AwardScope = 'INDIVIDUAL' | 'TEAM';
 
 // ==========================================
 // 2. INTERFACES
@@ -30,7 +31,7 @@ export interface StudentLite {
   name: string;
   email: string;
   degreeId?: number;
-  courseIds: number[]; 
+  courseIds?: number[]; // <--- Tornado Opcional (?) para evitar erros
 }
 
 export interface Degree {
@@ -110,6 +111,7 @@ export interface Award {
   description: string;
   points: number;
   type: AwardType;
+  scope: AwardScope;
   icon?: string;
   courseId?: number;
   courseName?: string; 
@@ -145,6 +147,7 @@ export interface CreateTeamRequest {
   members: { studentId: number; teamRole: TeamRole }[];
 }
 
+
 // ==========================================
 // 3. SERVICE
 // ==========================================
@@ -161,6 +164,11 @@ export class DataService {
   ];
 
   private students: StudentLite[] = [
+    { id: 1, name: 'Tiago Silva', email: '50440@upt.pt', degreeId: 1, courseIds: [1] },
+    { id: 2, name: 'David Aroso', email: '50441@upt.pt', degreeId: 1, courseIds: [1] },
+    { id: 3, name: 'Ana Pereira', email: '50442@upt.pt', degreeId: 1, courseIds: [1] },
+    { id: 4, name: 'João Santos', email: '50443@upt.pt', degreeId: 1, courseIds: [] },
+    { id: 5, name: 'Beatriz Costa', email: '50444@upt.pt', degreeId: 2, courseIds: [] }
 
   ];
 
@@ -227,11 +235,12 @@ export class DataService {
 
   // --- MOCK AWARDS ---
   private awards: Award[] = [
-    { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', icon: 'bi-lightning-charge-fill', isOwner: false },
-    { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', icon: 'bi-layers-fill', isOwner: false },
-    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, 
+    { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', scope: 'INDIVIDUAL', icon: 'bi-lightning-charge-fill', isOwner: false },
+    { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', scope: 'INDIVIDUAL', icon: 'bi-layers-fill', isOwner: false },
+    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', scope: 'TEAM', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, 
+    { id: 4, name: 'Team Spirit', description: 'Helped others', points: 3, type: 'COURSE', scope: 'INDIVIDUAL', courseId: 1, courseName: 'Software Quality', icon: 'bi-heart-fill', isOwner: true }, 
+    { id: 5, name: 'Shipped It!', description: 'Completed all sprint goals', points: 10, type: 'GLOBAL', scope: 'TEAM', icon: 'bi-box-seam-fill', isOwner: false }, 
   ];
-
 
   constructor(private httpClient: HttpClient) { }
 
@@ -317,15 +326,9 @@ export class DataService {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
-
+  
+  // MANTIDO HTTP como solicitado
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
-  /*   const course = this.courses.find(c => c.id === courseId);
-    
-    if (course && course.degree) {
-        const degreeId = course.degree.id;
-        return of(this.students.filter(s => s.degreeId === degreeId));
-    }
-    return of([]);  */
     return this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/courses/${courseId}/students`);
   }
 
@@ -370,8 +373,9 @@ export class DataService {
   
   // --- GAMIFICATION METHODS --- 
   getAwardsByCourse(courseId: number): Observable<Award[]> {
-    const courseAwards = this.awards.filter((a) => a.type === 'GLOBAL' || a.courseId === courseId);
-    return of(courseAwards);
+    // ALTERAÇÃO: Filtra APENAS os do tipo 'COURSE' (ignora os GLOBAL)
+    const availableAwards = this.awards.filter(a => a.courseId === courseId);
+    return of(availableAwards);
   }
 
   getGlobalAwards(): Observable<Award[]> {
@@ -430,7 +434,7 @@ export class DataService {
     return of(projectsWithDynamicCount);
   }
 
-  createAward(awardData: { name: string; description: string; points: number; courseId: number; }): Observable<boolean> {
+  createAward(awardData: { name: string; description: string; points: number; courseId: number; scope: AwardScope}): Observable<boolean> {
     const newId = this.awards.length > 0 ? Math.max(...this.awards.map((a) => a.id)) + 1 : 1;
     const course = this.courses.find(c => c.id === awardData.courseId);
     const courseName = course ? course.name : 'Unknown';
@@ -445,6 +449,7 @@ export class DataService {
       courseName: courseName, 
       icon: undefined,
       isOwner: true,
+      scope: awardData.scope,
     };
     this.awards.push(newAward);
     return of(true);
@@ -735,15 +740,14 @@ export class DataService {
     return of(false);
   }
 
-  // NOVOS MÉTODOS PARA ALUNOS
+  // NOVOS MÉTODOS PARA ALUNOS (Com proteção de undefined)
   addStudentToCourse(courseId: number, studentId: number): Observable<boolean> {
     const student = this.students.find(s => s.id === studentId);
     if (student) {
-      if (!student.courseIds) student.courseIds = [];
+      if (!student.courseIds) student.courseIds = []; // Garante inicialização
       if (!student.courseIds.includes(courseId)) {
         student.courseIds.push(courseId);
         
-        // Atualizar contador no curso (opcional mas recomendado)
         const course = this.courses.find(c => c.id === courseId);
         if(course) course.studentsCount = (course.studentsCount || 0) + 1;
 
@@ -760,7 +764,6 @@ export class DataService {
       if (index > -1) {
         student.courseIds.splice(index, 1);
         
-        // Atualizar contador no curso
         const course = this.courses.find(c => c.id === courseId);
         if(course && (course.studentsCount || 0) > 0) course.studentsCount!--;
 
@@ -900,6 +903,3 @@ export class DataService {
     return of(true).pipe(delay(500));
   }
 }
-
-
-

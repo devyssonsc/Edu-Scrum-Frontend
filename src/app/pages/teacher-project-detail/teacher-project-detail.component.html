@@ -154,6 +154,10 @@
                 <div class="team-header">
                     <h5>{{ team.name }}</h5>
                     <div class="header-tools">
+                        <button class="btn-icon-award" (click)="openAwardModalForTeam(team)" title="Award Team" style="background:none; border:none; color:#f39c12; margin-right:5px; cursor:pointer;">
+                            <i class="bi bi-trophy-fill"></i>
+                        </button>
+
                         <button class="btn-icon-danger" (click)="deleteTeam(team.id)" title="Delete Team">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -171,9 +175,16 @@
                                 <span>{{ m.student.name }}</span>
                             </div>
                             
-                            @if (m.role === 'DEVELOPER') {
-                                <i class="bi bi-x-circle remove-icon" (click)="removeMember(team, m.student.id)" title="Remove Developer"></i>
-                            }
+                            <div class="member-actions" style="display: flex; gap: 5px; align-items: center;">
+                                <i class="bi bi-trophy action-icon award-icon" 
+                                   style="color: #f39c12; cursor: pointer;"
+                                   (click)="openAwardModalForStudent(m.student)" 
+                                   title="Award Student"></i>
+
+                                @if (m.role === 'DEVELOPER') {
+                                    <i class="bi bi-x-circle remove-icon" (click)="removeMember(team, m.student.id)" title="Remove Developer"></i>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
@@ -291,6 +302,45 @@
                             <p>No sprints defined for this team.</p>
                         </div>
                     }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showAwardModal) {
+    <div class="modal-overlay" (click)="closeAwardModal()">
+        <div class="modal-content small-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3 style="margin:0; font-size:1.2rem;">Assign Award</h3>
+                <button class="btn-close-modal" (click)="closeAwardModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            
+            <div class="modal-body">
+                <p style="color: #666; margin-bottom: 1rem;">Assigning to <strong>{{ targetName }}</strong></p>
+                
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Select Award:</label>
+                
+                <select [(ngModel)]="selectedAwardId" class="form-select" style="width: 100%; padding: 8px; margin-bottom: 1.5rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <option [ngValue]="null">Choose an award...</option>
+                    @for (award of filteredAwards; track award.id) {
+                        <option [ngValue]="award.id">
+                            {{ award.name }} ({{ award.points }} pts)
+                        </option>
+                    }
+                </select>
+
+                @if (filteredAwards.length === 0) {
+                    <p style="color: #e74c3c; font-size: 0.9rem; margin-top: -1rem; margin-bottom: 1rem;">
+                        No {{ targetType === 'STUDENT' ? 'Individual' : 'Team' }} awards available for this course.
+                    </p>
+                }
+
+                <div class="modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button class="btn btn-secondary" (click)="closeAwardModal()">Cancel</button>
+                    <button class="btn btn-primary" (click)="confirmAwardAssignment()" [disabled]="!selectedAwardId">
+                        Confirm Assignment
+                    </button>
                 </div>
             </div>
         </div>
