@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component'; 
 import { DataService, Teacher, Course } from '../../services/dataService';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 
 @Component({
   selector: 'app-teacher-detail',
@@ -21,12 +23,13 @@ export class TeacherDetailComponent implements OnInit {
 
   teacherForm: FormGroup;
   teacherId: number | null = null; 
+  teacherName: string = "";
 
   stats = {
     coursesCount: 0
   };
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.teacherForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -50,8 +53,7 @@ export class TeacherDetailComponent implements OnInit {
   loadData(id: number) {
     this.dataService.getTeacherById(id).subscribe((teacher: Teacher | undefined) => {
       if (teacher) {
-        
-        this.stats.coursesCount = teacher.coursesCount;
+        this.teacherName = teacher.name
         this.teacherForm.patchValue({
           name: teacher.name,
           email: teacher.email
@@ -66,10 +68,13 @@ export class TeacherDetailComponent implements OnInit {
     const coursesArray = this.teacherForm.get('courses') as FormArray;
     coursesArray.clear();
 
-    this.dataService.getCourses().subscribe(allCourses => {
-        const teacherCourses = allCourses.filter(c => courseIds.includes(c.id));
+
+    this.httpClient.get(`${enviroments.apiUrl}/teachers/${this.teacherId}/courses`).subscribe((response: any) => {
+      console.log('Resposta do servidor:', response);
+        const teacherCourses = response
+        this.stats.coursesCount = teacherCourses.length
         
-        teacherCourses.forEach(c => {
+        teacherCourses.forEach((c : any) => {
             const group = this.fb.group({
                 id: [c.id],
                 name: [c.name]
@@ -79,6 +84,7 @@ export class TeacherDetailComponent implements OnInit {
         
         this.stats.coursesCount = teacherCourses.length;
     });
+
   }
 
   get courses() {
@@ -93,22 +99,10 @@ export class TeacherDetailComponent implements OnInit {
         email: this.teacherForm.value.email
       };
 
-      this.dataService.updateTeacher(this.teacherId, payload).subscribe({
-        next: (success) => {
-          if (success) {
-            alert('Teacher updated successfully!');
-            this.router.navigate(['/admin-dashboard']);
-          }
-        },
-        error: (err) => {
-          if (err.status === 409) {
-             alert('Error: This email is already assigned to another teacher.');
-             this.teacherForm.get('email')?.setErrors({ 'duplicate': true });
-          } else {
-             alert('An error occurred while updating the teacher.');
-          }
-        }
+      this.httpClient.put(`${enviroments.apiUrl}/users/teachers/${this.teacherId}`, payload).subscribe((response: any) => {
+        console.log('Resposta do servidor:', response);
       });
+      
     }
   }
 }

@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, FormsModule, Validators, FormControl, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
+
+import { HttpClient } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
 import { DataService, Project, Team, StudentLite, CreateTeamRequest, Sprint } from '../../services/dataService';
 
 // --- VALIDADOR DE DATAS ---
@@ -50,9 +53,10 @@ export class TeacherProjectDetailComponent implements OnInit {
   showSprintModal = false;
   selectedTeam: Team | null = null;
 
-  constructor() {
+  constructor(private httpClient: HttpClient) {
    
     this.teamForm = this.fb.group({
+      number:['0', Validators.required],
       name: ['', Validators.required],
       members: this.fb.array([], [Validators.minLength(3)]) 
     }, { validators: this.teamRolesValidator });
@@ -226,23 +230,31 @@ export class TeacherProjectDetailComponent implements OnInit {
     if (this.teamForm.valid && this.project) {
       const formValue = this.teamForm.value;
       const payload: CreateTeamRequest = {
-        name: formValue.name, projectId: this.project.id,
-        members: formValue.members.map((m: any) => ({ studentId: m.student.id, teamRole: m.role }))
+
+        name: formValue.name,
+        projectId: this.project.id,
+        groupNumber: formValue.number,
+        members: formValue.members.map((m: any) => ({
+          studentId: m.student.id,
+          teamRole: m.role
+        }))
       };
-      this.dataService.createTeam(payload).subscribe({
-        next: (success) => {
-          if (success) {
-            alert(`Team created successfully!`);
-            this.toggleCreateForm();
-            this.loadData(this.project!.id); 
-          }
-        },
-        error: (err) => {
-            if(err.status === 400) alert(err.message);
-            else if (err.status === 409) alert('Student conflict.');
-            else alert('Error creating team.');
-        }
+
+      this.httpClient.post(`${enviroments.apiUrl}/projects/${this.project.id}/teams`, payload).subscribe((response: any) => {
+        console.log("Team criado:", response);
+
+        payload.members.forEach((member) => {
+          this.httpClient.post(`${enviroments.apiUrl}/teams/${response.id}/members`, {
+            teamRole: member.teamRole,
+            projectId: response.projectId,
+            studentId: member.studentId
+
+          }).subscribe((response: any) => {
+            console.log("TeamMember registado:", response);
+          });
+        });
       });
+
     } else { this.teamForm.markAllAsTouched(); }
   }
 

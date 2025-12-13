@@ -75,6 +75,14 @@
     @if (showCreateTeamForm) {
         <form [formGroup]="teamForm" (ngSubmit)="onSubmitTeam()" class="card form-card inline-create">
             <h4 class="form-header">Create Team</h4>
+
+            <div class="form-group">
+                <label>Team Number</label>
+                <input type="number" formControlName="number">
+                @if (teamForm.get('number')?.invalid && teamForm.get('number')?.touched) {
+                    <small class="error-msg">Number is required.</small>
+                }
+            </div>
             
             <div class="form-group">
                 <label>Team Name</label>
@@ -90,7 +98,7 @@
                     <select [formControl]="selectedStudentId">
                         <option [ngValue]="null" disabled>Select a student...</option>
                         @for (student of availableStudents; track student.id) {
-                            <option [value]="student.id">{{ student.name }} ({{ student.studentNumber }})</option>
+                            <option [value]="student.id">{{ student.name }}</option>
                         }
                     </select>
                     <button type="button" class="btn-icon add-btn" (click)="addMemberToForm()" 
