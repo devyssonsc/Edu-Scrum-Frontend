@@ -19,7 +19,6 @@ export class TeacherDashboardComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   teacherName: string = 'Fátima Leal';
-
   teacherId: any = localStorage.getItem("id");
 
   // Data Holders
@@ -50,8 +49,13 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   loadAllData() {
-    // 1. CARREGAR CURSOS
-    this.dataService.getCourses().subscribe(res => {
+    // 1. Load Teacher Data
+    this.dataService.getTeacherById(this.teacherId).subscribe((res: any) => {
+      this.teacherName = res.name;
+    })
+
+    // 2. Load Courses
+    this.dataService.getCoursesByTeacher(this.teacherId).subscribe(res => {
       this.dataService.setCourses(res)
       this.courses = res.map(c => ({
         id: c.id,
@@ -68,7 +72,7 @@ export class TeacherDashboardComponent implements OnInit {
       }
     });
 
-    // 2. CARREGAR PROJETOS
+    // 3. Load Projects
     this.dataService.getAllProjects().subscribe(res => {
       this.projects = res.map(p => ({
         id: p.id,
@@ -84,7 +88,7 @@ export class TeacherDashboardComponent implements OnInit {
     });
 
 
-    // 3. Awards
+    // 4. Load Awards
     this.dataService.getAwardsByTeacher(this.teacherId).subscribe(res => {
       this.dataService.setAwards(res);
       this.rawAwards = res;

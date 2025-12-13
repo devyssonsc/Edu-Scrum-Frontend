@@ -56,6 +56,7 @@ export class TeacherProjectDetailComponent implements OnInit {
   constructor(private httpClient: HttpClient) {
    
     this.teamForm = this.fb.group({
+      number:['0', Validators.required],
       name: ['', Validators.required],
       members: this.fb.array([], [Validators.minLength(3)]) 
     }, { validators: this.teamRolesValidator });
@@ -246,7 +247,7 @@ export class TeacherProjectDetailComponent implements OnInit {
           this.httpClient.post(`${enviroments.apiUrl}/teams/${response.id}/members`, {
             teamRole: member.teamRole,
             projectId: response.projectId,
-            studentId: 7
+            studentId: member.studentId
 
           }).subscribe((response: any) => {
             console.log("TeamMember registado:", response);

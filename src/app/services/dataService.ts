@@ -275,6 +275,9 @@ export class DataService {
   getCoursesByStudent(id: any): Observable<Course[]> {
      return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/students/${id}/courses`);
   }
+  getCoursesByTeacher(id: any): Observable<Course[]> {
+    return this.httpClient.get<Course[]>(`${enviroments.apiUrl}/teachers/${id}/courses`);
+  }
 
   getCourseById(id: number): Observable<Course | undefined> { 
     return this.httpClient.get<Course>(`${enviroments.apiUrl}/courses/${id}`);
@@ -316,13 +319,14 @@ export class DataService {
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
-    const course = this.courses.find(c => c.id === courseId);
+  /*   const course = this.courses.find(c => c.id === courseId);
     
     if (course && course.degree) {
         const degreeId = course.degree.id;
         return of(this.students.filter(s => s.degreeId === degreeId));
     }
-    return of([]); 
+    return of([]);  */
+    return this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/courses/${courseId}/students`);
   }
   getAwards(): Observable<Award[]> { return of(this.awards); }
 
