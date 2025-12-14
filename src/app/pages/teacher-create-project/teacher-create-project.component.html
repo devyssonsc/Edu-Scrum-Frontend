@@ -24,10 +24,12 @@
                 <label for="start">Start Date</label>
                 <input 
                     type="date" 
-                    id="start" 
+                    id="startDate" 
                     formControlName="startDate" 
                     lang="en-CA"
-                    placeholder="yyyy-mm-dd">
+                    placeholder="yyyy-mm-dd"
+                    [min]="today">
+                    
                 
                 @if (projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched) {
                     <small class="error-msg">Required.</small>
@@ -41,7 +43,8 @@
                     id="end" 
                     formControlName="endDate" 
                     lang="en-CA"
-                    placeholder="yyyy-mm-dd">
+                    placeholder="yyyy-mm-dd"
+                    [min]="projectForm.get('startDate')?.value">
                 
                 @if (projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched) {
                     <small class="error-msg">Required.</small>

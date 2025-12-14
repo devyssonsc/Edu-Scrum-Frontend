@@ -11,7 +11,7 @@ import { enviroments } from '../../enviroments/enviroments';
 export type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
 export type TeamRole = 'PRODUCT_OWNER' | 'SCRUM_MASTER' | 'DEVELOPER';
 export type SprintStatus = 'PLANNED' | 'ACTIVE' | 'COMPLETED';
-export type AwardType = 'GLOBAL' | 'COURSE';
+export type AwardType = 'AUTOMATIC' | 'MANUAL';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 export type AwardScope = 'INDIVIDUAL' | 'TEAM';
 
@@ -246,12 +246,7 @@ export class DataService {
 
   // --- MOCK AWARDS ---
   private awards: Award[] = [
-    { id: 1, name: 'Fast Hands', description: 'Completed task in record time', points: 5, type: 'GLOBAL', scope: 'INDIVIDUAL', icon: 'bi-lightning-charge-fill', isOwner: false },
-    { id: 2, name: 'Multitasker', description: 'Completed 5 tasks in a sprint', points: 4, type: 'GLOBAL', scope: 'INDIVIDUAL', icon: 'bi-layers-fill', isOwner: false },
-    { id: 3, name: 'Best Pitch', description: 'Best project presentation', points: 1, type: 'COURSE', scope: 'TEAM', courseId: 1, courseName: 'Software Quality', icon: 'bi-mic-fill', isOwner: true }, 
-    { id: 4, name: 'Team Spirit', description: 'Helped others', points: 3, type: 'COURSE', scope: 'INDIVIDUAL', courseId: 1, courseName: 'Software Quality', icon: 'bi-heart-fill', isOwner: true }, 
-    { id: 5, name: 'Shipped It!', description: 'Completed all sprint goals', points: 10, type: 'GLOBAL', scope: 'TEAM', icon: 'bi-box-seam-fill', isOwner: false }, 
-  ];
+  ]
 
   constructor(private httpClient: HttpClient) { }
 
@@ -353,15 +348,8 @@ getCourseProjectCount(id: number): Observable<number> {
     );
 }
 //AI generated method
-getProjectCourseName(projectId: number) {
-  return this.httpClient
-    .get<any>(`${enviroments.apiUrl}/projects/${projectId}`)
-    .pipe(
-      switchMap(project => 
-        this.httpClient.get<any>(`${enviroments.apiUrl}/courses/${project.courseId}`)
-      ),
-      map(course => course.name)
-    );
+getCourseProjectStats(projectId: number): any {
+  return this.httpClient.get<any>(`${enviroments.apiUrl}/projects/${projectId}/course-teams`);
 }
 
 
@@ -467,9 +455,6 @@ getProjectCourseName(projectId: number) {
     return of(availableAwards);
   }
 
-  getGlobalAwards(): Observable<Award[]> {
-    return of(this.awards.filter((a) => a.type === 'GLOBAL'));
-  }
 
   getAwardById(id: number): Observable<Award | undefined> {
     return of(this.awards.find((a) => a.id === id));
@@ -536,7 +521,7 @@ getProjectCourseName(projectId: number) {
       name: awardData.name,
       description: awardData.description,
       points: awardData.points,
-      type: 'COURSE',
+      type: 'MANUAL',
       courseId: awardData.courseId,
       courseName: courseName, 
       icon: undefined,
@@ -734,7 +719,7 @@ getProjectCourseName(projectId: number) {
 
   updateAward(id: number, data: { name: string; description: string; points: number; courseId?: number | string | null }): Observable<boolean> {
     const award = this.awards.find((a) => a.id === id);
-    if (award && award.type === 'COURSE') {
+    if (award && award.type === 'MANUAL') {
       award.name = data.name;
       award.description = data.description;
       award.points = data.points;
@@ -934,7 +919,7 @@ getProjectCourseName(projectId: number) {
 
   deleteAward(name: string): Observable<boolean> {
     const index = this.awards.findIndex((a) => a.name === name);
-    if (index !== -1 && this.awards[index].type === 'COURSE') {
+    if (index !== -1 && this.awards[index].type === 'MANUAL') {
       this.awards.splice(index, 1);
       return of(true);
     }

@@ -6,6 +6,7 @@ import { StatsCardComponent } from '../../components/stats-card/stats-card.compo
 import { DataService, Teacher, Course } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-teacher-detail',
@@ -20,6 +21,8 @@ export class TeacherDetailComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "TEACHER";
 
   teacherForm: FormGroup;
   teacherId: number | null = null; 
@@ -38,6 +41,7 @@ export class TeacherDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.authService.checkRole(this.role);
     const rawId = this.route.snapshot.paramMap.get('id');
     
     if (rawId) {

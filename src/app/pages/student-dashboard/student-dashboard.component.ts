@@ -10,6 +10,7 @@ import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -20,6 +21,20 @@ import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } 
   styleUrl: './student-dashboard.component.scss'
 })
 export class StudentDashboardComponent implements OnInit {
+  private authService = inject(AuthService);
+  private role = "STUDENT";
+
+  stats = {
+  totalScore: '',
+  totalAwards: '',
+  automaticAwards: '',
+  manualAwards: '',
+  awardsDescription: '',
+  tasksCompleted: '',
+  tasksTotal: '',
+  ranking: '',
+  totalStudents: ''
+  };
 
 
   userRankingData: ChartConfiguration<'bar'>['data'] = {
@@ -76,12 +91,21 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.authService.checkRole(this.role);
+    this.getStats()
     this.onSelectOption(this.selectedOption);
     // this.fetchData();
   }
 
   goToRegisterSprint(projectId: number) {
     this.router.navigate([`/student-dashboard/register-sprint/${projectId}`]);
+  }
+
+  getStats(){
+    this.httpClient.get(`${enviroments.apiUrl}/students/${localStorage.getItem('id')}/dashboard`).subscribe((response: any) => {
+      console.log(response)
+      this.stats = response
+    });
   }
 
   fetchData() {
@@ -205,6 +229,7 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   changeTaskStatus(taskId: number, newStatus: string) {
+    console.log(newStatus)
     this.httpClient.patch(`${enviroments.apiUrl}/tasks/${taskId}/status`, { status: newStatus }).subscribe(response => {
       console.log('Task status changed successfully', response);
       this.fetchData();

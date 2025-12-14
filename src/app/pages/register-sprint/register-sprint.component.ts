@@ -4,6 +4,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-register-sprint',
@@ -17,6 +18,8 @@ import { enviroments } from '../../../enviroments/enviroments';
   styleUrl: './register-sprint.component.scss'
 })
 export class RegisterSprintComponent implements OnInit {
+  private authService = inject(AuthService);
+  private role = "STUDENT";
 
   private fb = inject(FormBuilder);
   sprintForm: FormGroup;
@@ -34,7 +37,7 @@ export class RegisterSprintComponent implements OnInit {
     this.sprintForm = this.fb.group({
       sprintNumber: [0, Validators.required],
       finalGoal: ['', Validators.required],
-      startDate: ['', Validators.required, this.startDateAfterTodayValidator],
+      startDate: ['', [Validators.required, this.startDateAfterTodayValidator]],
       endDate: ['', Validators.required],
       tasks: this.fb.array([], Validators.minLength(0))
     },
@@ -44,6 +47,7 @@ export class RegisterSprintComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.authService.checkRole(this.role);
     this.projectId = Number(this.route.snapshot.paramMap.get('projectId'));
   }
 

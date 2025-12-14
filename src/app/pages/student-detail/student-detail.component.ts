@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, FormArray, FormControl, ReactiveFormsModule, Va
 import { DataService, StudentLite, Degree, Course } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 
 @Component({
@@ -20,6 +21,8 @@ export class StudentDetailComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "STUDENT";
 
   studentForm: FormGroup;
   studentId: number | null = null;
@@ -39,6 +42,7 @@ export class StudentDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.authService.checkRole(this.role);
     this.dataService.getDegrees().subscribe(degrees => {
       this.allDegrees = degrees;
     });

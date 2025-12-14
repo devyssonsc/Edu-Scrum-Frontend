@@ -4,6 +4,7 @@ import { StatsCardComponent } from '../../components/stats-card/stats-card.compo
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
 import { DataService, Award } from '../../services/dataService';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -15,6 +16,8 @@ import { DataService, Award } from '../../services/dataService';
 export class TeacherDashboardComponent implements OnInit {
 
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "TEACHER";
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -40,6 +43,7 @@ export class TeacherDashboardComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
+    this.authService.checkRole(this.role);
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
         this.selectedOption = params['tab'];
@@ -91,14 +95,12 @@ export class TeacherDashboardComponent implements OnInit {
       }));
 
       this.projects.forEach(project => {
-      this.dataService.getCourseProjectCount(project.id).subscribe(count => {
-        project.Teams = count;
+      this.dataService.getCourseProjectStats(project.id).subscribe((res: any) => {
+        project.Teams = res.numberOfTeams;
+        project.Course = res.courseName
+      });
       });
 
-      this.dataService.getProjectCourseName(project.id).subscribe(name => {
-        project.Course = name;
-      });
-    });
 
 
       

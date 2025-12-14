@@ -4,6 +4,18 @@
         <h2 class="form-title">New Award</h2>
         <p class="context-info">Create a badge to gamify your courses.</p>
 
+                <div class="form-group">
+            <label for="scope">Scope</label>
+            <select id="scope" formControlName="scope">
+                <option [ngValue]="null" disabled>Select scope...</option>
+                <option value="STUDENT">Student</option>
+                <option value="TEAM">Team</option>
+            </select>
+            @if (awardForm.get('scope')?.invalid && awardForm.get('scope')?.touched) {
+                <small class="error-msg">Please select a scope.</small>
+            }
+        </div>
+
         <div class="form-group">
             <label for="course">Course</label>
             <select id="course" formControlName="courseId">

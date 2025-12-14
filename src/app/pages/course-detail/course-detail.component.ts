@@ -6,6 +6,7 @@ import { StatsCardComponent } from '../../components/stats-card/stats-card.compo
 import { DataService, Course, Degree, Teacher } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-course-detail',
@@ -19,6 +20,8 @@ export class CourseDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "ADMIN";
   private fb = inject(FormBuilder);
 
   courseForm: FormGroup;
@@ -45,6 +48,7 @@ export class CourseDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.authService.checkRole(this.role);
     this.dataService.getDegrees().subscribe(degrees => {
       this.allDegrees = degrees;
     });

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Course, Project, StudentLite } from '../../services/dataService'; 
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-teacher-course-detail',
@@ -17,6 +18,8 @@ export class TeacherCourseDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "TEACHER";
 
   courseId: number | null = null; 
   course: Course | undefined;
@@ -28,6 +31,7 @@ export class TeacherCourseDetailComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
+    this.authService.checkRole(this.role);
     const rawId = this.route.snapshot.paramMap.get('id');
     
     if (rawId) {
