@@ -51,7 +51,7 @@
                 </div>
 
                 @if(project.myRole === 'PRODUCT_OWNER') {
-                <button class="btn btn-info">New Sprint</button>
+                <button class="btn btn-info" (click)="goToRegisterSprint(project.projectId)">New Sprint</button>
                 }
 
                 <div class="accordion sprint-accordion" id="accordion-{{ project.id }}">

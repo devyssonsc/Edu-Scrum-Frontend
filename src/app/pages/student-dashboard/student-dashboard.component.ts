@@ -69,7 +69,7 @@ export class StudentDashboardComponent implements OnInit {
   selectedOption: string = this.sections[0];
   developers: any[] = [];
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient, private router: Router) {
     // this.taskForm = this.fb.group({
     //   task: this.fb.array([], Validators.minLength(0)) 
     // });
@@ -78,6 +78,10 @@ export class StudentDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.onSelectOption(this.selectedOption);
     // this.fetchData();
+  }
+
+  goToRegisterSprint(projectId: number) {
+    this.router.navigate([`/student-dashboard/register-sprint/${projectId}`]);
   }
 
   fetchData() {

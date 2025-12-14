@@ -16,6 +16,7 @@ import { TeacherProjectDetailComponent } from './pages/teacher-project-detail/te
 import { TeacherCreateAwardComponent } from './pages/teacher-create-award/teacher-create-award.component';
 import { TeacherAwardDetailComponent } from './pages/teacher-award-detail/teacher-award-detail.component';
 import { StudentDashboardComponent } from './pages/student-dashboard/student-dashboard.component';
+import { RegisterSprintComponent } from './pages/register-sprint/register-sprint.component';
 
 export const routes: Routes = [
     {
@@ -85,5 +86,9 @@ export const routes: Routes = [
     {
         path: 'student-dashboard',
         component: StudentDashboardComponent
+    },
+    {
+        path: 'student-dashboard/register-sprint/:projectId',
+        component: RegisterSprintComponent
     }
 ];
