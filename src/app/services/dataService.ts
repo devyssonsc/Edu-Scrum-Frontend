@@ -203,50 +203,9 @@ export class DataService {
   ];
 
   private teams: Team[] = [];
-  // --- MOCK TEAMS ---
- /*  private teams: Team[] = [
-    {
-      id: 101,
-      name: 'Alpha Team',
-      projectId: 1,
-      members: [
-        { student: this.students[0], role: 'PRODUCT_OWNER' }, 
-        { student: this.students[1], role: 'SCRUM_MASTER' }, 
-        { student: this.students[2], role: 'DEVELOPER' }     
-      ],
-      sprints: [
-        {
-            id: 1,
-            name: 'Sprint 1',
-            goal: 'Setup Project Architecture',
-            startDate: '2024-10-01',
-            endDate: '2024-10-15',
-            status: 'COMPLETED',
-            tasks: [
-                { id: 1, title: 'Database Schema', status: 'DONE', assigneeId: 1, assigneeName: 'Tiago Silva' },
-                { id: 2, title: 'Auth API', status: 'DONE', assigneeId: 2, assigneeName: 'David Aroso' }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Sprint 2',
-            goal: 'Frontend Basics',
-            startDate: '2024-10-16',
-            endDate: '2024-10-30',
-            status: 'ACTIVE',
-            tasks: [
-                { id: 3, title: 'Login Page', status: 'DONE', assigneeId: 3, assigneeName: 'Ana Pereira' },
-                { id: 4, title: 'Dashboard Layout', status: 'IN_PROGRESS', assigneeId: 2, assigneeName: 'David Aroso' },
-                { id: 5, title: 'User Profile', status: 'TODO', assigneeId: 1, assigneeName: 'Tiago Silva' }
-            ]
-        }
-      ]
-    },
-  ]; */
 
-  // --- MOCK AWARDS ---
-  private awards: Award[] = [
-  ]
+ 
+  private awards: Award[] = []
 
   constructor(private httpClient: HttpClient) { }
 
@@ -335,7 +294,7 @@ getCourseProjectCount(id: number): Observable<number> {
     return this.httpClient.get<any>(`${enviroments.apiUrl}/teachers/${id}/projects`);
   }
 
-  getProjectsByCourseId(id: number): Observable<Project | undefined> { 
+  getProjectsByCourseId(id: number): any { 
     return this.httpClient.get<any>(`${enviroments.apiUrl}/courses/${id}/projects`);
   }
 
@@ -404,7 +363,7 @@ getCourseProjectStats(projectId: number): any {
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
   }
   
-  // MANTIDO HTTP como solicitado
+
   getStudentsByCourseId(courseId: number): Observable<StudentLite[]> {
     return this.httpClient.get<StudentLite[]>(`${enviroments.apiUrl}/courses/${courseId}/students`);
   }
@@ -448,9 +407,8 @@ getCourseProjectStats(projectId: number): any {
     );
 }
   
-  // --- GAMIFICATION METHODS --- 
+  // --- GAMIFICATION METHODS MOCKUP--- 
   getAwardsByCourse(courseId: number): Observable<Award[]> {
-    // ALTERAÇÃO: Filtra APENAS os do tipo 'COURSE' (ignora os GLOBAL)
     const availableAwards = this.awards.filter(a => a.courseId === courseId);
     return of(availableAwards);
   }
@@ -499,17 +457,6 @@ getCourseProjectStats(projectId: number): any {
     return of(projectsWithDynamicCount);
   }
   
-  /* getProjectsByCourseId(courseId: number): Observable<Project[]> {
-    
-
-
-    const filteredProjects = this.projects.filter((p) => p.courseId === courseId);
-    const projectsWithDynamicCount = filteredProjects.map(p => {
-      const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
-      return { ...p, teamsCount: realTeamCount };
-    });
-    return of(projectsWithDynamicCount);
-  } */
 
   createAward(awardData: { name: string; description: string; points: number; courseId: number; scope: AwardScope}): Observable<boolean> {
     const newId = this.awards.length > 0 ? Math.max(...this.awards.map((a) => a.id)) + 1 : 1;
@@ -660,7 +607,7 @@ getCourseProjectStats(projectId: number): any {
     this.awards = awards;
   }
 
-  // --- UPDATE METHODS ---
+  // --- UPDATE METHODS FOR MOCK DATA ---
 
   updateDegree(id: number, updatedData: { name: string }): Observable<boolean> {
     const degree = this.degrees.find((d) => d.id === id);
@@ -790,7 +737,7 @@ getCourseProjectStats(projectId: number): any {
     return of(false);
   }
 
-  // --- RELATIONSHIP METHODS ---
+  // --- RELATIONSHIP METHODS FOR MOCK DATA ---
 
   addTeacherToCourse(courseId: number, teacherId: number): Observable<boolean> {
     const teacher = this.teachers.find((t) => t.id === teacherId);
@@ -850,7 +797,7 @@ getCourseProjectStats(projectId: number): any {
     return of(false);
   }
 
-  // --- DELETE METHODS ---
+  // --- DELETE METHODS FOR MOCK DATA---
 
   deleteDegree(id: number): Observable<boolean> {
     const index = this.degrees.findIndex((d) => d.id === id);
@@ -927,7 +874,7 @@ getCourseProjectStats(projectId: number): any {
   }
   
 
-  // --- CREATE METHODS ---
+  // --- CREATE METHODS FOR MOCK DATA ---
 
   createProject(projectData: any): Observable<boolean> {
     const courseId = Number(projectData.courseId);

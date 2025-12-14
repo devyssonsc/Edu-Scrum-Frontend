@@ -5,6 +5,7 @@ import { ShowTableComponent } from '../../components/show-table/show-table.compo
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Course, Project, StudentLite } from '../../services/dataService'; 
 import { AuthService } from '../../services/authService';
+import { forkJoin, of, switchMap, map } from 'rxjs';
 
 @Component({
   selector: 'app-teacher-course-detail',
@@ -49,20 +50,31 @@ export class TeacherCourseDetailComponent implements OnInit {
     });
 
     // 2. Carrega Projetos (para o card de Projetos)
-    this.dataService.getProjectsByCourseId(id).subscribe((data: any) => {
-      this.projectsView = data.map((p: Project) => ({
-        id: p.id, 
-        name: p.name,
-        startDate: p.startDate,
-        endDate: p.endDate,
-        teams: p.teamsCount
-      }));
-    });
+this.dataService.getProjectsByCourseId(id).pipe(
+  switchMap((projects: Project[]) => {
 
-    // 3. Carrega Alunos (para o card de Estudantes Inscritos)
-    this.dataService.getCourseStats(id).subscribe((res: any) => {
-        this.realStudentCount = res.studentsCount;
-    });
+    if (!projects.length) {
+      return of([]);
+    }
+
+    const requests = projects.map(project =>
+      this.dataService.getCourseProjectStats(project.id).pipe(
+        map((res:any) => ({
+          id: project.id,
+          name: project.name,
+          startDate: project.startDate,
+          endDate: project.endDate,
+          teams: res.numberOfTeams
+        }))
+      )
+    );
+
+    console.log(requests)
+    return forkJoin(requests);
+  })
+).subscribe((projectsView:any) => {
+  this.projectsView = projectsView;
+});
   }
 
   handleProjectClick(row: any) {
