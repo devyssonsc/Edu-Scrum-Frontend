@@ -28,13 +28,18 @@ export class RegisterSprintComponent implements OnInit {
 
   projectId: number | null = null;
 
+  today = new Date().toISOString().split('T')[0];
+
   constructor(private httpClient: HttpClient, private route: ActivatedRoute, private router: Router) {
     this.sprintForm = this.fb.group({
       sprintNumber: [0, Validators.required],
       finalGoal: ['', Validators.required],
-      startDate: ['', Validators.required],
+      startDate: ['', Validators.required, this.startDateAfterTodayValidator],
       endDate: ['', Validators.required],
       tasks: this.fb.array([], Validators.minLength(0))
+    },
+    {
+      validators: this.endDateAfterStartDateValidator
     });
   }
 
@@ -46,7 +51,7 @@ export class RegisterSprintComponent implements OnInit {
     return this.sprintForm.get('tasks') as FormArray;
   }
 
-newTaskGroup(description: string): FormGroup {
+  newTaskGroup(description: string): FormGroup {
     return this.fb.group({
       description: [description],
     });
@@ -62,7 +67,7 @@ newTaskGroup(description: string): FormGroup {
   }
 
   removeTask(index: number) {
-  this.tasks.removeAt(index);
+    this.tasks.removeAt(index);
   }
 
   onSubmit() {
@@ -94,5 +99,30 @@ newTaskGroup(description: string): FormGroup {
       console.log('Formulário Inválido');
     }
   }
+
+  startDateAfterTodayValidator(control: FormControl) {
+    if (!control.value) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(control.value);
+
+    return startDate > today
+      ? null
+      : { startDateBeforeToday: true };
+  }
+
+  endDateAfterStartDateValidator(group: FormGroup) {
+    const startDate = group.get('startDate')?.value;
+    const endDate = group.get('endDate')?.value;
+
+    if (!startDate || !endDate) return null;
+
+    return new Date(endDate) > new Date(startDate)
+      ? null
+      : { endDateBeforeStartDate: true };
+  }
+
 
 }
