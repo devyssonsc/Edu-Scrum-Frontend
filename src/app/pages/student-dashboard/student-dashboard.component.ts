@@ -149,7 +149,7 @@ export class StudentDashboardComponent implements OnInit {
 
     if (currentDate < startDate) {
       return 'Not Started';
-    } else if (currentDate >= startDate && currentDate <= endDate) {
+    } else if ((currentDate >= startDate && currentDate <= endDate) && !allTasksDone) {
       return 'In Progress';
     } else if (allTasksDone) {
       return 'Completed';
