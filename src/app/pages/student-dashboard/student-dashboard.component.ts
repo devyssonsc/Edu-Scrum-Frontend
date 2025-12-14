@@ -66,7 +66,7 @@ export class StudentDashboardComponent implements OnInit {
 
   sections: string[] = ['Awards', 'Dashboard', 'Rankings'];
 
-  selectedOption: string = this.sections[2];
+  selectedOption: string = this.sections[0];
   developers: any[] = [];
 
   constructor(private httpClient: HttpClient) {
