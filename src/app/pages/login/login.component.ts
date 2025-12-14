@@ -43,6 +43,7 @@ export class LoginComponent {
       .post(`${enviroments.apiUrl}/auth/login`, this.loginForm.value)
       .subscribe({
         next: (response: any) => {
+          console.log(response)
           localStorage.setItem('token', response.token);
           localStorage.setItem('id', response.id);
           localStorage.setItem('role', response.role);
