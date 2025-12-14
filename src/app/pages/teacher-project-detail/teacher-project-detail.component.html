@@ -5,23 +5,7 @@
             <i class="bi bi-arrow-left"></i> Back
         </button>
         
-        @if (!isEditingProject) {
-            <div class="title-group">
-                <h1>{{ project?.name }}</h1>
-                <span class="course-badge">{{ project?.courseName }}</span>
-                <button class="btn-icon-edit" (click)="toggleEditProject()" title="Edit Project Details">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
-            </div>
-        } @else {
-            <form [formGroup]="editProjectForm" (ngSubmit)="saveProject()" class="edit-header-form">
-                <input type="text" formControlName="name" class="header-input" placeholder="Project Name">
-                <div class="header-actions">
-                    <button type="submit" class="btn btn-primary btn-sm" [disabled]="editProjectForm.invalid">Save</button>
-                    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleEditProject()">Cancel</button>
-                </div>
-            </form>
-        }
+
     </div>
 
     @if (!isEditingProject) {
@@ -158,9 +142,6 @@
                             <i class="bi bi-trophy-fill"></i>
                         </button>
 
-                        <button class="btn-icon-danger" (click)="deleteTeam(team.id)" title="Delete Team">
-                            <i class="bi bi-trash"></i>
-                        </button>
                     </div>
                 </div>
                 

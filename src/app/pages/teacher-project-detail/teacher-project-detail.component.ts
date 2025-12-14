@@ -6,7 +6,8 @@ import { StatsCardComponent } from '../../components/stats-card/stats-card.compo
 
 import { HttpClient } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
-import { DataService, Project, Team, StudentLite, CreateTeamRequest, Sprint, Award } from '../../services/dataService';
+import { DataService, Project, Team, StudentLite, CreateTeamRequest, Sprint, Award, AwardType } from '../../services/dataService';
+import { AuthService } from '../../services/authService';
 
 // --- VALIDADOR DE DATAS ---
 const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -30,6 +31,8 @@ export class TeacherProjectDetailComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private dataService = inject(DataService);
+    private authService = inject(AuthService);
+  private role = "TEACHER";
   private fb = inject(FormBuilder);
 
   project: Project | undefined;
@@ -89,6 +92,9 @@ export class TeacherProjectDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
     if (projectId) { this.loadData(projectId); }
   }
@@ -276,13 +282,20 @@ export class TeacherProjectDetailComponent implements OnInit {
   // 4. AWARDS LOGIC
   // ==========================================
 
-  get filteredAwards(): Award[] {
+get filteredAwards(): Award[] {
     if (!this.targetType) return [];
 
-    const scopeNeeded = this.targetType === 'STUDENT' ? 'INDIVIDUAL' : 'TEAM'
-    
-    return this.availableAwards
-  }
+    // Scope necessário
+    const scopeNeeded = this.targetType === 'STUDENT' ? 'STUDENT' : 'TEAM';
+
+    // Type desejado
+    const desiredType: AwardType = 'MANUAL'; // agora está correto com o tipo
+
+    return this.availableAwards.filter(award =>
+        award.scope === scopeNeeded &&
+        award.type === desiredType
+    );
+}
 
   openAwardModalForTeam(team: Team) {
     this.targetType = 'TEAM';
@@ -317,12 +330,14 @@ export class TeacherProjectDetailComponent implements OnInit {
         "studentId": this.targetId, "projectId": this.project.id 
         }).subscribe(r => {
             console.log('Resposta do servidor:', r);
+            alert("The Award was Succesfully Assigned for the Student")
             })
     } else if (this.targetType === 'TEAM') {
         this.httpClient.post(`${enviroments.apiUrl}/awards/${awardId}/assign`, {
         "teamId": this.targetId, "projectId": this.project.id 
         }).subscribe(r => {
             console.log('Resposta do servidor:', r);
+            alert("The Award was Succesfully Assigned for the Team")
             })
     }
   }

@@ -43,6 +43,7 @@ export class LoginComponent {
         console.log('Resposta do servidor:', response);
         localStorage.setItem('token', response.token);
         localStorage.setItem('id', response.id);
+        localStorage.setItem('role', response.role);
         this.redirectUser(response.role);
        })
        

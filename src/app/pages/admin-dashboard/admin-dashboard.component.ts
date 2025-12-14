@@ -7,6 +7,7 @@ import { Course, DataService, Degree, StudentLite, Teacher } from '../../service
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
 import { forkJoin } from 'rxjs';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,6 +19,8 @@ import { forkJoin } from 'rxjs';
 export class AdminDashboardComponent implements OnInit {
   
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "ADMIN";
   private router = inject(Router);
 
   // Data Holders
@@ -42,6 +45,9 @@ export class AdminDashboardComponent implements OnInit {
   constructor(private httpClient: HttpClient) {}
 
   ngOnInit() {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.getData();
   }
 

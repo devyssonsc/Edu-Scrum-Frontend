@@ -18,7 +18,7 @@
         <div class="section-header">
             <h3>Award Data</h3>
             <div class="actions" style="display: flex; gap: 1rem;">
-                @if (award?.type === 'COURSE') {
+                @if (award?.type === 'MANUAL') {
                     <button type="submit" class="btn btn-primary" [disabled]="editForm.invalid || !editForm.dirty">
                         Save Changes
                     </button>
@@ -28,17 +28,17 @@
 
         <div class="form-group-main">
             <label>Award Name</label>
-            <input type="text" formControlName="name" class="main-input" [readonly]="award?.type === 'GLOBAL'">
+            <input type="text" formControlName="name" class="main-input" [readonly]="award?.type === 'MANUAL'">
         </div>
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Description</label>
-            <textarea formControlName="description" class="main-input" [readonly]="award?.type === 'GLOBAL'" rows="4"></textarea>
+            <textarea formControlName="description" class="main-input" [readonly]="award?.type === 'MANUAL'" rows="4"></textarea>
         </div>
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Associated Course</label>
-            @if (award?.type === 'GLOBAL') {
+            @if (award?.type === 'MANUAL') {
                 <input type="text" value="Global Award (All Courses)" class="main-input" readonly>
             } @else {
                 <select formControlName="courseId" class="main-input">
@@ -51,10 +51,10 @@
 
         <div class="form-group-main" style="margin-top: 1rem;">
             <label>Points Value</label>
-            <input [type]="award?.type === 'GLOBAL' ? 'text' : 'number'" 
+            <input [type]="award?.type === 'MANUAL' ? 'text' : 'number'" 
                    formControlName="points" 
                    class="main-input" 
-                   [readonly]="award?.type === 'GLOBAL'" 
+                   [readonly]="award?.type === 'MANUAL'" 
                    min="1" max="5">
         </div>
 

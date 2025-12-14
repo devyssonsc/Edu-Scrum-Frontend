@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
 import { DataService, Award, Course } from '../../services/dataService';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-teacher-award-detail',
@@ -16,6 +17,8 @@ export class TeacherAwardDetailComponent implements OnInit {
 
   private route = inject(ActivatedRoute);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "TEACHER";
   private fb = inject(FormBuilder);
   
   award: Award | undefined;
@@ -35,6 +38,9 @@ export class TeacherAwardDetailComponent implements OnInit {
   }
 
   ngOnInit() {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.awardId = Number(id);

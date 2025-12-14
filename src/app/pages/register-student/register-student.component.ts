@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 
 @Component({
@@ -19,6 +20,8 @@ import { enviroments } from '../../../enviroments/enviroments';
   styleUrl: './register-student.component.scss'
 })
 export class RegisterStudentComponent{
+  private authService = inject(AuthService);
+  private role = "ADMIN";
 
   private fb = inject(FormBuilder);
   studentForm: FormGroup;
@@ -35,7 +38,13 @@ export class RegisterStudentComponent{
     });
   }
 
-  ngOnInit(): void {this.loadDegrees();}
+  ngOnInit(): void {
+   if(!this.authService.checkRole(this.role)){
+      return
+    }
+    this.loadDegrees();
+    
+  }
     
   allDegrees: any[] = [];
   loadDegrees() {

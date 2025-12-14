@@ -6,6 +6,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DataService, Course } from '../../services/dataService';
 import { HttpClient } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-teacher-create-project',
@@ -20,22 +22,56 @@ export class TeacherCreateProjectComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "TEACHER";
 
   projectForm: FormGroup;
   courseId: number | null = null; 
   courseName: string = '';
 
+  today = new Date().toISOString().split('T')[0];
   constructor(private httpClient: HttpClient) {
-    this.projectForm = this.fb.group({
-      name: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      description: ['']
-    });
+this.projectForm = this.fb.group(
+  {
+    name: ['', Validators.required],
+    startDate: ['', [Validators.required, this.startDateAfterTodayValidator]],
+    endDate: ['', Validators.required],
+    description: ['']
+  },
+  {
+    validators: this.endDateAfterStartDateValidator
+  }
+);
   }
 
-  ngOnInit() {
+    startDateAfterTodayValidator = (control: AbstractControl): ValidationErrors | null => {
+  if (!control.value) return null;
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startDate = new Date(control.value);
+
+  return startDate >= today
+    ? null
+    : { startDateBeforeToday: true };
+};
+
+endDateAfterStartDateValidator = (group: AbstractControl): ValidationErrors | null => {
+  const startDate = group.get('startDate')?.value;
+  const endDate = group.get('endDate')?.value;
+
+  if (!startDate || !endDate) return null;
+
+  return new Date(endDate) > new Date(startDate)
+    ? null
+    : { endDateBeforeStartDate: true };
+};
+
+  ngOnInit() {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const rawId = this.route.snapshot.paramMap.get('courseId');
 
     const state = history.state;

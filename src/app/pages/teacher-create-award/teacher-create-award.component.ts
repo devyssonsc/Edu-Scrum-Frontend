@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DataService, Course } from '../../services/dataService';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-teacher-create-award',
@@ -17,6 +18,8 @@ export class TeacherCreateAwardComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
+  private authService = inject(AuthService);
+  private role = "TEACHER";
   private router = inject(Router);
 
   awardForm: FormGroup;
@@ -24,6 +27,7 @@ export class TeacherCreateAwardComponent implements OnInit {
 
   constructor(private httpClient: HttpClient) {
     this.awardForm = this.fb.group({
+      scope: ['', Validators.required],
       courseId: [null, Validators.required],
       name: ['', Validators.required],
       description: ['', Validators.required],
@@ -32,7 +36,10 @@ export class TeacherCreateAwardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.dataService.getCourses().subscribe(courses => {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
+    this.dataService.getCoursesByTeacher(localStorage.getItem("id")).subscribe(courses => {
       this.myCourses = courses;
     });
   }
@@ -43,11 +50,13 @@ export class TeacherCreateAwardComponent implements OnInit {
       const courseId = Number(formValue.courseId)
 
       const payload = {
+        scope: formValue.scope,
         name: formValue.name,
         description: formValue.description,
         points: Number(formValue.points),
       };
 
+      console.log(payload)
       this.httpClient.post(`${enviroments.apiUrl}/courses/${courseId}/awards`, payload).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
         alert('The Award was successfully registered.');

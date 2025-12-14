@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, FormControl } from '@angular/forms'; 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 interface Course {
   id: number;
@@ -28,6 +29,8 @@ interface DegreeResponse {
   styleUrl: './register-degree.component.scss'
 })
 export class RegisterDegreeComponent implements OnInit {
+  private authService = inject(AuthService);
+  private role = "ADMIN";
 
   private fb = inject(FormBuilder);
   degreeForm: FormGroup;
@@ -45,6 +48,9 @@ export class RegisterDegreeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
   }
 
   get courses() {

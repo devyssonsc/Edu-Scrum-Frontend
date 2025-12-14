@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { FormArray, FormControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { enviroments } from '../../../enviroments/enviroments';
+import { AuthService } from '../../services/authService';
 
 @Component({
   selector: 'app-register-course',
@@ -18,6 +19,8 @@ import { enviroments } from '../../../enviroments/enviroments';
   styleUrl: './register-course.component.scss'
 })
 export class RegisterCourseComponent implements OnInit {
+  private authService = inject(AuthService);
+  private role = "ADMIN";
 
   private fb = inject(FormBuilder);
   courseForm: FormGroup;
@@ -34,12 +37,14 @@ export class RegisterCourseComponent implements OnInit {
   selectedDegreeId = new FormControl<number | null>(null, Validators.required);
 
   ngOnInit(): void {
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.loadDegrees();
   }
 
   allDegrees: any[] = [];
   loadDegrees() {
-  const token = localStorage.getItem('token');
 
   this.httpClient.get<any[]>(`${enviroments.apiUrl}/degrees`)
     .subscribe({
