@@ -22,7 +22,7 @@ export class StudentDetailComponent implements OnInit {
   private fb = inject(FormBuilder);
   private dataService = inject(DataService);
   private authService = inject(AuthService);
-  private role = "STUDENT";
+  private role = "ADMIN";
 
   studentForm: FormGroup;
   studentId: number | null = null;

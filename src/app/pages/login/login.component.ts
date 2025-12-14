@@ -37,19 +37,26 @@ export class LoginComponent {
   }
   }
   onSubmit() {
-    if (this.loginForm.valid) {
-      console.log('Formulário Válido (Login):', this.loginForm.value);
-      this.httpClient.post(`${enviroments.apiUrl}/auth/login`, this.loginForm.value).subscribe((response: any) => {
-        console.log('Resposta do servidor:', response);
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('id', response.id);
-        localStorage.setItem('role', response.role);
-        this.redirectUser(response.role);
-       })
-       
-    } else {
-      console.log('Formulário Inválido');
-      this.loginForm.markAllAsTouched();
-    }
+  if (this.loginForm.valid) {
+
+    this.httpClient
+      .post(`${enviroments.apiUrl}/auth/login`, this.loginForm.value)
+      .subscribe({
+        next: (response: any) => {
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('id', response.id);
+          localStorage.setItem('role', response.role);
+          this.redirectUser(response.role);
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+
+          alert('Unable to log in. Please check your credentials.');
+        }
+      });
+
+  } else {
+    this.loginForm.markAllAsTouched();
   }
+}
 }
