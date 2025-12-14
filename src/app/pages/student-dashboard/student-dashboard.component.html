@@ -30,7 +30,7 @@
             </div>
             }
             }
-            @else if(selectedOption === 'Dashboard') {
+            @else if(selectedOption === 'Projects') {
             @for(project of data; track project) {
             <div class="card project-card">
                 <div class="project-header">
@@ -124,7 +124,7 @@
                                                     }
                                                 }
                                             </div>
-                                            <span class="task-status">{{ task.status }}</span>
+                                            <span class="badge text-bg-secondary task-status">{{ task.status }}</span>
                                         </div>
 
                                         }

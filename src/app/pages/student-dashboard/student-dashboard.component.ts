@@ -64,7 +64,7 @@ export class StudentDashboardComponent implements OnInit {
 
   currentUserId: string = localStorage.getItem('id') || '';
 
-  sections: string[] = ['Awards', 'Dashboard', 'Rankings'];
+  sections: string[] = ['Awards', 'Projects', 'Rankings'];
 
   selectedOption: string = this.sections[0];
   developers: any[] = [];
@@ -135,9 +135,6 @@ export class StudentDashboardComponent implements OnInit {
   onSelectOption(event: any) {
     console.log(event);
     this.selectedOption = event;
-    if (this.selectedOption == 'Rankings') {
-
-    }
     this.fetchData();
   }
 
