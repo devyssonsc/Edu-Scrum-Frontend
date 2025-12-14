@@ -35,7 +35,7 @@
             <div class="card project-card">
                 <div class="project-header">
                     <div class="project-info">
-                        <h3>{{ project.projectName }}</h3>
+                        <h3>{{ project.projectName }} ({{ project.myRole }})</h3>
                         <div class="project-description">{{ project.projectDescription }}</div>
                     </div>
                     <div class="project-progress">
@@ -50,13 +50,17 @@
                     <div class="progress-bar" [style.width.%]="getProjectProgress(project)"></div>
                 </div>
 
+                @if(project.myRole === 'PRODUCT_OWNER') {
+                <button class="btn btn-info">New Sprint</button>
+                }
+
                 <div class="accordion sprint-accordion" id="accordion-{{ project.id }}">
                     @for (sprint of project.sprints; track sprint) {
 
                     <div class="accordion-item">
 
                         <h2 class="accordion-header" id="heading-{{ sprint.id }}">
-                            <button
+                            <button (click)="project.myRole === 'SCRUM_MASTER' ? getProjectDevelopers(sprint.id) : null"
                                 class="accordion-button collapsed d-flex flex-row justify-content-between align-items-center gap-3"
                                 type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapse-' + sprint.id"
                                 aria-expanded="false" [attr.aria-controls]="'collapse-' + sprint.id">
@@ -71,7 +75,6 @@
                                 <span class="badge {{ getSprintStatusClass(sprint) }}">
                                     {{ getSprintStatus(sprint) }}
                                 </span>
-
                             </button>
                         </h2>
 
@@ -83,23 +86,57 @@
 
                                 <div class="task-list">
                                     @for(task of sprint.tasks; track task) {
+                                    @if((project.myRole === 'DEVELOPER' && task.assignedUserId == currentUserId)
+                                    || project.myRole !== 'DEVELOPER') {
                                     <div class="task-item d-flex flex-row justify-content-between align-items-center">
 
-                                        <i class="bi bi-card-checklist"></i>
+                                        <p class="task-title">
+                                            <i class="bi bi-card-checklist"></i>
+                                            {{ task.description }}
+                                        </p>
 
-                                        <p class="task-title">{{ task.description }}</p>
-                                        <p class="task-member">{{ task.teamMemberName }}</p>
 
+                                        @if(project.myRole === 'DEVELOPER') {
+                                        @if(task.status === 'TODO') {
+                                        <button class="btn btn-success"
+                                            (click)="changeTaskStatus(task.id, 'DOING')">Start</button>
+                                        }
+                                        @else if(task.status === 'DOING') {
+                                        <button class="btn btn-secondary"
+                                            (click)="changeTaskStatus(task.id, 'REVIEW')">Review</button>
+                                        }
+                                        }
+                                        @else if(project.myRole === 'SCRUM_MASTER') {
+                                        @if(task.status === 'TODO' && !task.assignedMemberId) {
+                                        <select name="developer" id="developer-{{ task.id }}"
+                                            (change)="assignTaskToDeveloper(task.id, $event.target)">
+                                            <option value="">Select Developer</option>
+                                            @for(developer of developers; track developer) {
+                                            <option [value]="developer.userId"
+                                                [selected]="developer.userId === task.assignedUserId">
+                                                {{ developer.name }}
+                                            </option>
+                                            }
+                                        </select>
+                                        }
+                                        @else {
+                                        <p class="task-member">{{ task.assignedMemberName }}</p>
+                                        }
+                                        }
                                         <span class="task-status">{{ task.status }}</span>
                                     </div>
                                     }
+                                    @if(project.myRole === 'PRODUCT_OWNER' && task.status === 'REVIEW') {
+                                    <div>
+                                        <button class="btn btn-success" (click)="changeTaskStatus(task.id, 'DONE')">Approve</button>
+                                        <button class="btn btn-info" (click)="changeTaskStatus(task.id, 'DOING')">Review</button>
+                                    </div>
+                                    }
+                                    }
                                 </div>
-
                             </div>
                         </div>
-
                     </div>
-
                     }
                 </div>
             </div>
