@@ -13,7 +13,13 @@ export class AuthService {
 
     if (role !== expectedRole) {
       alert('The page you tried to acess is for ' + expectedRole.toLowerCase() + 's only')
-      this.router.navigate(['/' + role?.toLowerCase() + '-dashboard']);
+      if(role == null){
+        this.router.navigate(['/login']);
+      
+      } else{
+        this.router.navigate(['/' + role?.toLowerCase() + '-dashboard']);
+      }
+      
       return false;
     }
     return true;
