@@ -43,7 +43,7 @@ export class TeacherCourseDetailComponent implements OnInit {
     });
 
     // 2. Carrega Projetos (para o card de Projetos)
-    this.dataService.getProjectsByCourseId(id).subscribe((data: Project[]) => {
+    this.dataService.getProjectsByCourseId(id).subscribe((data: any) => {
       this.projectsView = data.map((p: Project) => ({
         id: p.id, 
         name: p.name,

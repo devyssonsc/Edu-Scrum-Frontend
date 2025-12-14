@@ -26,6 +26,7 @@ export interface User {
   role: Role;
 }
 
+
 export interface StudentLite {
   id: number;
   name: string;
@@ -70,11 +71,13 @@ export interface Project {
   courseId?: number;
   courseName?: string;
   teamsCount?: number;
+  teams?: Team[]; // 👈 adiciona aqui
+  sprints?: any[];
 }
 
 export interface Sprint {
   id: number;
-  name: string;
+  finalGoal: string;
   goal: string;
   startDate: string;
   endDate: string;
@@ -84,7 +87,7 @@ export interface Sprint {
 
 export interface Task {
   id: number;
-  title: string;
+  description: string;
   status: TaskStatus;
   assigneeId?: number; 
   assigneeName?: string;
@@ -116,6 +119,13 @@ export interface Award {
   courseId?: number;
   courseName?: string; 
   isOwner?: boolean;
+}
+
+interface BackendTeam {
+  id: number;
+  name: string;
+  groupNumber: number;
+  memberCount: number;
 }
 
 export interface StudentAward {
@@ -192,8 +202,9 @@ export class DataService {
     },
   ];
 
+  private teams: Team[] = [];
   // --- MOCK TEAMS ---
-  private teams: Team[] = [
+ /*  private teams: Team[] = [
     {
       id: 101,
       name: 'Alpha Team',
@@ -231,7 +242,7 @@ export class DataService {
         }
       ]
     },
-  ];
+  ]; */
 
   // --- MOCK AWARDS ---
   private awards: Award[] = [
@@ -294,6 +305,10 @@ export class DataService {
     return this.httpClient.get<any>(`${enviroments.apiUrl}/stats/courses/${id}`);
   }
 
+getCourseProjectCount(id: number): Observable<number> {
+  return this.httpClient.get<number>(`${enviroments.apiUrl}/courses/${id}/projects/count`);
+}
+
 
 
   getStudents(): Observable<StudentLite[]> { return of(this.students); }
@@ -318,10 +333,84 @@ export class DataService {
 
 
 
-  getProjectById(id: number): Observable<Project | undefined> { return of(this.projects.find((p) => p.id === id)); }
+  getProjectById(id: number): Observable<Project | undefined> { 
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/projects/${id}`);
+  }
+  getProjectsByTeacher(id: number): Observable<any[]> { 
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/teachers/${id}/projects`);
+  }
+
+  getProjectsByCourseId(id: number): Observable<Project | undefined> { 
+    return this.httpClient.get<any>(`${enviroments.apiUrl}/courses/${id}/projects`);
+  }
+
+  //AI generated method
+  getProjectTeamsCount(projectId: number) {
+  return this.httpClient
+    .get<any>(`${enviroments.apiUrl}/projects/${projectId}/details`)
+    .pipe(
+      map(project => project.teams?.length || 0)
+    );
+}
+//AI generated method
+getProjectCourseName(projectId: number) {
+  return this.httpClient
+    .get<any>(`${enviroments.apiUrl}/projects/${projectId}`)
+    .pipe(
+      switchMap(project => 
+        this.httpClient.get<any>(`${enviroments.apiUrl}/courses/${project.courseId}`)
+      ),
+      map(course => course.name)
+    );
+}
 
 
-  getTeamsByProject(projectId: number): Observable<Team[]> { return of(this.teams.filter((t) => t.projectId === projectId)); }
+ getTeamsByProject(projectId: number): Observable<Team[]> {
+  return this.httpClient
+    .get<any>(`${enviroments.apiUrl}/projects/${projectId}/details`)
+    .pipe(
+      switchMap(project => {
+        if (!project?.teams) return of([] as Team[]);
+
+        const sprints: Sprint[] = (project.sprints || []).map((s: any) => ({
+          id: s.id,
+          sprintNumber: s.sprintNumber,
+          finalGoal: s.finalGoal,
+          startDate: s.startDate,
+          endDate: s.endDate,
+          tasks: (s.tasks || []).map((t: any) => ({
+            id: t.id,
+            description: t.description,
+            status: t.status,
+            assignedMemberId: t.assignedMemberId,
+            assignedMemberName: t.assignedMemberName
+          }))
+        }));
+
+        const teamObservables: Observable<Team>[] = project.teams.map((t: any) =>
+          this.httpClient.get<any[]>(`${enviroments.apiUrl}/teams/${t.id}/members`).pipe(
+            map(members => ({
+              id: t.id,
+              name: t.name,
+              projectId: projectId,
+              members: members.map(m => ({
+                id: m.teamMemberId,
+                student: {
+                  id: m.userId,
+                  name: m.name,
+                  email: '' // opcional
+                },
+                role: m.role
+              })),
+              sprints: sprints
+            } as Team))
+          )
+        );
+
+        return forkJoin(teamObservables);
+      })
+    );
+}
   getTeamsByCourseId(courseId: number): Observable<Team[]> {
     const projectIds = this.projects.filter((p) => p.courseId === courseId).map((p) => p.id);
     return of(this.teams.filter((t) => projectIds.includes(t.projectId)));
@@ -425,14 +514,17 @@ export class DataService {
     return of(projectsWithDynamicCount);
   }
   
-  getProjectsByCourseId(courseId: number): Observable<Project[]> {
+  /* getProjectsByCourseId(courseId: number): Observable<Project[]> {
+    
+
+
     const filteredProjects = this.projects.filter((p) => p.courseId === courseId);
     const projectsWithDynamicCount = filteredProjects.map(p => {
       const realTeamCount = this.teams.filter(t => t.projectId === p.id).length;
       return { ...p, teamsCount: realTeamCount };
     });
     return of(projectsWithDynamicCount);
-  }
+  } */
 
   createAward(awardData: { name: string; description: string; points: number; courseId: number; scope: AwardScope}): Observable<boolean> {
     const newId = this.awards.length > 0 ? Math.max(...this.awards.map((a) => a.id)) + 1 : 1;

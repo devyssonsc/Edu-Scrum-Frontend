@@ -96,6 +96,7 @@ export class TeacherProjectDetailComponent implements OnInit {
   loadData(projectId: number) {
     this.dataService.getProjectById(projectId).subscribe(p => {
       this.project = p;
+      console.log('PROJECT:', p);
       
       if (this.project) {
         this.editProjectForm.patchValue({
@@ -104,9 +105,10 @@ export class TeacherProjectDetailComponent implements OnInit {
           startDate: this.project.startDate,
           endDate: this.project.endDate
         });
+
         if (p?.courseId) {
             this.loadStudents(p.courseId);
-            this.dataService.getAwardsByCourse(p.courseId).subscribe(awards => {
+            this.httpClient.get(`${enviroments.apiUrl}/courses/${p.courseId}/awards`).subscribe((awards: any) => {
                 this.availableAwards = awards;
             });
         }
@@ -279,7 +281,7 @@ export class TeacherProjectDetailComponent implements OnInit {
 
     const scopeNeeded = this.targetType === 'STUDENT' ? 'INDIVIDUAL' : 'TEAM'
     
-    return this.availableAwards.filter(a => a.scope === scopeNeeded);
+    return this.availableAwards
   }
 
   openAwardModalForTeam(team: Team) {
@@ -310,21 +312,18 @@ export class TeacherProjectDetailComponent implements OnInit {
 
     const courseId = this.project.courseId;
     const awardId = Number(this.selectedAwardId);
-
     if (this.targetType === 'STUDENT') {
-        this.dataService.assignAwardToStudent(this.targetId, awardId, courseId).subscribe(success => {
-            if (success) {
-                alert(`Award assigned to ${this.targetName}!`);
-                this.closeAwardModal();
-            }
-        });
+        this.httpClient.post(`${enviroments.apiUrl}/awards/${awardId}/assign`, {
+        "studentId": this.targetId, "projectId": this.project.id 
+        }).subscribe(r => {
+            console.log('Resposta do servidor:', r);
+            })
     } else if (this.targetType === 'TEAM') {
-        this.dataService.assignAwardToTeam(this.targetId, awardId, courseId).subscribe(success => {
-            if (success) {
-                alert(`Award assigned to ${this.targetName}!`);
-                this.closeAwardModal();
-            }
-        });
+        this.httpClient.post(`${enviroments.apiUrl}/awards/${awardId}/assign`, {
+        "teamId": this.targetId, "projectId": this.project.id 
+        }).subscribe(r => {
+            console.log('Resposta do servidor:', r);
+            })
     }
   }
 

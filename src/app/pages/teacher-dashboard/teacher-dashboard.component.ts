@@ -62,8 +62,17 @@ export class TeacherDashboardComponent implements OnInit {
         Name: c.name,
         Degree: c.degreeName || 'N/A',
         Students: c.studentsCount,
-        Projects: c.projectsCount
+        Projects: 0
       }));
+
+    this.courses.forEach(course => {
+      this.dataService.getCourseProjectCount(course.id).subscribe(count => {
+        course.Projects = count;
+      });
+      this.dataService.getCourseStats(course.id).subscribe(res => {
+        course.Students = res.studentsCount;
+      });
+    });
       
       this.countCourses = res.length;
       
@@ -73,13 +82,25 @@ export class TeacherDashboardComponent implements OnInit {
     });
 
     // 3. Load Projects
-    this.dataService.getAllProjects().subscribe(res => {
-      this.projects = res.map(p => ({
+    this.dataService.getProjectsByTeacher(this.teacherId).subscribe((res:any) => {
+      this.projects = res.map((p:any) => ({
         id: p.id,
         Name: p.name,
         Course: p.courseName,
         Teams: p.teamsCount
       }));
+
+      this.projects.forEach(project => {
+      this.dataService.getCourseProjectCount(project.id).subscribe(count => {
+        project.Teams = count;
+      });
+
+      this.dataService.getProjectCourseName(project.id).subscribe(name => {
+        project.Course = name;
+      });
+    });
+
+
       
       this.countProjects = res.length;
       if (this.selectedOption === 'Projects') {

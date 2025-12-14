@@ -123,7 +123,7 @@ export class RegisterTeacherComponent implements OnInit {
       console.log('Formulário Válido:', this.teacherForm.value);
       this.httpClient.post(`${enviroments.apiUrl}/users`, this.teacherForm.value).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
-        alert('The student was successfully registered.');
+        alert('The teacher was successfully registered.');
 
         this.courses.controls.forEach((course: any) => {
             this.httpClient.post(`${enviroments.apiUrl}/courses/${course.value.courseId}/teachers/${response.id}`, {}).subscribe(r => {
