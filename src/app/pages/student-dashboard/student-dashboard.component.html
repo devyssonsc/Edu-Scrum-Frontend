@@ -112,8 +112,8 @@
                                             (change)="assignTaskToDeveloper(task.id, $event.target)">
                                             <option value="">Select Developer</option>
                                             @for(developer of developers; track developer) {
-                                            <option [value]="developer.userId"
-                                                [selected]="developer.userId === task.assignedUserId">
+                                            <option [value]="developer.teamMemberId"
+                                                [selected]="developer.teamMemberId === task.assignedMemberId">
                                                 {{ developer.name }}
                                             </option>
                                             }
@@ -128,10 +128,40 @@
                                     }
                                     @if(project.myRole === 'PRODUCT_OWNER' && task.status === 'REVIEW') {
                                     <div>
-                                        <button class="btn btn-success" (click)="changeTaskStatus(task.id, 'DONE')">Approve</button>
-                                        <button class="btn btn-info" (click)="changeTaskStatus(task.id, 'DOING')">Review</button>
+                                        <button class="btn btn-success"
+                                            (click)="changeTaskStatus(task.id, 'DONE')">Approve</button>
+                                        <button class="btn btn-info"
+                                            (click)="changeTaskStatus(task.id, 'DOING')">Review</button>
                                     </div>
                                     }
+                                    }
+                                    @if(project.myRole === 'PRODUCT_OWNER') {
+                                    <div class="form-group">
+                                        @if (showAddInput) {
+                                        <div class="inline-add-form">
+                                            <input type="text" [formControl]="newTaskControl"
+                                                placeholder="Ex: Implement login" class="inline-input"
+                                                [class.invalid]="newTaskControl.invalid && newTaskControl.touched">
+
+                                            <button type="button" class="btn-icon" (click)="createTask(sprint.id)"
+                                                [disabled]="newTaskControl.invalid">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+
+                                            <button type="button" class="btn-icon btn-cancel" (click)="cancelAddTask()">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </div>
+                                        }
+
+                                        @if (!showAddInput) {
+                                        <div class="add-button-container">
+                                            <button type="button" class="btn-add" (click)="showAddInput = true">
+                                                <i class="bi bi-plus-circle-fill"></i>
+                                            </button>
+                                        </div>
+                                        }
+                                    </div>
                                     }
                                 </div>
                             </div>

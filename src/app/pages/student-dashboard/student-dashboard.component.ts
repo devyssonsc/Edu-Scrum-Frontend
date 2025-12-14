@@ -9,7 +9,7 @@ import { enviroments } from '../../../enviroments/enviroments';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -230,11 +230,26 @@ export class StudentDashboardComponent implements OnInit {
       console.error('Error assigning task', error);
     });
   }
-  
 
-  // private fb = inject(FormBuilder);
-  // taskForm: FormGroup;
-  // newCourseName = this.fb.control('', Validators.required);
-  // showAddInput = false;
-  // isSubmitted = false;
+
+  newTaskControl = new FormControl('', Validators.required);
+  showAddInput = false;
+
+  createTask(sprintId: number) {
+    if (this.newTaskControl.invalid) return;
+
+    const description = this.newTaskControl.value!.trim();
+
+    this.httpClient.post(`${enviroments.apiUrl}/sprints/${sprintId}/tasks`,{ description }).subscribe((response) => {
+      console.log('Task created successfully', response);
+      this.newTaskControl.reset();
+      this.showAddInput = false;
+      this.fetchData();
+    });
+  }
+
+  cancelAddTask() {
+    this.newTaskControl.reset();
+    this.showAddInput = false;
+  }
 }
