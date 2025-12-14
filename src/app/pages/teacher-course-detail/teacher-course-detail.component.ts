@@ -43,13 +43,16 @@ export class TeacherCourseDetailComponent implements OnInit {
     }
   }
 
-  loadCourseData(id: number) {
-    // 1. Carrega dados básicos do curso
-    this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
-      this.course = data;
-    });
+ loadCourseData(id: number) { 
+  
+  this.dataService.getCourseById(id).subscribe((data: Course | undefined) => {
+    this.course = data;
+  });
 
-    // 2. Carrega Projetos (para o card de Projetos)
+  this.dataService.getCourseStats(id).subscribe((stats: any) => {
+    this.realStudentCount = stats?.studentsCount ?? 0;
+  });
+
 this.dataService.getProjectsByCourseId(id).pipe(
   switchMap((projects: Project[]) => {
 

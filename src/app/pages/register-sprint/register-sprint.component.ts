@@ -88,7 +88,7 @@ export class RegisterSprintComponent implements OnInit {
       console.log('Formulário Válido:', this.sprintForm.value);
       this.httpClient.post(`${enviroments.apiUrl}/projects/${this.projectId}/sprints`, this.sprintForm.value).subscribe((response: any) => {
         console.log('Resposta do servidor:', response);
-        alert('The Degree was successfully registered.');
+        alert('The Sprint was successfully registered.');
 
         newTasks.forEach((taskDescription: String) => {
           this.httpClient.post(`${enviroments.apiUrl}/sprints/${response.id}/tasks`, {
