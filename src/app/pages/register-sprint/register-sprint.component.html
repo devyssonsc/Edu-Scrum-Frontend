@@ -1,0 +1,112 @@
+<div class="div-container">
+    
+    <div style="text-align: left; margin-bottom: 1rem;">
+        <button class="btn-back" routerLink="/admin-dashboard">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+    
+    <form class="card form-card" [formGroup]="sprintForm" (ngSubmit)="onSubmit()">
+        
+        <h2 class="form-title">Register Sprint</h2> 
+
+        <div class="form-group">
+            <label for="sprintNumber">Sprint Number</label>
+            <input type="number" id="sprintNumber" formControlName="sprintNumber" placeholder="Ex: 1">
+            @if (sprintForm.get('sprintNumber')?.invalid && sprintForm.get('sprintNumber')?.touched) {
+                <small class="error-msg">This field is required</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="goal">Goal</label>
+            <input type="text" id="goal" formControlName="finalGoal" placeholder="Ex: Complete all tasks">
+            @if (sprintForm.get('finalGoal')?.invalid && sprintForm.get('finalGoal')?.touched) {
+                <small class="error-msg">This field is required</small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" formControlName="startDate" [min]="today">
+            @if (sprintForm.get('startDate')?.invalid && sprintForm.get('startDate')?.touched) {
+                <small class="error-msg">This field is required</small>
+            }
+            @if (sprintForm.get('startDate')?.errors?.['startDateBeforeToday']
+            && sprintForm.get('startDate')?.touched) {
+                <small class="error-msg">
+                    Start date must be after today
+                </small>
+            }
+        </div>
+
+        <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" formControlName="endDate" [min]="sprintForm.get('startDate')?.value">
+            @if (sprintForm.get('endDate')?.invalid && sprintForm.get('endDate')?.touched) {
+                <small class="error-msg">This field is required</small>
+            }
+        </div>
+            
+        <div class="form-group">
+            <label>Tasks</label>
+
+            <div formArrayName="tasks" class="tasks-list">
+                @for(task of tasks.controls; track $index; let i = $index) {
+                    <div class="task-item">
+                        <span class="name">{{ task.value }}</span>
+                        <i class="bi bi-trash" (click)="removeTask(i)"></i>
+                    </div>
+                }
+
+                @if(tasks.length === 0 && !showAddInput) {
+                    <p class="empty-list-msg">Add tasks to this sprint</p>
+                }
+            </div>
+
+            
+            @if (showAddInput) {
+                <div class="inline-add-form">
+                    <input 
+                        type="text"
+                        [formControl]="newCourseName"
+                        placeholder="Ex: Software Quality"
+                        class="inline-input"
+                        [class.invalid]="newCourseName.invalid && newCourseName.touched"
+                    >
+
+                    <button type="button" class="btn-icon" (click)="addTask()" [disabled]="newCourseName.invalid">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+
+                    <button type="button" class="btn-icon btn-cancel" (click)="showAddInput = false">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            }
+
+            
+            @if (!showAddInput) {
+                <div class="add-button-container">
+                    <button type="button" class="btn-add" (click)="showAddInput = true">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </button>
+                </div>
+            }
+
+            
+            @if (tasks.invalid && (tasks.touched || isSubmitted)) {
+                <small class="error-msg">At least one task is required</small>
+            }
+            @if (sprintForm.errors?.['endDateBeforeStartDate'] && sprintForm.get('endDate')?.touched) {
+                <small class="error-msg">
+                    End date must be after start date
+                </small>
+            }
+        </div>
+
+        <hr class="divider">
+
+        <button type="submit" class="btn btn-primary" [disabled]="sprintForm.invalid">Register Sprint</button>
+    </form>
+</div>

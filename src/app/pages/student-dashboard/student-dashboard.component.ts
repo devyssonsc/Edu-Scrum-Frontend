@@ -1,174 +1,141 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
 import { StatsCardComponent } from '../../components/stats-card/stats-card.component';
+import { HttpClient } from '@angular/common/http';
+import { enviroments } from '../../../enviroments/enviroments';
+
+import { ChartConfiguration } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [StatsCardComponent, SectionSelectorComponent, ShowTableComponent],
+  imports: [StatsCardComponent, SectionSelectorComponent, ShowTableComponent, BaseChartDirective, CommonModule,
+    ReactiveFormsModule,],
   templateUrl: './student-dashboard.component.html',
   styleUrl: './student-dashboard.component.scss'
 })
-export class StudentDashboardComponent {
-  allData: any = {
-    awards: [
+export class StudentDashboardComponent implements OnInit {
+
+
+  userRankingData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: [
       {
-        badgeIcon: "Awards/Innovator.png",
-        awardName: "Innovator",
-        awardDescription: "Innovator Award for outstanding project",
-        projectName: "Project X",
-        assignedAt: "2024-05-01",
-        points: 2
-      },
-      {
-        badgeIcon: "Awards/MVT.png",
-        awardName: "MVT",
-        awardDescription: "Most Valuable Member in project",
-        projectName: "Project J",
-        assignedAt: "2024-07-12",
-        points: 3
-      },
-      {
-        badgeIcon: "Awards/MVT.png",
-        awardName: "MVT",
-        awardDescription: "Most Valuable Member in project",
-        projectName: "Project J",
-        assignedAt: "2024-07-12",
-        points: 3
-      },
-      {
-        badgeIcon: "Awards/MVT.png",
-        awardName: "MVT",
-        awardDescription: "Most Valuable Member in project",
-        projectName: "Project J",
-        assignedAt: "2024-07-12",
-        points: 3
-      },
-    ],
-    projects: [
-      {
-        "id": 1,
-        "name": "Final Project",
-        "description": "The main project for this course.",
-        "startDate": "2025-11-10",
-        "endDate": "2025-12-20",
-        "sprints": [
-          {
-            "id": 1,
-            "sprintNumber": 1,
-            "goal": "Deliver the core login functionality.",
-            "startDate": "2025-11-10",
-            "endDate": "2025-11-17",
-            "tasks": [
-              {
-                "id": 1,
-                "description": "As a user, I want to log in, so that I can access my profile.",
-                "status": "TODO",
-                "teamMemberName": "Aluno Texugo"
-              }
-            ]
-          },
-          {
-            "id": 2,
-            "sprintNumber": 2,
-            "goal": "Deliver the core login functionality.",
-            "startDate": "2025-11-10",
-            "endDate": "2025-11-17",
-            "tasks": [
-              {
-                "id": 3,
-                "description": "As a user, I want to log in, so that I can access my profile.",
-                "status": "DONE",
-                "teamMemberName": "Aluno Texugo"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": 2,
-        "name": "Final Project",
-        "description": "The main project for this course.",
-        "startDate": "2025-11-10",
-        "endDate": "2025-12-20",
-        "sprints": [
-          {
-            "id": 1,
-            "sprintNumber": 1,
-            "goal": "Deliver the core login functionality.",
-            "startDate": "2025-11-10",
-            "endDate": "2025-11-17",
-            "tasks": [
-              {
-                "id": 1,
-                "description": "As a user, I want to log in, so that I can access my profile.",
-                "status": "TODO",
-                "teamMemberName": "Aluno Texugo"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    students: [
-      {
-        num: 50440,
-        name: "Tiago Silva",
-        email: "50440@alunos.upt.pt",
-        degree: "Engenharia Informática"
-      },
-      {
-        num: 50441,
-        name: "David Aroso",
-        email: "50441@alunos.upt.pt",
-        degree: "Engenharia Informática"
-      }
-    ],
-    teachers: [
-      {
-        name: "Fátima Leal",
-        email: "fatimal@upt.pt",
-        courses: 3
-      },
-      {
-        name: "Bruno Cunha",
-        email: "Bruninho@upt.pt",
-        courses: 4
+        label: '',
+        data: []
       }
     ]
   };
 
+  userRankingOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    indexAxis: 'y' // 👈 ISSO deixa horizontal
+  };
 
-  data: any[] = this.allData.awards;
+  teamRankingData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: [
+      {
+        label: '',
+        data: []
+      }
+    ]
+  };
 
-  sections: string[] = ['Awards', 'Progression', 'Scores', 'Specific functions'];
+  teamRankingOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true
+  };
 
-  openSprints: Record<string, boolean> = {};
+  data: any | any[] = [];
 
-  constructor(private router: Router) { }
+  awards: any[] = [];
+  projects: any[] = [];
+
+  rankings: {
+    studentInfo: any;
+    individualRankings: any[];
+    teamRankingsByCourse: any[];
+  } | null = null;
+
+  currentUserId: string = localStorage.getItem('id') || '';
+
+  sections: string[] = ['Awards', 'Projects', 'Rankings'];
 
   selectedOption: string = this.sections[0];
+  developers: any[] = [];
 
-  get columns(): string[] {
-    if (!this.allData.degrees || this.allData.degrees.length === 0) return [];
-    return Object.keys(this.allData.degrees[0]);
+  constructor(private httpClient: HttpClient, private router: Router) {
+    // this.taskForm = this.fb.group({
+    //   task: this.fb.array([], Validators.minLength(0)) 
+    // });
   }
+
+  ngOnInit(): void {
+    this.onSelectOption(this.selectedOption);
+    // this.fetchData();
+  }
+
+  goToRegisterSprint(projectId: number) {
+    this.router.navigate([`/student-dashboard/register-sprint/${projectId}`]);
+  }
+
+  fetchData() {
+    this.httpClient.get(`${enviroments.apiUrl}/students/${localStorage.getItem('id')}/${this.selectedOption.toLowerCase()}`).subscribe((response: any) => {
+      if (this.selectedOption === 'Awards') {
+        for (let award of response) {
+          if (award.badgeIcon == null) {
+            award.badgeIcon = 'generic-badge';
+          }
+        }
+      }
+
+      if (this.selectedOption === 'Rankings') {
+        this.rankings = response;
+        const userLabels = response.individualRankings.map((item: any) => item.studentName) || [];
+        const userScores = response.individualRankings.map((item: any) => item.totalScore);
+        this.userRankingData = {
+          labels: userLabels,
+          datasets: [
+            {
+              label: 'Score',
+              data: userScores
+            }
+          ]
+        };
+
+        const teamLabels = response.teamRankingsByCourse[0].rankings.map((item: any) => item.teamName);
+        const teamScores = response.teamRankingsByCourse[0].rankings.map((item: any) => item.totalScore);
+        this.teamRankingData = {
+          labels: teamLabels,
+          datasets: [
+            {
+              label: 'Total Score',
+              data: teamScores
+            }
+          ]
+        };
+      } else {
+        this.data = response;
+      }
+      console.log(this.rankings);
+    });
+  }
+
+
+  // get columns(): string[] {
+  //   if (!this.allData.degrees || this.allData.degrees.length === 0) return [];
+  //   return Object.keys(this.allData.degrees[0]);
+  // }
 
   onSelectOption(event: any) {
     console.log(event);
     this.selectedOption = event;
-
-    if (this.selectedOption === this.sections[0]) {
-      this.data = this.allData.awards;
-    } else if (this.selectedOption === this.sections[1]) {
-      this.data = this.allData.projects;
-    } else if (this.selectedOption === 'Estudantes') {
-      this.data = this.allData.students;
-    } else if (this.selectedOption === 'Professores') {
-      this.data = this.allData.teachers;
-    }
+    this.fetchData();
   }
 
   getSprintStatus(sprint: any): string {
@@ -179,9 +146,9 @@ export class StudentDashboardComponent {
 
     if (currentDate < startDate) {
       return 'Not Started';
-    } else if (currentDate >= startDate && currentDate <= endDate) {
+    } else if ((currentDate >= startDate && currentDate <= endDate) && !allTasksDone) {
       return 'In Progress';
-    } else if(allTasksDone) {
+    } else if (allTasksDone) {
       return 'Completed';
     } else {
       return 'Overdue';
@@ -202,9 +169,84 @@ export class StudentDashboardComponent {
   }
 
   getProjectProgress(project: any): number {
-    const totalTasks = project.sprints.reduce((sum: number, sprint: any) => sum + sprint.tasks.length, 0);
-    const completedTasks = project.sprints.reduce((sum: number, sprint: any) => 
-      sum + sprint.tasks.filter((task: any) => task.status === 'DONE').length, 0);
-    return totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+    if (!project?.sprints || project.sprints.length === 0) {
+      return 0;
+    }
+
+    const totalTasks = project.sprints.reduce(
+      (sum: number, sprint: any) => sum + (sprint.tasks?.length ?? 0),
+      0
+    );
+
+    const completedTasks = project.sprints.reduce(
+      (sum: number, sprint: any) =>
+        sum + (sprint.tasks?.filter((task: any) => task.status === 'DONE').length ?? 0),
+      0
+    );
+
+    return totalTasks === 0
+      ? 0
+      : Math.round((completedTasks / totalTasks) * 100);
+  }
+
+  isCurrentUser(student: any): boolean {
+    if (localStorage.getItem('id') == student.studentId) {
+      return true;
+    }
+    return false;
+  }
+
+  isCurrentUserTeam(team: any): boolean {
+    if (team.members.some((member: any) => localStorage.getItem('id') == member.studentId)) {
+      return true;
+    }
+    return false;
+  }
+
+  changeTaskStatus(taskId: number, newStatus: string) {
+    this.httpClient.patch(`${enviroments.apiUrl}/tasks/${taskId}/status`, { status: newStatus }).subscribe(response => {
+      console.log('Task status changed successfully', response);
+      this.fetchData();
+    }, error => {
+      console.error('Error changing task status', error);
+    });
+  }
+
+  getProjectDevelopers(sprintId: number): void {
+    this.httpClient.get(`${enviroments.apiUrl}/teams/developers?sprintId=${sprintId}`).subscribe((response: any) => {
+      this.developers = response;
+    });
+  }
+
+  assignTaskToDeveloper(taskId: number, developerId: EventTarget | null): void {
+    console.log((developerId as HTMLSelectElement).value);
+    this.httpClient.patch(`${enviroments.apiUrl}/tasks/${taskId}/assign`, { teamMemberId: (developerId as HTMLSelectElement).value }).subscribe(response => {
+      console.log('Task assigned successfully', response);
+    }, error => {
+      console.error('Error assigning task', error);
+    });
+  }
+
+
+  newTaskControl = new FormControl('', Validators.required);
+  showAddInput = false;
+
+  createTask(sprintId: number) {
+    if (this.newTaskControl.invalid) return;
+
+    const description = this.newTaskControl.value!.trim();
+
+    this.httpClient.post(`${enviroments.apiUrl}/sprints/${sprintId}/tasks`,{ description }).subscribe((response) => {
+      console.log('Task created successfully', response);
+      this.newTaskControl.reset();
+      this.showAddInput = false;
+      this.fetchData();
+    });
+  }
+
+  cancelAddTask() {
+    this.newTaskControl.reset();
+    this.showAddInput = false;
   }
 }

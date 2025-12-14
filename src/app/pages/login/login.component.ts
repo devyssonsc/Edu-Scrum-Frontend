@@ -21,9 +21,7 @@ export class LoginComponent {
       password: ['', Validators.required]
     });
 
-  constructor(private httpClient: HttpClient) {
-    
-  }
+  constructor(private httpClient: HttpClient) {}
 
   redirectUser(role: string){
     switch (role) {
@@ -34,8 +32,7 @@ export class LoginComponent {
         this.router.navigate(['/teacher-dashboard']);
         break;
       case 'STUDENT':
-        alert('Dashboard em desenvolvimento.');
-        //this.router.navigate(['/student-dashboard']);
+        this.router.navigate(['/student-dashboard']);
         break;
   }
   }
