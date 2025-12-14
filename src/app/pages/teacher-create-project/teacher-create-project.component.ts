@@ -69,7 +69,9 @@ endDateAfterStartDateValidator = (group: AbstractControl): ValidationErrors | nu
 };
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const rawId = this.route.snapshot.paramMap.get('courseId');
 
     const state = history.state;

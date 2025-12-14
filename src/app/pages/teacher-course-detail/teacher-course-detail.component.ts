@@ -31,7 +31,9 @@ export class TeacherCourseDetailComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const rawId = this.route.snapshot.paramMap.get('id');
     
     if (rawId) {

@@ -92,7 +92,9 @@ export class TeacherProjectDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
     if (projectId) { this.loadData(projectId); }
   }

@@ -37,7 +37,9 @@ export class RegisterCourseComponent implements OnInit {
   selectedDegreeId = new FormControl<number | null>(null, Validators.required);
 
   ngOnInit(): void {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.loadDegrees();
   }
 

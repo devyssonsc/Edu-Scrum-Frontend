@@ -43,7 +43,9 @@ export class DegreeDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const routeParam = this.route.snapshot.paramMap.get('id');
     
     if (routeParam) {

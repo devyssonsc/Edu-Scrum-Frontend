@@ -36,7 +36,9 @@ export class TeacherCreateAwardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.dataService.getCoursesByTeacher(localStorage.getItem("id")).subscribe(courses => {
       this.myCourses = courses;
     });

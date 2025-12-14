@@ -43,7 +43,9 @@ export class TeacherDashboardComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.route.queryParams.subscribe(params => {
       if (params['tab']) {
         this.selectedOption = params['tab'];

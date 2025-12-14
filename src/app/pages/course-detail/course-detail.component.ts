@@ -48,7 +48,9 @@ export class CourseDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.dataService.getDegrees().subscribe(degrees => {
       this.allDegrees = degrees;
     });

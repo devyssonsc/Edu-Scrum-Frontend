@@ -91,7 +91,9 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.checkRole(this.role);
+   if(!this.authService.checkRole(this.role)){
+      return
+    }
     this.getStats()
     this.onSelectOption(this.selectedOption);
     // this.fetchData();

@@ -15,7 +15,6 @@ export class AuthService {
       alert('The page you tried to acess is for ' + expectedRole.toLowerCase() + 's only')
       if(role == null){
         this.router.navigate(['/login']);
-      
       } else{
         this.router.navigate(['/' + role?.toLowerCase() + '-dashboard']);
       }

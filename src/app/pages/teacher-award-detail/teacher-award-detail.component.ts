@@ -38,7 +38,9 @@ export class TeacherAwardDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.authService.checkRole(this.role);
+    if(!this.authService.checkRole(this.role)){
+      return
+    }
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.awardId = Number(id);

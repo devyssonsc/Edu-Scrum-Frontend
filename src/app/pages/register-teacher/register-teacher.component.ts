@@ -44,7 +44,9 @@ export class RegisterTeacherComponent implements OnInit {
   }
 
     ngOnInit(): void {
-      this.authService.checkRole(this.role);
+      if(!this.authService.checkRole(this.role)){
+      return
+    }
       this.loadCourses();
     }
   
