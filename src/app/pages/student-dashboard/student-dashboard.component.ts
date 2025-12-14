@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SectionSelectorComponent } from '../../components/section-selector/section-selector.component';
 import { ShowTableComponent } from '../../components/show-table/show-table.component';
@@ -8,11 +8,14 @@ import { enviroments } from '../../../enviroments/enviroments';
 
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [StatsCardComponent, SectionSelectorComponent, ShowTableComponent, BaseChartDirective],
+  imports: [StatsCardComponent, SectionSelectorComponent, ShowTableComponent, BaseChartDirective, CommonModule,
+    ReactiveFormsModule,],
   templateUrl: './student-dashboard.component.html',
   styleUrl: './student-dashboard.component.scss'
 })
@@ -20,11 +23,11 @@ export class StudentDashboardComponent implements OnInit {
 
 
   userRankingData: ChartConfiguration<'bar'>['data'] = {
-    labels: ['Maria', 'Carlos', 'João', 'Ana', 'Pedro', 'Sofia', 'Lucas', 'Beatriz'],
+    labels: [],
     datasets: [
       {
-        label: 'Score',
-        data: [520, 480, 410, 380, 360, 330, 310, 290]
+        label: '',
+        data: []
       }
     ]
   };
@@ -35,204 +38,17 @@ export class StudentDashboardComponent implements OnInit {
   };
 
   teamRankingData: ChartConfiguration<'bar'>['data'] = {
-    labels: ['ScrumMasters', 'CodeHeroes', 'DevDynamos', 'AgileWolves'],
+    labels: [],
     datasets: [
       {
-        label: 'Total Score',
-        data: [850, 720, 680, 610]
+        label: '',
+        data: []
       }
     ]
   };
 
   teamRankingOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true
-  };
-
-  allData: any = {
-    awards: [
-      {
-        badgeIcon: "Awards/Innovator.png",
-        awardName: "Innovator",
-        awardDescription: "Innovator Award for outstanding project",
-        projectName: "Project X",
-        assignedAt: "2024-05-01",
-        points: 2
-      },
-      {
-        badgeIcon: "Awards/MVT.png",
-        awardName: "MVT",
-        awardDescription: "Most Valuable Member in project",
-        projectName: "Project J",
-        assignedAt: "2024-07-12",
-        points: 3
-      },
-      {
-        badgeIcon: "Awards/MVT.png",
-        awardName: "MVT",
-        awardDescription: "Most Valuable Member in project",
-        projectName: "Project J",
-        assignedAt: "2024-07-12",
-        points: 3
-      },
-      {
-        badgeIcon: "Awards/MVT.png",
-        awardName: "MVT",
-        awardDescription: "Most Valuable Member in project",
-        projectName: "Project J",
-        assignedAt: "2024-07-12",
-        points: 3
-      },
-    ],
-    projects: [
-      {
-        "id": 1,
-        "name": "Final Project",
-        "description": "The main project for this course.",
-        "startDate": "2025-11-10",
-        "endDate": "2025-12-20",
-        "sprints": [
-          {
-            "id": 1,
-            "sprintNumber": 1,
-            "goal": "Deliver the core login functionality.",
-            "startDate": "2025-11-10",
-            "endDate": "2025-11-17",
-            "tasks": [
-              {
-                "id": 1,
-                "description": "As a user, I want to log in, so that I can access my profile.",
-                "status": "TODO",
-                "teamMemberName": "Aluno Texugo"
-              }
-            ]
-          },
-          {
-            "id": 2,
-            "sprintNumber": 2,
-            "goal": "Deliver the core login functionality.",
-            "startDate": "2025-11-10",
-            "endDate": "2025-11-17",
-            "tasks": [
-              {
-                "id": 3,
-                "description": "As a user, I want to log in, so that I can access my profile.",
-                "status": "DONE",
-                "teamMemberName": "Aluno Texugo"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": 2,
-        "name": "Final Project",
-        "description": "The main project for this course.",
-        "startDate": "2025-11-10",
-        "endDate": "2025-12-20",
-        "sprints": [
-          {
-            "id": 1,
-            "sprintNumber": 1,
-            "goal": "Deliver the core login functionality.",
-            "startDate": "2025-11-10",
-            "endDate": "2025-11-17",
-            "tasks": [
-              {
-                "id": 1,
-                "description": "As a user, I want to log in, so that I can access my profile.",
-                "status": "TODO",
-                "teamMemberName": "Aluno Texugo"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    rankings: [{
-      studentInfo: {
-        id: "12345",
-        name: "João Silva",
-        totalScore: 365
-      },
-      individualRankings: [
-        { rank: 1, studentId: "001", studentName: "Maria Santos", totalScore: 450 },
-        { rank: 2, studentId: "002", studentName: "Carlos Oliveira", totalScore: 420 },
-        { rank: 3, studentId: "12345", studentName: "João Silva", totalScore: 365 },
-        { rank: 4, studentId: "003", studentName: "Ana Costa", totalScore: 340 },
-        { rank: 5, studentId: "004", studentName: "Pedro Lima", totalScore: 320 },
-        { rank: 6, studentId: "005", studentName: "Sofia Mendes", totalScore: 300 },
-        { rank: 7, studentId: "006", studentName: "Lucas Ferreira", totalScore: 280 },
-        { rank: 8, studentId: "007", studentName: "Beatriz Alves", totalScore: 260 },
-      ],
-      teamRankingsByCourse: [
-        {
-          courseId: "c1",
-          courseName: "Software Quality",
-          rankings: [
-            {
-              rank: 1, teamId: "t1", teamName: "ScrumMasters", totalScore: 850, memberCount: 4, members: [
-                { studentId: "12345", studentName: "João Silva", score: 250 },
-                { studentId: "m2", studentName: "Maria Santos", score: 220 },
-                { studentId: "m3", studentName: "Carlos Oliveira", score: 200 },
-                { studentId: "m4", studentName: "Ana Costa", score: 180 }
-              ]
-            },
-            {
-              rank: 2, teamId: "t2", teamName: "CodeHeroes", totalScore: 720, memberCount: 4, members: [
-                { studentId: "m5", studentName: "Pedro Lima", score: 200 },
-                { studentId: "m6", studentName: "Sofia Mendes", score: 190 },
-                { studentId: "m7", studentName: "Lucas Ferreira", score: 170 },
-                { studentId: "m8", studentName: "Beatriz Alves", score: 160 }
-              ]
-            },
-            {
-              rank: 3, teamId: "t3", teamName: "DevDynamos", totalScore: 680, memberCount: 3, members: [
-                { studentId: "m9", studentName: "Rafael Santos", score: 250 },
-                { studentId: "m10", studentName: "Juliana Costa", score: 230 },
-                { studentId: "m11", studentName: "Bruno Almeida", score: 200 }
-              ]
-            },
-            {
-              rank: 4, teamId: "t4", teamName: "AgileWolves", totalScore: 620, memberCount: 4, members: [
-                { studentId: "m12", studentName: "Mariana Silva", score: 180 },
-                { studentId: "m13", studentName: "Gabriel Rocha", score: 160 },
-                { studentId: "m14", studentName: "Fernanda Lima", score: 150 },
-                { studentId: "m15", studentName: "Thiago Souza", score: 130 }
-              ]
-            }
-          ]
-        },
-        {
-          courseId: "c2",
-          courseName: "Mobile Development",
-          rankings: [
-            {
-              rank: 1, teamId: "t5", teamName: "AppBuilders", totalScore: 780, memberCount: 3, members: [
-                { studentId: "m16", studentName: "Diego Martins", score: 280 },
-                { studentId: "m17", studentName: "Camila Pereira", score: 260 },
-                { studentId: "m18", studentName: "André Gomes", score: 240 }
-              ]
-            },
-            {
-              rank: 2, teamId: "t6", teamName: "MobileFirst", totalScore: 650, memberCount: 4, members: [
-                { studentId: "12345", studentName: "João Silva", score: 180 },
-                { studentId: "m20", studentName: "Patricia Oliveira", score: 170 },
-                { studentId: "m21", studentName: "Ricardo Dias", score: 160 },
-                { studentId: "m22", studentName: "Amanda Ribeiro", score: 140 }
-              ]
-            },
-            {
-              rank: 3, teamId: "t7", teamName: "SwiftTeam", totalScore: 580, memberCount: 4, members: [
-                { studentId: "m23", studentName: "Leonardo Cruz", score: 160 },
-                { studentId: "m24", studentName: "Isabela Nunes", score: 150 },
-                { studentId: "m25", studentName: "Matheus Cardoso", score: 140 },
-                { studentId: "m26", studentName: "Larissa Moreira", score: 130 }
-              ]
-            }
-          ]
-        }
-      ]
-    }]
   };
 
   data: any | any[] = [];
@@ -246,11 +62,18 @@ export class StudentDashboardComponent implements OnInit {
     teamRankingsByCourse: any[];
   } | null = null;
 
-  sections: string[] = ['Awards', 'Dashboard', 'Rankings', 'Specific functions'];
+  currentUserId: string = localStorage.getItem('id') || '';
+
+  sections: string[] = ['Awards', 'Dashboard', 'Rankings'];
 
   selectedOption: string = this.sections[2];
+  developers: any[] = [];
 
-  constructor(private router: Router, private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {
+    // this.taskForm = this.fb.group({
+    //   task: this.fb.array([], Validators.minLength(0)) 
+    // });
+  }
 
   ngOnInit(): void {
     this.onSelectOption(this.selectedOption);
@@ -379,4 +202,35 @@ export class StudentDashboardComponent implements OnInit {
     }
     return false;
   }
+
+  changeTaskStatus(taskId: number, newStatus: string) {
+    this.httpClient.patch(`${enviroments.apiUrl}/tasks/${taskId}/status`, { status: newStatus }).subscribe(response => {
+      console.log('Task status changed successfully', response);
+      this.fetchData();
+    }, error => {
+      console.error('Error changing task status', error);
+    });
+  }
+
+  getProjectDevelopers(sprintId: number): void {
+    this.httpClient.get(`${enviroments.apiUrl}/teams/developers?sprintId=${sprintId}`).subscribe((response: any) => {
+      this.developers = response;
+    });
+  }
+
+  assignTaskToDeveloper(taskId: number, developerId: EventTarget | null): void {
+    console.log((developerId as HTMLSelectElement).value);
+    this.httpClient.patch(`${enviroments.apiUrl}/tasks/${taskId}/assign`, { teamMemberId: (developerId as HTMLSelectElement).value }).subscribe(response => {
+      console.log('Task assigned successfully', response);
+    }, error => {
+      console.error('Error assigning task', error);
+    });
+  }
+  
+
+  // private fb = inject(FormBuilder);
+  // taskForm: FormGroup;
+  // newCourseName = this.fb.control('', Validators.required);
+  // showAddInput = false;
+  // isSubmitted = false;
 }
