@@ -51,7 +51,7 @@
                 </div>
 
                 @if(project.myRole === 'PRODUCT_OWNER') {
-                <button class="btn btn-info" (click)="goToRegisterSprint(project.projectId)">New Sprint</button>
+                <button class="btn btn-secondary" (click)="goToRegisterSprint(project.projectId)">New Sprint</button>
                 }
 
                 <div class="accordion sprint-accordion" id="accordion-{{ project.id }}">
@@ -86,82 +86,84 @@
 
                                 <div class="task-list">
                                     @for(task of sprint.tasks; track task) {
-                                    @if((project.myRole === 'DEVELOPER' && task.assignedUserId == currentUserId)
-                                    || project.myRole !== 'DEVELOPER') {
-                                    <div class="task-item d-flex flex-row justify-content-between align-items-center">
+                                        @if((project.myRole === 'DEVELOPER' && task.assignedUserId == currentUserId) ||
+                                        project.myRole !== 'DEVELOPER') {
+                                        <div class="task-item d-flex flex-row justify-content-between align-items-center">
 
-                                        <p class="task-title">
-                                            <i class="bi bi-card-checklist"></i>
-                                            {{ task.description }}
-                                        </p>
+                                            <span class="task-title">
+                                                <i class="bi bi-card-checklist"></i>
+                                                {{ task.description }}
+                                            </span>
 
+                                            <div class="task-actions">
+                                                @if(project.myRole === 'DEVELOPER') {
+                                                    @if(task.status === 'TODO') {
+                                                        <button class="btn btn-success"
+                                                        (click)="changeTaskStatus(task.id, 'DOING')">Start</button>
+                                                    }
+                                                    @else if(task.status === 'DOING') {
+                                                        <button class="btn btn-warning"
+                                                        (click)="changeTaskStatus(task.id, 'REVIEW')">Review</button>
+                                                    }
+                                                }
+                                                @else if(project.myRole === 'SCRUM_MASTER') {
+                                                    @if(task.status === 'TODO') {
+                                                        <select name="developer" id="developer-{{ task.id }}"
+                                                            (change)="assignTaskToDeveloper(task.id, $event.target)">
+                                                            <option value="">Select Developer</option>
+                                                            @for(developer of developers; track developer) {
+                                                                <option [value]="developer.teamMemberId"
+                                                                    [selected]="developer.teamMemberId === task.assignedMemberId">
+                                                                    {{ developer.name }}
+                                                                </option>
+                                                            }
+                                                        </select>
+                                                    }
+                                                    @else {
+                                                        <p class="task-member">{{ task.assignedMemberName }}</p>
+                                                    }
+                                                }
+                                            </div>
+                                            <span class="task-status">{{ task.status }}</span>
+                                        </div>
 
-                                        @if(project.myRole === 'DEVELOPER') {
-                                        @if(task.status === 'TODO') {
-                                        <button class="btn btn-success"
-                                            (click)="changeTaskStatus(task.id, 'DOING')">Start</button>
                                         }
-                                        @else if(task.status === 'DOING') {
-                                        <button class="btn btn-secondary"
-                                            (click)="changeTaskStatus(task.id, 'REVIEW')">Review</button>
+                                        @if(project.myRole === 'PRODUCT_OWNER' && task.status === 'REVIEW') {
+                                        <div>
+                                            <button class="btn btn-success"
+                                                (click)="changeTaskStatus(task.id, 'DONE')">Approve</button>
+                                            <button class="btn btn-info"
+                                                (click)="changeTaskStatus(task.id, 'DOING')">Review</button>
+                                        </div>
                                         }
                                         }
-                                        @else if(project.myRole === 'SCRUM_MASTER') {
-                                        @if(task.status === 'TODO' && !task.assignedMemberId) {
-                                        <select name="developer" id="developer-{{ task.id }}"
-                                            (change)="assignTaskToDeveloper(task.id, $event.target)">
-                                            <option value="">Select Developer</option>
-                                            @for(developer of developers; track developer) {
-                                            <option [value]="developer.teamMemberId"
-                                                [selected]="developer.teamMemberId === task.assignedMemberId">
-                                                {{ developer.name }}
-                                            </option>
+                                        @if(project.myRole === 'PRODUCT_OWNER') {
+                                        <div class="form-group">
+                                            @if (showAddInput) {
+                                            <div class="inline-add-form">
+                                                <input type="text" [formControl]="newTaskControl"
+                                                    placeholder="Ex: Implement login" class="inline-input"
+                                                    [class.invalid]="newTaskControl.invalid && newTaskControl.touched">
+
+                                                <button type="button" class="btn-icon" (click)="createTask(sprint.id)"
+                                                    [disabled]="newTaskControl.invalid">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+
+                                                <button type="button" class="btn-icon btn-cancel" (click)="cancelAddTask()">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </div>
                                             }
-                                        </select>
-                                        }
-                                        @else {
-                                        <p class="task-member">{{ task.assignedMemberName }}</p>
-                                        }
-                                        }
-                                        <span class="task-status">{{ task.status }}</span>
-                                    </div>
-                                    }
-                                    @if(project.myRole === 'PRODUCT_OWNER' && task.status === 'REVIEW') {
-                                    <div>
-                                        <button class="btn btn-success"
-                                            (click)="changeTaskStatus(task.id, 'DONE')">Approve</button>
-                                        <button class="btn btn-info"
-                                            (click)="changeTaskStatus(task.id, 'DOING')">Review</button>
-                                    </div>
-                                    }
-                                    }
-                                    @if(project.myRole === 'PRODUCT_OWNER') {
-                                    <div class="form-group">
-                                        @if (showAddInput) {
-                                        <div class="inline-add-form">
-                                            <input type="text" [formControl]="newTaskControl"
-                                                placeholder="Ex: Implement login" class="inline-input"
-                                                [class.invalid]="newTaskControl.invalid && newTaskControl.touched">
 
-                                            <button type="button" class="btn-icon" (click)="createTask(sprint.id)"
-                                                [disabled]="newTaskControl.invalid">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-
-                                            <button type="button" class="btn-icon btn-cancel" (click)="cancelAddTask()">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
+                                            @if (!showAddInput) {
+                                            <div class="add-button-container">
+                                                <button type="button" class="btn-add" (click)="showAddInput = true">
+                                                    <i class="bi bi-plus-circle-fill"></i>
+                                                </button>
+                                            </div>
+                                            }
                                         </div>
-                                        }
-
-                                        @if (!showAddInput) {
-                                        <div class="add-button-container">
-                                            <button type="button" class="btn-add" (click)="showAddInput = true">
-                                                <i class="bi bi-plus-circle-fill"></i>
-                                            </button>
-                                        </div>
-                                        }
-                                    </div>
                                     }
                                 </div>
                             </div>
